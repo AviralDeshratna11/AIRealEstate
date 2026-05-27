@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Calculator } from "lucide-react";
-import { Property, estimateFinance, formatInr } from "@/lib/api";
+import { FinanceEstimate, Property, estimateFinance, formatInr } from "@/lib/api";
 
 export function FinancePanel({ focused }: { focused: Property | null }) {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<FinanceEstimate | null>(null);
 
   async function run() {
     if (!focused) return;
@@ -23,7 +23,7 @@ export function FinancePanel({ focused }: { focused: Property | null }) {
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-estate-700">Finance and construction</p>
       <h2 className="text-2xl font-black text-slate-950">EMI and material estimate</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        Estimates loan burden and construction materials from the selected property's price and built-up area.
+        Estimates loan burden and construction materials from the selected property price and built-up area.
       </p>
       <button
         onClick={run}

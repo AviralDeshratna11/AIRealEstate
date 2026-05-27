@@ -5,8 +5,8 @@ import { FileUp, Scale } from "lucide-react";
 import { API_URL } from "@/lib/api";
 
 export function DocumentAndNegotiation() {
-  const [docResult, setDocResult] = useState<any>(null);
-  const [negotiation, setNegotiation] = useState<any>(null);
+  const [docResult, setDocResult] = useState<unknown>(null);
+  const [negotiation, setNegotiation] = useState<unknown>(null);
 
   async function upload(file?: File) {
     if (!file) return;
@@ -43,7 +43,7 @@ export function DocumentAndNegotiation() {
           Upload document
           <input type="file" accept=".pdf,image/*,.txt" onChange={(e) => upload(e.target.files?.[0])} className="sr-only" />
         </label>
-        {docResult && <pre className="mt-4 max-h-80 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-emerald-200">{JSON.stringify(docResult, null, 2)}</pre>}
+        {docResult !== null && <pre className="mt-4 max-h-80 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-emerald-200">{JSON.stringify(docResult, null, 2)}</pre>}
       </div>
 
       <div className="glass rounded-lg p-5 shadow-soft">
@@ -54,7 +54,7 @@ export function DocumentAndNegotiation() {
           <Scale size={17} />
           Run buyer counter-offer demo
         </button>
-        {negotiation && <pre className="mt-4 max-h-80 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-emerald-200">{JSON.stringify(negotiation, null, 2)}</pre>}
+        {negotiation !== null && <pre className="mt-4 max-h-80 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-emerald-200">{JSON.stringify(negotiation, null, 2)}</pre>}
       </div>
     </section>
   );

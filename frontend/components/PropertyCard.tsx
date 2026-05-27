@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Building2, CalendarDays, IndianRupee, MapPin, TrendingUp } from "lucide-react";
 import { Property, formatCr, formatInr } from "@/lib/api";
@@ -20,7 +21,15 @@ export function PropertyCard({
     <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:border-estate-500 hover:shadow-soft">
       <button onClick={() => onFocus(property)} className="block w-full text-left">
         <div className="relative h-48 overflow-hidden bg-slate-200">
-          {property.image_url && <img src={property.image_url} alt="" className="h-full w-full object-cover" />}
+          {property.image_url && (
+            <Image
+              src={property.image_url}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover"
+            />
+          )}
           <div className="absolute left-3 top-3 rounded-md bg-white/95 px-3 py-1 text-xs font-black uppercase text-slate-900">{property.status}</div>
           <div className="absolute bottom-3 left-3 rounded-md bg-slate-950/90 px-3 py-2 text-white backdrop-blur">
             <p className="text-lg font-black">{formatCr(property.price)}</p>

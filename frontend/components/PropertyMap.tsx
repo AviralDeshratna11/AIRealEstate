@@ -15,7 +15,7 @@ export function PropertyMap({
   onFocus: (property: Property) => void;
 }) {
   const mapRef = useRef<LeafletMap | null>(null);
-  const leafletRef = useRef<any>(null);
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<Marker[]>([]);
 

@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { CalendarCheck, MessageCircle, PhoneCall } from "lucide-react";
 import {
+  AgentRunResult,
+  BookingResponse,
+  LeadQualification,
   Property,
   createBooking,
   getBookingSlots,
@@ -14,12 +17,12 @@ type Slot = { time: string; available?: boolean };
 
 export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
   const [leadMessage, setLeadMessage] = useState("Hi, I want a 2BHK in Powai or Andheri under 2.5 cr. Can I visit tomorrow?");
-  const [whatsapp, setWhatsapp] = useState<any>(null);
+  const [whatsapp, setWhatsapp] = useState<LeadQualification | null>(null);
   const [callText, setCallText] = useState("Caller wants a site visit this weekend and asks about EMI for the focused property.");
-  const [callResult, setCallResult] = useState<any>(null);
+  const [callResult, setCallResult] = useState<AgentRunResult | null>(null);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<BookingResponse | null>(null);
 
   useEffect(() => {
     getBookingSlots().then((items) => {

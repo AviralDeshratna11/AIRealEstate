@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Route } from "lucide-react";
-import { Property, guideTour } from "@/lib/api";
+import { Property, TourGuideResult, guideTour } from "@/lib/api";
 
 export function TourGuidePanel({ focused }: { focused: Property | null }) {
-  const [tour, setTour] = useState<any>(null);
+  const [tour, setTour] = useState<TourGuideResult | null>(null);
 
   async function run() {
     setTour(await guideTour(focused?.id));
@@ -22,7 +22,7 @@ export function TourGuidePanel({ focused }: { focused: Property | null }) {
       {tour && (
         <div className="mt-4 space-y-3">
           <p className="text-sm leading-6 text-slate-600">{tour.narration}</p>
-          {tour.waypoints.map((w: any, i: number) => (
+          {tour.waypoints.map((w, i) => (
             <div key={w.label} className="rounded-md bg-white p-3 ring-1 ring-slate-200">
               <p className="font-black">{i + 1}. {w.label}</p>
               <p className="text-sm text-slate-500">{w.focus}</p>

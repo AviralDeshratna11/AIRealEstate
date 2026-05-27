@@ -12,6 +12,7 @@ node_modules
 out
 __pycache__
 *.pyc
+*.tsbuildinfo
 *.log
 .DS_Store
 pgdata

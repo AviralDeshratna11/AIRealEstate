@@ -4,13 +4,19 @@ import { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
 import { API_URL } from "@/lib/api";
 
+type AvailabilityItem = {
+  id?: string;
+  title: string;
+  availability: string;
+};
+
 export function AvailabilityTicker() {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<AvailabilityItem[]>([]);
 
   useEffect(() => {
     const source = new EventSource(`${API_URL}/api/properties/availability/stream`);
     source.addEventListener("availability", (event) => {
-      const data = JSON.parse((event as MessageEvent).data);
+      const data = JSON.parse((event as MessageEvent).data) as { properties?: AvailabilityItem[] };
       setItems(data.properties || []);
     });
     source.onerror = () => source.close();

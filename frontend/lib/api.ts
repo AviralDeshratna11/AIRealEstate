@@ -79,6 +79,50 @@ export type LeadQualification = {
   extracted_requirements: Record<string, unknown>;
 };
 
+export type AgentRunResult = {
+  route: string;
+  answer: string;
+  data?: {
+    properties?: Property[];
+    [key: string]: unknown;
+  };
+};
+
+export type FinanceEstimate = {
+  property_price: number | null;
+  loan_amount: number | null;
+  monthly_emi: number | null;
+  emi_per_lakh: number;
+  annual_rate_pct: number;
+  tenure_years: number;
+  construction_cost_range?: { min?: number | null; max?: number | null } | null;
+  material_estimate?: MaterialEstimate | null;
+  notes?: string[];
+};
+
+export type TourWaypoint = {
+  label: string;
+  focus: string;
+};
+
+export type TourGuideResult = {
+  property_id: string | null;
+  route_name: string;
+  narration: string;
+  waypoints: TourWaypoint[];
+  next_action: string;
+};
+
+export type BookingResponse = {
+  booking?: {
+    id?: string;
+    status?: string;
+    start?: string;
+    title?: string;
+    demo?: boolean;
+  };
+};
+
 export async function getProperties(): Promise<Property[]> {
   try {
     const res = await fetch(`${API_URL}/api/properties`, { cache: "no-store" });
@@ -109,7 +153,7 @@ export async function searchProperties(query: string): Promise<{ properties: Pro
   }
 }
 
-export async function runAgent(message: string, channel: "web" | "whatsapp" | "call" | "tour" | "broker" = "web") {
+export async function runAgent(message: string, channel: "web" | "whatsapp" | "call" | "tour" | "broker" = "web"): Promise<AgentRunResult> {
   try {
     const res = await fetch(`${API_URL}/api/agents/run`, {
       method: "POST",
@@ -147,7 +191,7 @@ export async function estimateFinance(input: {
   annual_rate_pct?: number;
   tenure_years?: number;
   construction_quality?: string;
-}) {
+}): Promise<FinanceEstimate> {
   try {
     const res = await fetch(`${API_URL}/api/finance/estimate`, {
       method: "POST",
@@ -180,7 +224,7 @@ export async function estimateFinance(input: {
   }
 }
 
-export async function guideTour(property_id?: string, query = "Give me a guided tour") {
+export async function guideTour(property_id?: string, query = "Give me a guided tour"): Promise<TourGuideResult> {
   try {
     const res = await fetch(`${API_URL}/api/tour/guide`, {
       method: "POST",
@@ -257,7 +301,7 @@ export async function createBooking(input: {
   email: string;
   start_time: string;
   property_title: string;
-}) {
+}): Promise<BookingResponse> {
   try {
     const res = await fetch(`${API_URL}/api/bookings`, {
       method: "POST",
@@ -280,7 +324,7 @@ export async function createBooking(input: {
   }
 }
 
-export async function simulateCallAgent(message: string) {
+export async function simulateCallAgent(message: string): Promise<AgentRunResult> {
   return runAgent(message, "call");
 }
 
