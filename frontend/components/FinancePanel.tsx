@@ -20,21 +20,21 @@ export function FinancePanel({ focused }: { focused: Property | null }) {
 
   return (
     <section className="glass rounded-lg p-5 shadow-soft">
-      <p className="text-xs font-bold uppercase tracking-[0.24em] text-estate-700">Finance and construction</p>
-      <h2 className="text-2xl font-black text-slate-950">EMI and material estimate</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">
+      <p className="section-kicker">Finance and construction</p>
+      <h2 className="font-display text-3xl font-black leading-none text-ink">EMI and material estimate</h2>
+      <p className="mt-2 text-sm font-medium leading-6 text-ink/62">
         Estimates loan burden and construction materials from the selected property price and built-up area.
       </p>
       <button
         onClick={run}
         disabled={!focused}
-        className="mt-4 flex items-center gap-2 rounded-md bg-slate-950 px-4 py-3 text-sm font-black text-white disabled:opacity-50"
+        className="mt-4 flex items-center gap-2 rounded-md bg-coral px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50"
       >
         <Calculator size={16} />
         Estimate focused property
       </button>
       {result && (
-        <div className="mt-4 grid gap-3 rounded-md bg-white p-4 ring-1 ring-slate-200 md:grid-cols-2">
+        <div className="mt-4 grid gap-3 rounded-md border border-ink/12 bg-white/62 p-4 md:grid-cols-2">
           <Kpi label="Monthly EMI" value={formatInr(result.monthly_emi)} />
           <Kpi label="EMI/lakh" value={formatInr(result.emi_per_lakh)} />
           <Kpi label="Construction range" value={`${formatInr(result.construction_cost_range?.min)} - ${formatInr(result.construction_cost_range?.max)}`} />
@@ -48,8 +48,8 @@ export function FinancePanel({ focused }: { focused: Property | null }) {
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-1 text-xl font-black text-slate-950">{value}</p>
+      <p className="text-xs font-black uppercase tracking-[0.12em] text-ink/40">{label}</p>
+      <p className="mt-1 font-display text-2xl font-black text-ink">{value}</p>
     </div>
   );
 }

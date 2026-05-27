@@ -5,17 +5,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#111827",
+        ink: "#191713",
+        paper: "#f4efe3",
+        brass: "#b8832f",
+        coral: "#d6532c",
+        peacock: "#006d77",
         estate: {
-          50: "#eefdf8",
-          100: "#d5f8ed",
-          500: "#11a37f",
-          700: "#08745f",
-          900: "#06483d"
+          50: "#eef8f6",
+          100: "#d6ece8",
+          500: "#008f82",
+          700: "#006d77",
+          900: "#12333a"
         }
       },
+      fontFamily: {
+        sans: ["var(--font-body)", "ui-sans-serif", "sans-serif"],
+        display: ["var(--font-display)", "ui-serif", "serif"]
+      },
       boxShadow: {
-        soft: "0 24px 80px rgba(15, 23, 42, 0.12)"
+        soft: "0 22px 60px rgba(25, 23, 19, 0.13)",
+        crisp: "8px 8px 0 rgba(25, 23, 19, 0.12)"
       }
     }
   },

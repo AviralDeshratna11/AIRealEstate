@@ -14,13 +14,14 @@ export function AgentSwarmPanel() {
 
   return (
     <section className="glass rounded-lg p-5 shadow-soft">
-      <p className="text-xs font-bold uppercase tracking-[0.24em] text-estate-700">Agent swarm</p>
-      <h2 className="mb-4 text-2xl font-black text-slate-950">Automation agents for Mumbai launch</h2>
+      <p className="section-kicker">Agent swarm</p>
+      <h2 className="mb-4 font-display text-3xl font-black leading-none text-ink">Automation agents for Mumbai launch</h2>
       <div className="grid gap-3 md:grid-cols-2">
-        {agents.map(([name, desc]) => (
-          <div key={name} className="rounded-md bg-white p-4 ring-1 ring-slate-200">
-            <p className="font-black text-slate-950">{name}</p>
-            <p className="mt-1 text-sm leading-5 text-slate-500">{desc}</p>
+        {agents.map(([name, desc], index) => (
+          <div key={name} className="mapline rounded-md border border-ink/12 bg-white/62 p-4 pl-6">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-coral">Agent {String(index + 1).padStart(2, "0")}</p>
+            <p className="mt-1 font-black text-ink">{name}</p>
+            <p className="mt-1 text-sm font-medium leading-5 text-ink/55">{desc}</p>
           </div>
         ))}
       </div>

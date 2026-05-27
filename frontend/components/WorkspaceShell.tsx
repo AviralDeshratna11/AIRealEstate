@@ -8,12 +8,14 @@ import {
   Bot,
   Building2,
   CalendarClock,
+  ChevronRight,
   FileText,
   Home,
   IndianRupee,
   LayoutGrid,
   Map,
   MessagesSquare,
+  RadioTower,
   TrendingUp,
 } from "lucide-react";
 import { AgentConsole } from "@/components/AgentConsole";
@@ -37,14 +39,14 @@ const tabs: Array<{
   description: string;
   icon: ComponentType<{ size?: number; className?: string }>;
 }> = [
-  { id: "search", label: "Search", description: "Client intent, ranked inventory, shortlist", icon: LayoutGrid },
-  { id: "market", label: "Market", description: "Inventory, liquidity, redevelopment signals", icon: TrendingUp },
-  { id: "map", label: "Map", description: "Locality pins and selected property context", icon: Map },
-  { id: "finance", label: "Finance", description: "EMI, affordability, material estimates", icon: IndianRupee },
-  { id: "tour", label: "Tours", description: "Viewing routes and availability workflow", icon: CalendarClock },
-  { id: "channels", label: "Channels", description: "WhatsApp, calls, booking, availability", icon: MessagesSquare },
-  { id: "documents", label: "Docs & Deals", description: "Extraction and negotiation automation", icon: FileText },
-  { id: "agents", label: "Agents", description: "Swarm routing and operating model", icon: Bot },
+  { id: "search", label: "Search", description: "Intent, ranking, shortlist", icon: LayoutGrid },
+  { id: "market", label: "Market", description: "Inventory and redevelopment", icon: TrendingUp },
+  { id: "map", label: "Map", description: "Pins, locality, focus", icon: Map },
+  { id: "finance", label: "Finance", description: "EMI and materials", icon: IndianRupee },
+  { id: "tour", label: "Tours", description: "Viewing route control", icon: CalendarClock },
+  { id: "channels", label: "Channels", description: "WhatsApp, calls, slots", icon: MessagesSquare },
+  { id: "documents", label: "Docs & Deals", description: "Extraction and offers", icon: FileText },
+  { id: "agents", label: "Agents", description: "Swarm operations", icon: Bot },
 ];
 
 export function WorkspaceShell() {
@@ -93,22 +95,30 @@ export function WorkspaceShell() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-4 py-5 md:px-6 lg:px-8">
-        <header className="mb-5 border-b border-slate-200 pb-5">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-estate-700">
-                ASTRA Estate Mumbai
-              </p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-5xl">
+    <main className="min-h-screen text-ink">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 py-4 md:px-6 lg:px-8">
+        <header className="mb-5 overflow-hidden rounded-lg border border-ink/15 bg-[#fffaf0]/86 shadow-soft backdrop-blur">
+          <div className="grid gap-0 xl:grid-cols-[1fr_520px]">
+            <div className="p-5 md:p-6">
+              <div className="mb-8 flex items-center justify-between gap-4">
+                <Link href="/" className="inline-flex items-center gap-2 rounded-md border border-ink/15 bg-white/60 px-3 py-2 text-sm font-black text-ink hover:bg-white">
+                  <Home size={16} />
+                  Home
+                </Link>
+                <span className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#fffaf0]">
+                  <RadioTower size={14} />
+                  Live desk
+                </span>
+              </div>
+              <p className="section-kicker">ASTRA Estate Mumbai</p>
+              <h1 className="mt-2 font-display text-4xl font-black leading-none text-ink md:text-6xl">
                 Real-estate command workspace
               </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 md:text-base">
-                Dedicated workflows for search, market intelligence, maps, finance, tours, documents, negotiation, and agent operations.
+              <p className="mt-4 max-w-3xl text-base font-medium leading-7 text-ink/64">
+                One operator surface for ranked inventory, maps, finance, viewings, lead channels, documents, and deal strategy.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid border-t border-ink/15 bg-ink text-[#fffaf0] sm:grid-cols-3 xl:border-l xl:border-t-0">
               <Metric label="Inventory" value={String(properties.length || "-")} />
               <Metric label="Shortlist" value={String(compare.length)} />
               <Metric label="Focus" value={focused ? formatCr(focused.price) : "-"} />
@@ -116,21 +126,10 @@ export function WorkspaceShell() {
           </div>
         </header>
 
-        <div className="grid flex-1 gap-5 xl:grid-cols-[300px_1fr]">
+        <div className="grid flex-1 gap-5 xl:grid-cols-[286px_minmax(0,1fr)]">
           <aside className="space-y-4">
-            <nav className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-              <Link
-                href="/"
-                className="mb-2 flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
-                title="Return home"
-              >
-                <Home size={18} className="shrink-0" />
-                <span>
-                  <span className="block text-sm font-black">Home</span>
-                  <span className="mt-0.5 block text-xs leading-4 text-slate-500">Return to command home</span>
-                </span>
-              </Link>
-              {tabs.map((tab) => {
+            <nav className="rounded-lg border border-ink/15 bg-[#fffaf0]/90 p-2 shadow-soft backdrop-blur">
+              {tabs.map((tab, index) => {
                 const Icon = tab.icon;
                 const selected = tab.id === activeTab;
                 return (
@@ -138,19 +137,22 @@ export function WorkspaceShell() {
                     key={tab.id}
                     onClick={() => selectTab(tab.id)}
                     className={clsx(
-                      "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition",
+                      "group mb-1 flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition last:mb-0",
                       selected
-                        ? "bg-slate-950 text-white shadow-sm"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                        ? "bg-ink text-[#fffaf0] shadow-crisp"
+                        : "text-ink/66 hover:bg-white hover:text-ink"
                     )}
                   >
-                    <Icon size={18} className="shrink-0" />
-                    <span>
-                      <span className="block text-sm font-black">{tab.label}</span>
-                      <span className={clsx("mt-0.5 block text-xs leading-4", selected ? "text-slate-300" : "text-slate-500")}>
+                    <span className={clsx("grid h-9 w-9 shrink-0 place-items-center rounded-md", selected ? "bg-coral text-white" : "bg-ink/8 text-ink")}>
+                      <Icon size={17} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-black">{String(index + 1).padStart(2, "0")} / {tab.label}</span>
+                      <span className={clsx("mt-0.5 block truncate text-xs font-semibold", selected ? "text-white/62" : "text-ink/45")}>
                         {tab.description}
                       </span>
                     </span>
+                    <ChevronRight size={15} className={clsx(selected ? "text-white/68" : "text-ink/25 group-hover:text-coral")} />
                   </button>
                 );
               })}
@@ -161,21 +163,21 @@ export function WorkspaceShell() {
           </aside>
 
           <section className="min-w-0">
-            <div className="mb-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-4 flex flex-col gap-3 rounded-lg border border-ink/15 bg-[#fffaf0]/88 px-4 py-4 shadow-sm backdrop-blur lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-md bg-estate-50 text-estate-700">
-                  <ActiveIcon size={20} />
+                <div className="grid h-12 w-12 place-items-center rounded-md bg-coral text-white shadow-crisp">
+                  <ActiveIcon size={21} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Current workflow</p>
-                  <h2 className="text-xl font-black text-slate-950">{active.label}</h2>
+                  <p className="section-kicker">Current workflow</p>
+                  <h2 className="font-display text-3xl font-black leading-none text-ink">{active.label}</h2>
                 </div>
               </div>
-              <p className="max-w-2xl text-sm leading-6 text-slate-500">{active.description}</p>
+              <p className="max-w-2xl text-sm font-semibold leading-6 text-ink/58">{active.description}</p>
             </div>
 
             {activeTab === "search" && (
-              <div className="grid gap-5 2xl:grid-cols-[390px_1fr]">
+              <div className="grid gap-5 2xl:grid-cols-[410px_1fr]">
                 <AgentConsole onProperties={updateProperties} />
                 <InventoryGrid properties={properties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
               </div>
@@ -229,24 +231,24 @@ export function WorkspaceShell() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <p className="text-2xl font-black text-slate-950">{value}</p>
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+    <div className="border-b border-white/12 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+      <p className="font-display text-3xl font-black leading-none text-[#fffaf0]">{value}</p>
+      <p className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-white/46">{label}</p>
     </div>
   );
 }
 
 function FocusedProperty({ property }: { property: Property | null }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="rounded-lg border border-ink/15 bg-[#fffaf0]/90 p-4 shadow-sm backdrop-blur">
       <div className="mb-3 flex items-center gap-2">
-        <Building2 size={17} className="text-estate-700" />
-        <p className="text-sm font-black text-slate-950">Focused property</p>
+        <Building2 size={17} className="text-coral" />
+        <p className="font-display text-lg font-black text-ink">Focused property</p>
       </div>
       {property ? (
         <div>
-          <p className="text-base font-black leading-tight text-slate-950">{property.title}</p>
-          <p className="mt-1 text-sm text-slate-500">{property.locality}, Mumbai</p>
+          <p className="text-base font-black leading-tight text-ink">{property.title}</p>
+          <p className="mt-1 text-sm font-semibold text-ink/52">{property.locality}, Mumbai</p>
           <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
             <Info label="Price" value={formatCr(property.price)} />
             <Info label="Type" value={`${property.bedrooms}BHK`} />
@@ -255,7 +257,7 @@ function FocusedProperty({ property }: { property: Property | null }) {
           </div>
         </div>
       ) : (
-        <p className="text-sm leading-6 text-slate-500">Select a property to keep finance, map, and tour workflows in sync.</p>
+        <p className="text-sm leading-6 text-ink/52">Select a property to sync finance, map, and tour workflows.</p>
       )}
     </section>
   );
@@ -263,9 +265,9 @@ function FocusedProperty({ property }: { property: Property | null }) {
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-slate-50 p-3">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-1 font-black text-slate-950">{value}</p>
+    <div className="rounded-md border border-ink/10 bg-white/58 p-3">
+      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-ink/38">{label}</p>
+      <p className="mt-1 font-black text-ink">{value}</p>
     </div>
   );
 }
@@ -287,10 +289,10 @@ function InventoryGrid({
     <section className="min-w-0">
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-estate-700">Recommended inventory</p>
-          <h3 className="text-2xl font-black text-slate-950">Ranked property matches</h3>
+          <p className="section-kicker">Recommended inventory</p>
+          <h3 className="font-display text-3xl font-black leading-none text-ink">Ranked property matches</h3>
         </div>
-        <p className="text-sm font-bold text-slate-400">{properties.length} listings</p>
+        <p className="rounded-md bg-ink px-3 py-1.5 text-sm font-black text-[#fffaf0]">{properties.length} listings</p>
       </div>
       <div className={clsx("grid gap-4", compact ? "lg:grid-cols-3" : "lg:grid-cols-2 2xl:grid-cols-3")}>
         {properties.map((property) => (
@@ -323,43 +325,44 @@ function InventoryRail({
   return (
     <aside className="space-y-3">
       <div>
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-estate-700">Inventory rail</p>
-        <h3 className="text-2xl font-black text-slate-950">Active listings</h3>
+        <p className="section-kicker">Inventory rail</p>
+        <h3 className="font-display text-3xl font-black leading-none text-ink">Active listings</h3>
       </div>
       <div className="grid gap-3">
         {properties.map((property) => {
           const selected = focused?.id === property.id;
+          const compared = compare.some((p) => p.id === property.id);
           return (
             <div
               key={property.id}
               className={clsx(
-                "rounded-lg border bg-white p-4 text-left shadow-sm transition",
-                selected ? "border-slate-950 ring-2 ring-slate-950/10" : "border-slate-200 hover:border-estate-500"
+                "rounded-lg border bg-[#fffaf0]/92 p-4 text-left shadow-sm transition",
+                selected ? "border-coral shadow-crisp" : "border-ink/15 hover:border-peacock"
               )}
             >
               <button onClick={() => onFocus(property)} className="w-full text-left">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-black leading-tight text-slate-950">{property.title}</p>
-                    <p className="mt-1 text-sm text-slate-500">{property.locality} - {formatCr(property.price)}</p>
+                    <p className="font-black leading-tight text-ink">{property.title}</p>
+                    <p className="mt-1 text-sm font-semibold text-ink/52">{property.locality} - {formatCr(property.price)}</p>
                   </div>
-                  <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase text-slate-500">
+                  <span className="rounded-md bg-ink/8 px-2 py-1 text-xs font-black uppercase text-ink/50">
                     {property.status}
                   </span>
                 </div>
               </button>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <p className="text-xs font-bold text-slate-400">
+                <p className="text-xs font-bold text-ink/45">
                   {property.bedrooms}BHK - {property.area_sqft} sq ft - ReDev {Math.round(property.redevelopment_score || 0)}/100
                 </p>
                 <button
                   onClick={() => onCompare(property)}
                   className={clsx(
-                    "rounded-md px-3 py-1.5 text-xs font-black",
-                    compare.some((p) => p.id === property.id) ? "bg-estate-700 text-white" : "bg-slate-100 text-slate-700"
+                    "rounded-md px-3 py-1.5 text-xs font-black transition",
+                    compared ? "bg-coral text-white" : "bg-ink text-[#fffaf0] hover:bg-peacock"
                   )}
                 >
-                  {compare.some((p) => p.id === property.id) ? "Added" : "Compare"}
+                  {compared ? "Added" : "Compare"}
                 </button>
               </div>
             </div>

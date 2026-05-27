@@ -13,19 +13,19 @@ export function TourGuidePanel({ focused }: { focused: Property | null }) {
 
   return (
     <section className="glass rounded-lg p-5 shadow-soft">
-      <p className="text-xs font-bold uppercase tracking-[0.24em] text-estate-700">Tour guide assistant</p>
-      <h2 className="text-2xl font-black text-slate-950">AI viewing route</h2>
-      <button onClick={run} className="mt-4 flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-3 text-sm font-black text-white">
+      <p className="section-kicker">Tour guide assistant</p>
+      <h2 className="font-display text-3xl font-black leading-none text-ink">AI viewing route</h2>
+      <button onClick={run} className="mt-4 flex items-center gap-2 rounded-md bg-peacock px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5">
         <Route size={16} />
         Generate guided tour
       </button>
       {tour && (
         <div className="mt-4 space-y-3">
-          <p className="text-sm leading-6 text-slate-600">{tour.narration}</p>
+          <p className="text-sm font-medium leading-6 text-ink/62">{tour.narration}</p>
           {tour.waypoints.map((w, i) => (
-            <div key={w.label} className="rounded-md bg-white p-3 ring-1 ring-slate-200">
-              <p className="font-black">{i + 1}. {w.label}</p>
-              <p className="text-sm text-slate-500">{w.focus}</p>
+            <div key={w.label} className="rounded-md border border-ink/12 bg-white/62 p-3">
+              <p className="font-black text-ink">{i + 1}. {w.label}</p>
+              <p className="text-sm font-semibold text-ink/52">{w.focus}</p>
             </div>
           ))}
         </div>

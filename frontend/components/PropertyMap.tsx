@@ -72,19 +72,19 @@ export function PropertyMap({
     <section className="glass overflow-hidden rounded-lg p-5 shadow-soft">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-estate-700">Mumbai live map</p>
-          <h2 className="text-2xl font-black text-slate-950">Locality pins</h2>
+          <p className="section-kicker">Mumbai live map</p>
+          <h2 className="font-display text-3xl font-black leading-none text-ink">Locality pins</h2>
         </div>
-        <div className="rounded-md bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-slate-200">OSM - {properties.length}</div>
+        <div className="rounded-md bg-ink px-3 py-1 text-xs font-black text-[#fffaf0]">OSM - {properties.length}</div>
       </div>
-      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-md bg-slate-200" />
-      <div className="mt-4 rounded-md bg-slate-950 p-4 text-white">
-        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-emerald-200">
+      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-md border border-ink/15 bg-paper" />
+      <div className="ink-panel mt-4 rounded-md p-4">
+        <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#f1b24a]">
           <MapPin size={14} />
           Focused property
         </p>
         <p className="mt-1 font-bold">{focused?.title || "Select a marker to focus"}</p>
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-white/68">
           {focused ? `${focused.address} - EMI est. ${formatCr((focused.monthly_emi_estimate || 0) * 12)}/yr` : "Map uses real Mumbai coordinates and OpenStreetMap tiles."}
         </p>
       </div>

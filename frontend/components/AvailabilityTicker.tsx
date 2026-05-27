@@ -26,14 +26,14 @@ export function AvailabilityTicker() {
   return (
     <div className="glass rounded-lg p-4 shadow-soft">
       <div className="mb-3 flex items-center gap-2">
-        <Activity size={16} className="text-emerald-600" />
-        <p className="text-sm font-black text-slate-900">Real-time availability</p>
+        <Activity size={16} className="text-coral" />
+        <p className="font-display text-lg font-black text-ink">Real-time availability</p>
       </div>
       <div className="space-y-2">
         {(items.length ? items : [{ title: "Connecting to availability stream...", availability: "SSE pending" }]).slice(0, 4).map((item, idx) => (
-          <div key={item.id || idx} className="rounded-md bg-white px-3 py-2 text-sm ring-1 ring-slate-100">
-            <p className="font-semibold text-slate-800">{item.title}</p>
-            <p className="text-xs text-slate-500">{item.availability}</p>
+          <div key={item.id || idx} className="rounded-md border border-ink/10 bg-white/58 px-3 py-2 text-sm">
+            <p className="font-black text-ink">{item.title}</p>
+            <p className="text-xs font-semibold text-ink/50">{item.availability}</p>
           </div>
         ))}
       </div>
