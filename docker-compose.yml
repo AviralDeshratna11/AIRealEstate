@@ -34,15 +34,17 @@ services:
         condition: service_healthy
 
   frontend:
-    image: python:3.11-slim
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: astra-estate-frontend
     restart: unless-stopped
-    working_dir: /site
-    command: python -m http.server 3000 --bind 0.0.0.0
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend/out:/site:ro
+    environment:
+      PORT: 3000
+    depends_on:
+      - backend
 
 volumes:
   pgdata:

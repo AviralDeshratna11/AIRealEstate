@@ -92,6 +92,12 @@ export default function HomePage() {
               Open workspace
               <ArrowRight size={16} />
             </Link>
+            <Link
+              href="/manager"
+              className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-white px-4 py-2 text-sm font-black text-emerald-800 transition hover:-translate-y-0.5"
+            >
+              Manager portal
+            </Link>
           </nav>
 
           <div className="grid flex-1 content-center gap-8 py-10 lg:grid-cols-[1fr_220px]">

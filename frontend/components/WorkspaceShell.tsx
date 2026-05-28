@@ -105,10 +105,16 @@ export function WorkspaceShell() {
                   <Home size={16} />
                   Home
                 </Link>
-                <span className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#fffaf0]">
-                  <RadioTower size={14} />
-                  Live desk
-                </span>
+                <div className="flex items-center gap-2">
+                  <Link href="/manager" className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-800 hover:bg-emerald-100">
+                    <Building2 size={14} />
+                    Manager portal
+                  </Link>
+                  <span className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#fffaf0]">
+                    <RadioTower size={14} />
+                    Live desk
+                  </span>
+                </div>
               </div>
               <p className="section-kicker">ASTRA Estate Mumbai</p>
               <h1 className="mt-2 font-display text-4xl font-black leading-none text-ink md:text-6xl">
