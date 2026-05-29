@@ -298,3 +298,197 @@ create table if not exists listing_embeddings (
   content_type text not null,
   created_at timestamptz not null default now()
 );
+
+create table if not exists broker_profiles (
+  id text primary key default gen_random_uuid()::text,
+  user_id text,
+  full_name text not null,
+  agency_name text,
+  phone text not null,
+  email text not null,
+  whatsapp_number text,
+  rera_agent_id text,
+  operating_localities text[] not null default '{}',
+  years_experience int not null default 0,
+  property_categories text[] not null default '{}',
+  buyer_network_size int not null default 0,
+  average_monthly_visits int not null default 0,
+  preferred_commission_structure text,
+  languages_spoken text[] not null default '{}',
+  specialization text[] not null default '{}',
+  verification_status text not null default 'pending',
+  trust_score numeric not null default 0,
+  profile_photo_url text,
+  business_card_url text,
+  kyc_document_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists broker_tieup_requests (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  manager_id text,
+  listing_id text,
+  status text not null default 'requested',
+  requested_commission numeric,
+  approved_commission numeric,
+  requested_validity_days int,
+  approved_validity_days int,
+  requested_exclusivity boolean not null default false,
+  approved_exclusivity boolean not null default false,
+  requested_propertypool_rights boolean not null default false,
+  approved_propertypool_rights boolean not null default false,
+  intended_buyer_segment text,
+  expected_buyer_count int,
+  marketing_channels text[] not null default '{}',
+  broker_message text,
+  manager_response text,
+  ai_recommendation_json jsonb not null default '{}'::jsonb,
+  approved_terms_json jsonb not null default '{}'::jsonb,
+  expires_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists broker_property_access (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  listing_id text,
+  tieup_id text,
+  access_status text,
+  can_share_whatsapp boolean not null default false,
+  can_create_propertypool boolean not null default false,
+  can_book_visits boolean not null default false,
+  can_view_documents boolean not null default false,
+  can_view_manager_contact boolean not null default false,
+  commission_rule_json jsonb not null default '{}'::jsonb,
+  attribution_expiry_days int not null default 90,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists broker_buyers (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  full_name text not null,
+  phone text not null,
+  email text,
+  budget_min numeric,
+  budget_max numeric,
+  preferred_localities text[] not null default '{}',
+  property_type_preference text,
+  bhk_preference text,
+  purchase_purpose text,
+  buying_timeline text,
+  loan_required boolean not null default true,
+  family_size int,
+  lead_temperature text not null default 'warm',
+  communication_channel text not null default 'WhatsApp',
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists broker_lead_attributions (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  buyer_id text,
+  listing_id text,
+  tieup_id text,
+  attribution_status text,
+  first_introduced_at timestamptz,
+  last_interaction_at timestamptz,
+  expiry_at timestamptz,
+  source text,
+  duplicate_conflict boolean not null default false,
+  conflict_details_json jsonb not null default '{}'::jsonb,
+  commission_eligible boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists propertypool_events (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text,
+  broker_id text,
+  manager_id text,
+  tieup_id text,
+  event_title text,
+  event_type text,
+  status text,
+  scheduled_start timestamptz,
+  scheduled_end timestamptz,
+  max_buyers int,
+  meeting_point text,
+  buyer_segment text,
+  route_json jsonb not null default '{}'::jsonb,
+  tour_script text,
+  invite_message text,
+  reminder_schedule_json jsonb not null default '{}'::jsonb,
+  manager_approval_status text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists propertypool_registrations (
+  id text primary key default gen_random_uuid()::text,
+  event_id text,
+  buyer_id text,
+  broker_id text,
+  rsvp_status text,
+  checkin_status text,
+  checkin_time timestamptz,
+  feedback_json jsonb not null default '{}'::jsonb,
+  interest_level text,
+  next_action text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists broker_commissions (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  buyer_id text,
+  listing_id text,
+  tieup_id text,
+  deal_status text,
+  property_value numeric,
+  commission_percentage numeric,
+  expected_commission numeric,
+  approved_commission numeric,
+  payout_status text,
+  dispute_status text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists broker_agent_tasks (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  listing_id text,
+  buyer_id text,
+  propertypool_event_id text,
+  agent_name text,
+  task_type text,
+  status text,
+  priority text,
+  input_json jsonb not null default '{}'::jsonb,
+  output_json jsonb not null default '{}'::jsonb,
+  error_message text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  completed_at timestamptz
+);
+
+create table if not exists broker_audit_logs (
+  id text primary key default gen_random_uuid()::text,
+  broker_id text,
+  listing_id text,
+  buyer_id text,
+  action text,
+  actor_type text,
+  actor_name text,
+  details_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);

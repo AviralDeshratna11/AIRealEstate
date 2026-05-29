@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Bot,
+  BriefcaseBusiness,
   Building2,
   CalendarClock,
   FileText,
@@ -93,9 +94,17 @@ export default function HomePage() {
               <ArrowRight size={16} />
             </Link>
             <Link
+              href="/broker"
+              className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-white px-4 py-2 text-sm font-black text-emerald-800 transition hover:-translate-y-0.5"
+            >
+              <BriefcaseBusiness size={16} />
+              Broker portal
+            </Link>
+            <Link
               href="/manager"
               className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-white px-4 py-2 text-sm font-black text-emerald-800 transition hover:-translate-y-0.5"
             >
+              <Building2 size={16} />
               Manager portal
             </Link>
           </nav>

@@ -56,9 +56,9 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           <MessageCircle size={16} />
           WhatsApp assistant
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Lead qualification</h2>
+        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Lead qualification and auto-reply</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
-          Demo mode scores the lead and drafts a reply. With WhatsApp credentials, this endpoint can sit behind a real webhook.
+          Incoming WhatsApp messages are scored, routed, and answered automatically when the Twilio sandbox or production webhook is connected.
         </p>
         <textarea
           value={leadMessage}
@@ -66,11 +66,12 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           className="mt-4 min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
         />
         <button onClick={runWhatsApp} className="mt-3 w-full rounded-md bg-coral px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5">
-          Run WhatsApp demo
+          Send WhatsApp reply
         </button>
         {whatsapp && (
           <div className="mt-4 rounded-md border border-peacock/20 bg-[#eef8f6] p-4 text-sm font-semibold leading-6 text-peacock">
-            <p className="font-black">Score {whatsapp.lead_score}/100 - {whatsapp.intent}</p>
+            <p className="font-black">Assistant response</p>
+            <p className="mt-2">Lead score {whatsapp.lead_score}/100 - {whatsapp.intent}</p>
             <p className="mt-2">{whatsapp.suggested_reply}</p>
           </div>
         )}
@@ -81,9 +82,9 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           <PhoneCall size={16} />
           Call agent
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Voice triage simulation</h2>
+        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Voice triage and handoff</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
-          This simulates the same routing Vapi would hit. Real inbound/outbound voice needs Vapi webhook configuration.
+          This routes call-intent handling the same way the live voice assistant would. Real inbound and outbound calls need Vapi webhook configuration.
         </p>
         <textarea
           value={callText}
@@ -91,7 +92,7 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           className="mt-4 min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
         />
         <button onClick={runCall} className="mt-3 w-full rounded-md bg-ink px-4 py-3 text-sm font-black text-[#fffaf0] shadow-crisp transition hover:-translate-y-0.5">
-          Simulate call
+          Run voice triage
         </button>
         {callResult && (
           <div className="mt-4 rounded-md border border-ink/12 bg-white/62 p-4 text-sm font-medium leading-6 text-ink/62">
@@ -106,9 +107,9 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           <CalendarCheck size={16} />
           Booking page
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Viewing slots</h2>
+        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Viewing slots and booking</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
-          Demo slots appear without Cal.com. Add Cal.com keys to turn this into real slot lookup and booking creation.
+          Slot suggestions are shown here now. Add Cal.com keys to turn this into live availability lookup and booking creation.
         </p>
         <div className="mt-4 grid gap-2">
           {slots.map((slot) => (
@@ -124,11 +125,11 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           ))}
         </div>
         <button onClick={bookSlot} disabled={!selectedSlot} className="mt-3 w-full rounded-md bg-peacock px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50">
-          Book demo viewing
+          Book viewing
         </button>
         {booking && (
           <div className="mt-4 rounded-md border border-peacock/20 bg-[#eef8f6] p-4 text-sm font-semibold leading-6 text-peacock">
-            <p className="font-black">Booking {booking.booking?.status}</p>
+            <p className="font-black">Booking confirmed</p>
             <p>{booking.booking?.title}</p>
           </div>
         )}

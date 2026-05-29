@@ -1,29 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import {
-  AlertTriangle,
   ArrowRight,
   BadgeCheck,
-  Bell,
   Building2,
   CalendarClock,
   CheckCircle2,
   ChevronRight,
-  CircleDollarSign,
-  FileStack,
-  GripVertical,
   ImageIcon,
-  MapPin,
   MessagesSquare,
-  PenLine,
   Plus,
   RefreshCw,
-  Scale,
   Settings2,
   Shield,
   Sparkles,
@@ -41,7 +32,6 @@ import type {
   ManagerTask,
 } from "@/lib/api";
 import {
-  API_URL,
   createManagerListing,
   formatCr,
   getManagerAuditLog,
@@ -54,10 +44,8 @@ import {
   publishManagerListing,
   runManagerAutomation,
   runManagerListingAgents,
-  uploadManagerDocuments,
-  uploadManagerMedia,
 } from "@/lib/api";
-import { DEMO_MANAGER_LISTINGS, MANAGER_DEMO_LISTING_IDS } from "@/lib/manager-demo";
+import { DEMO_MANAGER_LISTINGS } from "@/lib/manager-demo";
 
 type ViewMode = "dashboard" | "listings" | "new" | "detail" | "leads" | "automation" | "market" | "tasks" | "settings";
 
@@ -124,6 +112,7 @@ const navItems: Array<{ mode: ViewMode; label: string; href: string; icon: typeo
   { mode: "dashboard", label: "Manager", href: "/manager", icon: Building2 },
   { mode: "listings", label: "Listings", href: "/manager/listings", icon: SquareStack },
   { mode: "new", label: "New Listing", href: "/manager/listings/new", icon: Plus },
+  { mode: "leads", label: "Broker Tie-ups", href: "/manager/tieups", icon: Shield },
   { mode: "leads", label: "Leads", href: "/manager/leads", icon: MessagesSquare },
   { mode: "automation", label: "Automation", href: "/manager/automation", icon: Wand2 },
   { mode: "market", label: "Market", href: "/manager/market", icon: TrendingUp },
@@ -236,8 +225,6 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
   }, [listings, search]);
 
   const activeListing = listing || filteredListings[0] || DEMO_MANAGER_LISTINGS[0];
-  const detailListings = (listing ? [listing] : filteredListings.length ? filteredListings : DEMO_MANAGER_LISTINGS).slice(0, 8);
-
   async function onCreateListing(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy("create");
@@ -367,7 +354,7 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
           {view === "dashboard" && <DashboardView dashboard={currentDashboard} listings={currentDashboard.listings} mapPins={currentDashboard.map_pins} onFocus={(id) => router.push(`/manager/listings/${id}`)} />}
           {view === "listings" && <ListingsView listings={filteredListings} search={search} setSearch={setSearch} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
           {view === "new" && <NewListingView draft={draft} setDraft={setDraft} onSubmit={onCreateListing} busy={busy === "create"} />}
-          {view === "detail" && activeListing && <ListingDetailView listing={activeListing} tab={detailTab} setTab={setDetailTab} onPublish={onPublish} onRunAutomation={onRunAutomation} onRunAgents={onRunListingAgents} busy={busy} onRefetch={async () => setListing(await getManagerListing(activeListing.id))} />}
+          {view === "detail" && activeListing && <ListingDetailView listing={activeListing} tab={detailTab} setTab={setDetailTab} onPublish={onPublish} onRunAutomation={onRunAutomation} onRunAgents={onRunListingAgents} onRefetch={async () => setListing(await getManagerListing(activeListing.id))} />}
           {view === "leads" && <LeadsView leads={leads.length ? leads : (currentDashboard.listings.flatMap((item) => item.leads || []) as ManagerLead[])} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
           {view === "automation" && <AutomationView rules={automationRules.length ? automationRules : (currentDashboard.listings[0]?.automation_rules as ManagerAutomationRule[] | undefined) || []} />}
           {view === "market" && <MarketView market={market} listings={listings.length ? listings : currentDashboard.listings} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
@@ -552,7 +539,7 @@ function NewListingView({ draft, setDraft, onSubmit, busy }: { draft: ListingDra
   );
 }
 
-function ListingDetailView({ listing, tab, setTab, onPublish, onRunAutomation, onRunAgents, busy, onRefetch }: { listing: ManagerListing; tab: typeof detailTabs[number]; setTab: (tab: typeof detailTabs[number]) => void; onPublish: () => Promise<void>; onRunAutomation: () => Promise<void>; onRunAgents: () => Promise<void>; busy: string | null; onRefetch: () => Promise<void> }) {
+function ListingDetailView({ listing, tab, setTab, onPublish, onRunAutomation, onRunAgents, onRefetch }: { listing: ManagerListing; tab: typeof detailTabs[number]; setTab: (tab: typeof detailTabs[number]) => void; onPublish: () => Promise<void>; onRunAutomation: () => Promise<void>; onRunAgents: () => Promise<void>; onRefetch: () => Promise<void> }) {
   return (
     <div className="space-y-5">
       <Panel title="Listing operating screen" eyebrow="Main operating context">
@@ -847,6 +834,3 @@ function Progress({ label, value, tone }: { label: string; value: number; tone: 
   return <div className="space-y-2"><div className="flex items-center justify-between text-sm font-semibold text-slate-600"><span>{label}</span><span>{value}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-200"><div className={clsx("h-full rounded-full", bar)} style={{ width: `${value}%` }} /></div></div>;
 }
 
-function AvailabilityMarker({ color }: { color: string }) {
-  return <span className={clsx("inline-flex h-3 w-3 rounded-full", color === "green" ? "bg-emerald-500" : color === "blue" ? "bg-blue-500" : color === "red" ? "bg-red-500" : color === "purple" ? "bg-violet-500" : color === "gray" ? "bg-slate-400" : "bg-amber-500")} />;
-}

@@ -11,6 +11,8 @@
   --teal: #006d77;
   --brass: #b8832f;
   --coral: #d6532c;
+  --font-body: "IBM Plex Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 }
 
 body {

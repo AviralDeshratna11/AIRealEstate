@@ -22,6 +22,14 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-2.5-flash"
 
+    whatsapp_provider: str = "mock"
+    whatsapp_access_token: str | None = None
+    whatsapp_phone_number_id: str | None = None
+
+    twilio_account_sid: str | None = None
+    twilio_auth_token: str | None = None
+    twilio_whatsapp_from: str | None = None
+
     calcom_api_key: str | None = None
     calcom_api_base: str = "https://api.cal.com"
     calcom_api_version: str = "2024-08-13"
@@ -31,7 +39,7 @@ class Settings(BaseSettings):
     calcom_timezone: str = "Asia/Kolkata"
 
     vapi_webhook_secret: str | None = None
-    allowed_origins: str = Field(default="http://localhost:3000")
+    allowed_origins: str = Field(default="http://localhost:3000,http://127.0.0.1:3000")
 
     @property
     def cors_origins(self) -> List[str]:

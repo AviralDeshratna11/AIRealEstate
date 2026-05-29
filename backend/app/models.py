@@ -175,6 +175,23 @@ class LeadQualificationResponse(BaseModel):
     extracted_requirements: dict[str, Any] = Field(default_factory=dict)
 
 
+class WhatsAppSendRequest(BaseModel):
+    to: str = Field(min_length=6)
+    message: str = Field(min_length=1, max_length=1600)
+    dry_run: bool = True
+
+
+class WhatsAppSendResponse(BaseModel):
+    provider: str
+    sent: bool
+    to: str
+    from_number: str | None = None
+    sid: str | None = None
+    status: str | None = None
+    message: str
+    dry_run: bool = False
+
+
 class NegotiationRole(str, Enum):
     buyer = "buyer"
     seller = "seller"

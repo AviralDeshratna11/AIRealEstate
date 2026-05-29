@@ -102,6 +102,23 @@ See `.env.example`. Required only for production-grade behavior:
 - `VAPI_WEBHOOK_SECRET` and Vapi URL config for phone agent testing.
 - WhatsApp/Meta/Twilio credentials if you want outbound messages.
 
+## WhatsApp sandbox setup
+
+For a free Twilio sandbox flow:
+
+1. Run `ngrok http 8000` and copy the HTTPS URL.
+2. In Twilio Console, point the WhatsApp inbound webhook to `https://<ngrok-url>/api/whatsapp/webhook`.
+3. Set `WHATSAPP_PROVIDER=twilio` and keep `TWILIO_WHATSAPP_FROM=whatsapp:+14155238886` (sandbox sender) in `.env`.
+4. Join the Twilio sandbox from your phone, then send a message to the sandbox number.
+
+Outbound test:
+
+```bash
+curl -X POST http://localhost:8000/api/whatsapp/send \
+  -H 'Content-Type: application/json' \
+  -d '{"to":"+918209979629","message":"Test from ASTRA","dry_run":true}'
+```
+
 ## Free-tier deployment
 
 ### Frontend on Vercel
