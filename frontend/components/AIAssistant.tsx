@@ -15,6 +15,8 @@ export function AIAssistant() {
       content: "Hi, I can help with ASTRA workflows, property search, finance estimates, documents, tours, negotiation, and setup.",
     },
   ]);
+  const [configured, setConfigured] = useState(false);
+  const [model, setModel] = useState<string | null>(null);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -32,6 +34,8 @@ export function AIAssistant() {
         context: currentContext(),
         history: nextMessages.slice(-8),
       });
+      setConfigured(reply.configured);
+      setModel(reply.model || null);
       const suffix = reply.configured ? "" : "\n\nConfigure GEMINI_API_KEY in the root .env file for full LLM responses.";
       setMessages([...nextMessages, { role: "assistant", content: `${reply.answer}${suffix}` }]);
     } catch {
@@ -63,7 +67,7 @@ export function AIAssistant() {
               </div>
               <div>
                 <p className="font-display text-lg font-black text-ink">ASTRA AI Assistant</p>
-                <p className="section-kicker">Gemini-ready</p>
+                <p className="section-kicker">{configured ? `Live — ${model ?? "gemini"}` : "Demo assistant"}</p>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-md text-ink/50 hover:bg-ink/8">
