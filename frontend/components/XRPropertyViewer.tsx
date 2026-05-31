@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   Bot,
   CalendarClock,
+  Camera,
   ChevronLeft,
   Compass,
   DoorOpen,
@@ -25,6 +26,7 @@ import {
   Play,
   RotateCcw,
   Send,
+  Share2,
   ShieldAlert,
   SkipBack,
   SkipForward,
@@ -73,11 +75,14 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
   const [autoPlaying, setAutoPlaying] = useState(false);
   const [autoIndex, setAutoIndex] = useState(0);
   const [dollhouse, setDollhouse] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const cameraTargetRef = useRef<{ position?: XRVector; lookAt?: XRVector; hotspotId?: string } | null>(null);
   const cameraStateRef = useRef<{ position: XRVector; target: XRVector } | null>(null);
   const dollhouseRef = useRef(false);
   const speakCancelRef = useRef(false);
   const navigateToRef = useRef<((hotspot: XRHotspot) => void) | null>(null);
+  const captureRef = useRef<(() => string | null) | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -99,6 +104,12 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
           lookAt: session.starting_camera_look_at,
           hotspotId: session.current_hotspot_id,
         };
+        const shared = parseSharedView(window.location.search);
+        if (shared) {
+          cameraTargetRef.current = { position: shared.position, lookAt: shared.lookAt, hotspotId: shared.hotspotId };
+          const sharedHotspot = data.hotspots.find((hotspot) => hotspot.hotspot_id === shared.hotspotId);
+          if (sharedHotspot) setActiveHotspot(sharedHotspot);
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -237,6 +248,46 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
     }
   }
 
+  function flashToast(message: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast(message);
+    toastTimerRef.current = setTimeout(() => setToast(null), 2600);
+  }
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+  }, []);
+
+  function takeSnapshot() {
+    const data = captureRef.current?.();
+    if (!data) {
+      flashToast("Snapshot unavailable — viewer still loading.");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = data;
+    link.download = `astra-xr-${propertyId}-${activeHotspot?.room_name?.toLowerCase().replace(/\s+/g, "-") || "view"}.png`;
+    link.click();
+    flashToast("Snapshot saved to your downloads.");
+  }
+
+  async function shareView() {
+    const state = cameraStateRef.current;
+    const position = state?.position || activeHotspot?.camera_position_json;
+    const lookAt = state?.target || activeHotspot?.camera_look_at_json;
+    const params = new URLSearchParams();
+    if (position) params.set("cam", `${round(position.x)},${round(position.y)},${round(position.z)}`);
+    if (lookAt) params.set("look", `${round(lookAt.x)},${round(lookAt.y)},${round(lookAt.z)}`);
+    if (activeHotspot?.hotspot_id) params.set("h", activeHotspot.hotspot_id);
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      flashToast("Shareable view link copied to clipboard.");
+    } catch {
+      flashToast("Copy failed — long-press the address bar to share.");
+    }
+  }
+
   function startVoice() {
     const SpeechRecognition = (window as SpeechWindow).SpeechRecognition || (window as SpeechWindow).webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -314,6 +365,7 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
         cameraTargetRef={cameraTargetRef}
         cameraStateRef={cameraStateRef}
         dollhouseRef={dollhouseRef}
+        captureRef={captureRef}
         comfortMode={comfortMode}
         onReady={() => setViewerReady(true)}
         onAssetFailed={() => setAssetFailed(true)}
@@ -348,6 +400,12 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
         >
           {dollhouse ? <Minimize size={20} /> : <Maximize size={20} />}
         </button>
+        <button onClick={takeSnapshot} aria-label="Capture snapshot" className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-black/42 text-white backdrop-blur-xl transition hover:bg-white/12">
+          <Camera size={20} />
+        </button>
+        <button onClick={shareView} aria-label="Share this view" className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-black/42 text-white backdrop-blur-xl transition hover:bg-white/12">
+          <Share2 size={20} />
+        </button>
       </div>
 
       <div className="absolute bottom-28 left-4 top-40 z-20 hidden w-[310px] flex-col gap-3 lg:flex">
@@ -379,8 +437,34 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
       <XRBottomActionBar role={role} onAsk={askGuide} onFeedback={saveFeedback} />
 
       {!hasReadyAsset || assetFailed ? <XRFallbackNotice payload={payload} role={role} /> : null}
+
+      {toast ? (
+        <div className="pointer-events-none absolute bottom-[150px] left-1/2 z-40 -translate-x-1/2 rounded-2xl border border-white/14 bg-black/72 px-4 py-2.5 text-sm font-black text-white shadow-2xl backdrop-blur-xl">
+          {toast}
+        </div>
+      ) : null}
     </main>
   );
+}
+
+function round(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function parseSharedView(search: string): { position: XRVector; lookAt: XRVector; hotspotId?: string } | null {
+  const params = new URLSearchParams(search);
+  const cam = params.get("cam");
+  const look = params.get("look");
+  if (!cam || !look) return null;
+  const toVec = (raw: string): XRVector | null => {
+    const parts = raw.split(",").map(Number);
+    if (parts.length !== 3 || parts.some((value) => Number.isNaN(value))) return null;
+    return { x: parts[0], y: parts[1], z: parts[2] };
+  };
+  const position = toVec(cam);
+  const lookAt = toVec(look);
+  if (!position || !lookAt) return null;
+  return { position, lookAt, hotspotId: params.get("h") || undefined };
 }
 
 function GaussianSplatScene({
@@ -389,6 +473,7 @@ function GaussianSplatScene({
   cameraTargetRef,
   cameraStateRef,
   dollhouseRef,
+  captureRef,
   comfortMode,
   onReady,
   onAssetFailed,
@@ -399,6 +484,7 @@ function GaussianSplatScene({
   cameraTargetRef: React.MutableRefObject<{ position?: XRVector; lookAt?: XRVector; hotspotId?: string } | null>;
   cameraStateRef: React.MutableRefObject<{ position: XRVector; target: XRVector } | null>;
   dollhouseRef: React.MutableRefObject<boolean>;
+  captureRef: React.MutableRefObject<(() => string | null) | null>;
   comfortMode: boolean;
   onReady: () => void;
   onAssetFailed: () => void;
@@ -431,7 +517,7 @@ function GaussianSplatScene({
       camera.position.set(0, 1.6, 7);
       const controlsTarget = new THREE.Vector3(0, 1.2, 0);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.xr.enabled = true;
@@ -505,6 +591,14 @@ function GaussianSplatScene({
       renderer.domElement.addEventListener("pointerdown", onPointer);
 
       sceneRef.current = { camera, controlsTarget, hotspotMeshes };
+      captureRef.current = () => {
+        try {
+          renderer.render(scene, camera);
+          return renderer.domElement.toDataURL("image/png");
+        } catch {
+          return null;
+        }
+      };
       onReady();
 
       if (payload.xr_asset?.asset_url?.endsWith(".ksplat") || payload.xr_asset?.asset_url?.endsWith(".splat")) {
@@ -553,6 +647,7 @@ function GaussianSplatScene({
         renderer.setAnimationLoop(null);
         renderer.domElement.removeEventListener("pointerdown", onPointer);
         window.removeEventListener("resize", onResize);
+        captureRef.current = null;
         controls.dispose();
         renderer.dispose();
         vrButton.remove();
@@ -565,7 +660,7 @@ function GaussianSplatScene({
       mounted = false;
       cleanup();
     };
-  }, [payload, comfortMode, activeHotspot?.hotspot_id, cameraTargetRef, cameraStateRef, dollhouseRef, onAssetFailed, onHotspotSelect, onReady]);
+  }, [payload, comfortMode, activeHotspot?.hotspot_id, cameraTargetRef, cameraStateRef, dollhouseRef, captureRef, onAssetFailed, onHotspotSelect, onReady]);
 
   return <div ref={mountRef} className="absolute inset-0" />;
 }
