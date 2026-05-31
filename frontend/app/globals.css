@@ -146,3 +146,185 @@ body {
 .lift-in {
   animation: liftIn 520ms ease both;
 }
+
+.hero-grid {
+  background:
+    linear-gradient(90deg, rgba(255, 250, 240, 0.12) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 250, 240, 0.12) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 78%, transparent);
+}
+
+.route-line {
+  position: absolute;
+  right: 8%;
+  top: 24%;
+  width: 23%;
+  height: 50%;
+  border-top: 2px solid rgba(255, 250, 240, 0.42);
+  border-right: 2px solid rgba(255, 250, 240, 0.42);
+  border-bottom: 2px solid rgba(255, 250, 240, 0.42);
+  transform: skewY(-10deg);
+}
+
+.route-train {
+  position: absolute;
+  right: 25%;
+  top: 24%;
+  display: grid;
+  height: 34px;
+  width: 34px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--coral);
+  color: #fffaf0;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.22);
+  animation: routeTrain 7.5s ease-in-out infinite;
+}
+
+.signal-ring {
+  position: absolute;
+  left: -13px;
+  top: -12px;
+  height: 34px;
+  width: 34px;
+  border: 1px solid rgba(241, 178, 74, 0.72);
+  border-radius: 999px;
+  animation: signalRing 2.4s ease-out infinite;
+}
+
+.signal-pulse {
+  animation: signalPulse 1.8s ease-in-out infinite;
+}
+
+.ticker-strip {
+  overflow: hidden;
+}
+
+.ticker-track {
+  animation: tickerSlide 28s linear infinite;
+}
+
+.workflow-card {
+  animation: liftIn 580ms ease both;
+}
+
+.market-bar {
+  position: relative;
+  transform-origin: left center;
+  animation: barReveal 900ms ease both;
+}
+
+.market-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 250, 240, 0.52), transparent);
+  animation: signalSweep 2.8s ease-in-out infinite;
+}
+
+.agent-core {
+  animation: corePulse 3.2s ease-in-out infinite;
+}
+
+.agent-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 0;
+  width: 0;
+  animation: agentOrbit 14s linear infinite;
+}
+
+.agent-orbit span {
+  position: absolute;
+  left: 108px;
+  top: -14px;
+  display: inline-flex;
+  min-width: 76px;
+  justify-content: center;
+  border: 1px solid rgba(255, 250, 240, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.1);
+  padding: 6px 8px;
+  color: rgba(255, 250, 240, 0.82);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes routeTrain {
+  0% { transform: translate(0, 0); }
+  28% { transform: translate(116px, 72px); }
+  58% { transform: translate(22px, 176px); }
+  82% { transform: translate(142px, 250px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes signalRing {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@keyframes signalPulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes tickerSlide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes barReveal {
+  from { transform: scaleX(0.12); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes signalSweep {
+  0%, 100% { transform: translateX(-120%); }
+  50% { transform: translateX(120%); }
+}
+
+@keyframes corePulse {
+  0%, 100% {
+    box-shadow: 6px 6px 0 rgba(214, 83, 44, 0.38), 0 0 0 0 rgba(241, 178, 74, 0.18);
+  }
+  50% {
+    box-shadow: 6px 6px 0 rgba(214, 83, 44, 0.38), 0 0 0 18px rgba(241, 178, 74, 0);
+  }
+}
+
+@keyframes agentOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-train,
+  .signal-ring,
+  .signal-pulse,
+  .ticker-track,
+  .workflow-card,
+  .market-bar,
+  .market-bar::after,
+  .agent-core,
+  .agent-orbit,
+  .lift-in {
+    animation: none;
+  }
+}
