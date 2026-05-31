@@ -78,15 +78,26 @@ async def whatsapp_webhook(request: Request):
         or "I need help finding a Mumbai property"
     )
     phone = payload.get("From") or payload.get("phone")
-    result = await agent.qualify(LeadQualificationRequest(channel=LeadChannel.whatsapp, phone=phone, message=str(text)))
+    try:
+        result = await agent.qualify(LeadQualificationRequest(channel=LeadChannel.whatsapp, phone=phone, message=str(text)))
+        reply_text = result.suggested_reply
+        lead_payload = result.model_dump()
+    except Exception:
+        reply_text = "Thanks for your message. I can help with shortlist, EMI, and visit booking. Please share budget, locality, and preferred visit time."
+        lead_payload = {
+            "lead_score": 50,
+            "intent": "information_request",
+            "recommended_agent": "whatsapp_assistant",
+            "suggested_reply": reply_text,
+            "extracted_requirements": {},
+        }
 
     settings = get_settings()
     if settings.whatsapp_provider.lower() == "twilio":
-        if phone:
-            await _send_twilio_whatsapp(str(phone), result.suggested_reply)
-        return Response(content="", media_type="text/plain")
+        # Twilio WhatsApp expects TwiML in the webhook response for immediate replies.
+        return Response(content=_build_twiml(reply_text), media_type="application/xml")
 
-    return JSONResponse({"reply": result.suggested_reply, "lead": result.model_dump(), "provider": settings.whatsapp_provider})
+    return JSONResponse({"reply": reply_text, "lead": lead_payload, "provider": settings.whatsapp_provider})
 
 
 @router.post("/send", response_model=WhatsAppSendResponse)
@@ -104,14 +115,43 @@ async def send_whatsapp_message(request: WhatsAppSendRequest):
             dry_run=True,
         )
 
-    result = await _send_twilio_whatsapp(request.to, request.message)
-    return WhatsAppSendResponse(
-        provider="twilio",
-        sent=True,
-        to=_normalize_whatsapp_number(request.to),
-        from_number=_normalize_whatsapp_number(from_number) if from_number else None,
-        sid=result.get("sid"),
-        status=result.get("status"),
-        message=request.message,
-        dry_run=False,
-    )
+    try:
+        result = await _send_twilio_whatsapp(request.to, request.message)
+        return WhatsAppSendResponse(
+            provider="twilio",
+            sent=True,
+            to=_normalize_whatsapp_number(request.to),
+            from_number=_normalize_whatsapp_number(from_number) if from_number else None,
+            sid=result.get("sid"),
+            status=result.get("status"),
+            message=request.message,
+            dry_run=False,
+        )
+    except httpx.HTTPStatusError as exc:
+        error_code = None
+        error_message = None
+        try:
+            payload = exc.response.json()
+            error_code = payload.get("code")
+            error_message = payload.get("message")
+        except Exception:
+            error_message = str(exc)
+
+        status = "failed"
+        if error_code:
+            status = f"failed:{error_code}"
+
+        user_message = request.message
+        if error_message:
+            user_message = f"{request.message} | send_error: {error_message}"
+
+        return WhatsAppSendResponse(
+            provider="twilio",
+            sent=False,
+            to=_normalize_whatsapp_number(request.to),
+            from_number=_normalize_whatsapp_number(from_number) if from_number else None,
+            sid=None,
+            status=status,
+            message=user_message,
+            dry_run=False,
+        )

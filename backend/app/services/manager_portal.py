@@ -285,11 +285,12 @@ class ManagerPortalService:
                 pool = await get_pool()
             except Exception:
                 pool = None
-            if pool is not None:
-                async with pool.acquire() as conn:
-                    for statement in DDL_STATEMENTS:
-                        await conn.execute(statement)
-                await self._seed_database(pool)
+            if pool is None:
+                return
+            async with pool.acquire() as conn:
+                for statement in DDL_STATEMENTS:
+                    await conn.execute(statement)
+            await self._seed_database(pool)
             self._seeded = True
 
     def _seed_listings(self) -> dict[str, dict[str, Any]]:

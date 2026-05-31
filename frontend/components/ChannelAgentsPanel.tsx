@@ -3,23 +3,29 @@
 import { useEffect, useState } from "react";
 import { CalendarCheck, MessageCircle, PhoneCall } from "lucide-react";
 import {
-  AgentRunResult,
   BookingResponse,
   LeadQualification,
   Property,
+  DEFAULT_WHATSAPP_NUMBER,
+  WhatsAppSendResult,
   createBooking,
   getBookingSlots,
   qualifyWhatsAppLead,
-  simulateCallAgent,
+  sendWhatsAppMessage,
+  runVoiceGuide,
+  VoiceGuideResult,
 } from "@/lib/api";
 
 type Slot = { time: string; available?: boolean };
 
 export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
   const [leadMessage, setLeadMessage] = useState("Hi, I want a 2BHK in Powai or Andheri under 2.5 cr. Can I visit tomorrow?");
+  const [whatsAppTo, setWhatsAppTo] = useState(DEFAULT_WHATSAPP_NUMBER);
   const [whatsapp, setWhatsapp] = useState<LeadQualification | null>(null);
+  const [whatsappSend, setWhatsappSend] = useState<WhatsAppSendResult | null>(null);
+  const [whatsAppSending, setWhatsAppSending] = useState(false);
   const [callText, setCallText] = useState("Caller wants a site visit this weekend and asks about EMI for the focused property.");
-  const [callResult, setCallResult] = useState<AgentRunResult | null>(null);
+  const [callResult, setCallResult] = useState<VoiceGuideResult | null>(null);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
   const [booking, setBooking] = useState<BookingResponse | null>(null);
@@ -32,11 +38,27 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
   }, []);
 
   async function runWhatsApp() {
-    setWhatsapp(await qualifyWhatsAppLead({ message: leadMessage, preferred_locality: focused?.locality }));
+    setWhatsAppSending(true);
+    try {
+      const lead = await qualifyWhatsAppLead({
+        message: leadMessage,
+        preferred_locality: focused?.locality,
+        phone: whatsAppTo,
+      });
+      setWhatsapp(lead);
+      const sendResult = await sendWhatsAppMessage({
+        to: whatsAppTo,
+        message: lead.suggested_reply,
+        dry_run: false,
+      });
+      setWhatsappSend(sendResult);
+    } finally {
+      setWhatsAppSending(false);
+    }
   }
 
   async function runCall() {
-    setCallResult(await simulateCallAgent(callText));
+    setCallResult(await runVoiceGuide({ message: callText, propertyId: focused?.id }));
   }
 
   async function bookSlot() {
@@ -58,14 +80,20 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         </p>
         <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Lead qualification and auto-reply</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
-          Incoming WhatsApp messages are scored, routed, and answered automatically when the Twilio sandbox or production webhook is connected.
+          This sends a real outbound WhatsApp reply through Twilio from the site after lead qualification.
         </p>
+        <input
+          value={whatsAppTo}
+          onChange={(event) => setWhatsAppTo(event.target.value)}
+          placeholder="+918209979629"
+          className="mt-4 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+        />
         <textarea
           value={leadMessage}
           onChange={(event) => setLeadMessage(event.target.value)}
-          className="mt-4 min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+          className="mt-3 min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
         />
-        <button onClick={runWhatsApp} className="mt-3 w-full rounded-md bg-coral px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5">
+        <button onClick={runWhatsApp} disabled={whatsAppSending} className="mt-3 w-full rounded-md bg-coral px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50">
           Send WhatsApp reply
         </button>
         {whatsapp && (
@@ -73,6 +101,17 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
             <p className="font-black">Assistant response</p>
             <p className="mt-2">Lead score {whatsapp.lead_score}/100 - {whatsapp.intent}</p>
             <p className="mt-2">{whatsapp.suggested_reply}</p>
+          </div>
+        )}
+        {whatsappSend && (
+          <div className={`mt-4 rounded-md border p-4 text-sm font-semibold leading-6 ${whatsappSend.sent ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
+            <p className="font-black">Delivery status</p>
+            <p className="mt-2">{whatsappSend.sent ? "Sent" : "Not sent"} | {whatsappSend.status || "unknown"}</p>
+            <p className="mt-2">To: {whatsappSend.to}</p>
+            {whatsappSend.sid ? <p className="mt-1">SID: {whatsappSend.sid}</p> : null}
+            {!whatsappSend.sent && whatsappSend.message.includes("63016") ? (
+              <p className="mt-2">Twilio 63016 means you are outside WhatsApp&apos;s 24-hour customer window. Send a new inbound WhatsApp message first, then retry.</p>
+            ) : null}
           </div>
         )}
       </div>
@@ -84,7 +123,7 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         </p>
         <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Voice triage and handoff</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
-          This routes call-intent handling the same way the live voice assistant would. Real inbound and outbound calls need Vapi webhook configuration.
+          This calls the live XR voice guide endpoint, which is the same decision logic used by the Vapi voice route.
         </p>
         <textarea
           value={callText}
@@ -96,8 +135,8 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         </button>
         {callResult && (
           <div className="mt-4 rounded-md border border-ink/12 bg-white/62 p-4 text-sm font-medium leading-6 text-ink/62">
-            <p className="font-black text-ink">{callResult.route}</p>
-            <p className="mt-2">{callResult.answer}</p>
+            <p className="font-black text-ink">{callResult.response_type}</p>
+            <p className="mt-2">{callResult.spoken_text}</p>
           </div>
         )}
       </div>

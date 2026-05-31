@@ -11,6 +11,7 @@ import {
 } from "@/lib/manager-demo";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const DEFAULT_WHATSAPP_NUMBER = "+918209979629";
 
 export type MaterialEstimate = {
   cement_bags?: [number, number];
@@ -89,6 +90,23 @@ export type LeadQualification = {
   extracted_requirements: Record<string, unknown>;
 };
 
+export type WhatsAppWebhookResult = {
+  reply: string;
+  lead: LeadQualification;
+  provider: string;
+};
+
+export type WhatsAppSendResult = {
+  provider: string;
+  sent: boolean;
+  to: string;
+  from_number?: string | null;
+  sid?: string | null;
+  status?: string | null;
+  message: string;
+  dry_run: boolean;
+};
+
 export type AgentRunResult = {
   route: string;
   answer: string;
@@ -121,6 +139,23 @@ export type TourGuideResult = {
   narration: string;
   waypoints: TourWaypoint[];
   next_action: string;
+};
+
+export type VoiceGuideResult = {
+  response_type: string;
+  spoken_text: string;
+  display_text: string;
+  navigation_target?: string | null;
+  camera_position?: Record<string, number> | null;
+  camera_look_at?: Record<string, number> | null;
+  room_id?: string | null;
+  hotspot_id?: string | null;
+  highlight_hotspots?: string[];
+  suggested_actions?: string[];
+  confidence_score?: number;
+  requires_handoff?: boolean;
+  handoff_agent?: string | null;
+  safety_notes?: string[];
 };
 
 export type BookingResponse = {
@@ -751,6 +786,100 @@ export async function qualifyWhatsAppLead(input: {
       recommended_agent: "mumbai_search_agent",
       suggested_reply: `Thanks${input.name ? ` ${input.name}` : ""}! I can shortlist Mumbai homes around ${locality}, share EMI estimates, and offer viewing slots today or tomorrow.`,
       extracted_requirements: { locality, channel: "whatsapp", demo: true },
+    };
+  }
+}
+
+export async function sendWhatsAppWebhook(input: {
+  message: string;
+  phone?: string;
+  preferred_locality?: string;
+}): Promise<WhatsAppWebhookResult> {
+  try {
+    const res = await fetch(`${API_URL}/api/whatsapp/webhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Body: input.message,
+        From: input.phone || DEFAULT_WHATSAPP_NUMBER,
+        preferred_locality: input.preferred_locality,
+      }),
+    });
+    if (!res.ok) throw new Error("WhatsApp webhook failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo WhatsApp webhook reply.", error);
+    const lead = await qualifyWhatsAppLead({
+      message: input.message,
+      phone: input.phone,
+      preferred_locality: input.preferred_locality,
+    });
+    return { reply: lead.suggested_reply, lead, provider: "frontend-demo" };
+  }
+}
+
+export async function sendWhatsAppMessage(input: {
+  to?: string;
+  message: string;
+  dry_run?: boolean;
+}): Promise<WhatsAppSendResult> {
+  const to = input.to || DEFAULT_WHATSAPP_NUMBER;
+  try {
+    const res = await fetch(`${API_URL}/api/whatsapp/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to,
+        message: input.message,
+        dry_run: input.dry_run ?? false,
+      }),
+    });
+    if (!res.ok) throw new Error("WhatsApp send failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo WhatsApp send result.", error);
+    return {
+      provider: "frontend-demo",
+      sent: false,
+      to: to.startsWith("whatsapp:") ? to : `whatsapp:${to}`,
+      from_number: null,
+      sid: null,
+      status: "failed",
+      message: `${input.message} | send_error: WhatsApp send could not be completed`,
+      dry_run: input.dry_run ?? false,
+    };
+  }
+}
+
+export async function runVoiceGuide(input: {
+  message: string;
+  propertyId?: string;
+}): Promise<VoiceGuideResult> {
+  const propertyId = input.propertyId || DEMO_PROPERTIES[0].id;
+  try {
+    const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/guide/voice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: input.message,
+        transcript: input.message,
+        role: "public",
+        query_mode: "voice",
+      }),
+    });
+    if (!res.ok) throw new Error("Voice guide failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo voice guide.", error);
+    return {
+      response_type: "answer",
+      spoken_text: "I can guide you through the property, answer finance and legal questions, or jump to a room.",
+      display_text: "Demo voice guide is active.",
+      suggested_actions: ["Show living room", "Explain EMI", "Check legal readiness"],
+      confidence_score: 0.72,
+      requires_handoff: false,
+      handoff_agent: "Property Page Agent",
+      safety_notes: ["Demo fallback used because the backend voice route was unavailable."],
     };
   }
 }

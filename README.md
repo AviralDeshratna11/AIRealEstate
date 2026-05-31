@@ -36,6 +36,7 @@ Then open:
 - Health: `http://localhost:8000/health`
 
 The app works without paid keys by using in-memory Mumbai demo data and deterministic agent fallbacks.
+If you want the live backend to use Supabase, set `DATABASE_URL` in `.env` to your Supabase pooled Postgres connection string before starting Docker.
 
 ## Backend manual run
 
@@ -92,12 +93,31 @@ cd backend
 python -m app.db.seed
 ```
 
+The manager portal tables are created on demand by the backend when `DATABASE_URL` is set, so Supabase is enough for live manager listing CRUD.
+
+## Implemented Automations
+
+These are the automation surfaces implemented so far and exposed by the backend:
+
+- Property search and ranking with semantic fallback and Mumbai market signals.
+- WhatsApp lead qualification, reply generation, and Twilio send/webhook support.
+- Voice triage through Vapi, now routed through the XR guide voice flow.
+- AI guided tours for property pages and XR room-by-room navigation.
+- Cal.com viewing-slot lookup and booking creation.
+- Finance estimation for EMI, loan amount, and construction/material ranges.
+- Market intelligence for inventory, redevelopment, and locality context.
+- Negotiation optimization using the LP-based counter-offer engine.
+- Document extraction for legal, contingency, and calendar reminders.
+- Manager portal automation for publishing, leads, tasks, audit logs, and property listings.
+- Broker portal automation for tie-ups, buyer matching, PropertyPool events, commissions, and follow-up tasks.
+- AI assistant fallback for general workspace questions and product guidance.
+
 ## Environment variables
 
 See `.env.example`. Required only for production-grade behavior:
 
 - `OPENAI_API_KEY` for structured outputs, semantic embeddings, and document extraction.
-- `DATABASE_URL` for Supabase/Postgres/pgvector.
+- `DATABASE_URL` for Supabase/Postgres/pgvector. Use the Supabase pooled Postgres URI with SSL enabled.
 - `CALCOM_API_KEY`, `CALCOM_EVENT_TYPE_ID` for live viewing slots.
 - `VAPI_WEBHOOK_SECRET` and Vapi URL config for phone agent testing.
 - WhatsApp/Meta/Twilio credentials if you want outbound messages.

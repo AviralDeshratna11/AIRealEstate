@@ -315,10 +315,11 @@ class BrokerPortalService:
                 pool = await get_pool()
             except Exception:
                 pool = None
-            if pool is not None:
-                async with pool.acquire() as conn:
-                    for statement in DDL_STATEMENTS:
-                        await conn.execute(statement)
+            if pool is None:
+                return
+            async with pool.acquire() as conn:
+                for statement in DDL_STATEMENTS:
+                    await conn.execute(statement)
             self._seeded = True
 
     def _seed_demo_records(self) -> None:

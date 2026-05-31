@@ -5,12 +5,12 @@ from typing import Any
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from app.agents.graph import build_agent_graph
 from app.models import VapiMessage
+from app.services.property_xr import property_xr_service
 from app.utils.sse import sse_event
 
 router = APIRouter(prefix="/api/vapi", tags=["vapi"])
-graph = build_agent_graph()
+DEFAULT_VOICE_PROPERTY_ID = "seller-demo-powai-1"
 
 
 def _latest_user_text(payload: dict[str, Any]) -> str:
@@ -26,6 +26,20 @@ def _latest_user_text(payload: dict[str, Any]) -> str:
     if message.get("transcript"):
         return str(message["transcript"])
     return str(message.get("text") or message.get("content") or "I need help with a property viewing")
+
+
+def _latest_property_id(payload: dict[str, Any]) -> str:
+    message = payload.get("message", payload)
+    candidates = [
+        payload.get("property_id"),
+        message.get("property_id"),
+        message.get("artifact", {}).get("property_id") if isinstance(message.get("artifact"), dict) else None,
+        message.get("metadata", {}).get("property_id") if isinstance(message.get("metadata"), dict) else None,
+    ]
+    for candidate in candidates:
+        if candidate:
+            return str(candidate)
+    return DEFAULT_VOICE_PROPERTY_ID
 
 
 @router.post("/server-events")
@@ -52,10 +66,15 @@ async def vapi_server_events(payload: VapiMessage):
 async def vapi_custom_llm(request: Request):
     payload = await request.json()
     user_text = _latest_user_text(payload)
+    property_id = _latest_property_id(payload)
 
     async def events():
-        result = await graph.ainvoke({"session_id": "vapi-call", "user_query": user_text, "data": {}})
-        answer = result.get("answer", "I can help with that.")
+        result = await property_xr_service.guide(
+            property_id,
+            {"query": user_text, "transcript": user_text, "role": "public", "query_mode": "voice"},
+            "voice",
+        )
+        answer = result.get("spoken_text") or result.get("display_text") or "I can help with that."
         # Vapi custom LLM integrations commonly consume SSE deltas. This shape is intentionally simple.
         for word in answer.split():
             yield sse_event({"choices": [{"delta": {"content": word + " "}}]}, event="message")
