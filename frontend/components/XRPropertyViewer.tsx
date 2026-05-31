@@ -15,6 +15,8 @@ import {
   IndianRupee,
   Layers3,
   MapPin,
+  Maximize,
+  Minimize,
   Mic,
   MicOff,
   Move3D,
@@ -70,7 +72,10 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
   const [assetFailed, setAssetFailed] = useState(false);
   const [autoPlaying, setAutoPlaying] = useState(false);
   const [autoIndex, setAutoIndex] = useState(0);
+  const [dollhouse, setDollhouse] = useState(false);
   const cameraTargetRef = useRef<{ position?: XRVector; lookAt?: XRVector; hotspotId?: string } | null>(null);
+  const cameraStateRef = useRef<{ position: XRVector; target: XRVector } | null>(null);
+  const dollhouseRef = useRef(false);
   const speakCancelRef = useRef(false);
   const navigateToRef = useRef<((hotspot: XRHotspot) => void) | null>(null);
 
@@ -149,6 +154,10 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
   }
 
   async function navigateTo(hotspot: XRHotspot) {
+    if (dollhouseRef.current) {
+      dollhouseRef.current = false;
+      setDollhouse(false);
+    }
     setActiveHotspot(hotspot);
     const orderedIndex = orderedHotspots.findIndex((item) => item.hotspot_id === hotspot.hotspot_id);
     if (orderedIndex >= 0) setAutoIndex(orderedIndex);
@@ -210,6 +219,22 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
     const next = Math.min(Math.max(autoIndex + direction, 0), orderedHotspots.length - 1);
     setAutoIndex(next);
     navigateTo(orderedHotspots[next]);
+  }
+
+  function toggleDollhouse() {
+    const next = !dollhouse;
+    setDollhouse(next);
+    dollhouseRef.current = next;
+    if (next) {
+      setAutoPlaying(false);
+      cameraTargetRef.current = { position: { x: 0, y: 8, z: 8.5 }, lookAt: { x: 0, y: 0.4, z: 0 }, hotspotId: undefined };
+    } else if (activeHotspot) {
+      cameraTargetRef.current = {
+        position: activeHotspot.camera_position_json,
+        lookAt: activeHotspot.camera_look_at_json,
+        hotspotId: activeHotspot.hotspot_id,
+      };
+    }
   }
 
   function startVoice() {
@@ -287,6 +312,8 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
         payload={payload}
         activeHotspot={activeHotspot}
         cameraTargetRef={cameraTargetRef}
+        cameraStateRef={cameraStateRef}
+        dollhouseRef={dollhouseRef}
         comfortMode={comfortMode}
         onReady={() => setViewerReady(true)}
         onAssetFailed={() => setAssetFailed(true)}
@@ -307,16 +334,33 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
         onNext={() => stepAutoTour(1)}
       />
 
-      <div className="absolute left-4 top-24 z-20 flex flex-col gap-3 md:left-6">
+      <div className="absolute left-4 top-24 z-30 flex flex-col gap-3 md:left-6">
         <button onClick={() => setShowRooms((value) => !value)} className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-black/42 text-white backdrop-blur-xl transition hover:bg-white/12">
           <DoorOpen size={20} />
         </button>
         <button onClick={() => setShowTranscript((value) => !value)} className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-black/42 text-white backdrop-blur-xl transition hover:bg-white/12">
           <Bot size={20} />
         </button>
+        <button
+          onClick={toggleDollhouse}
+          aria-pressed={dollhouse}
+          className={clsx("pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border backdrop-blur-xl transition", dollhouse ? "border-amber-300/40 bg-amber-400 text-slate-950" : "border-white/12 bg-black/42 text-white hover:bg-white/12")}
+        >
+          {dollhouse ? <Minimize size={20} /> : <Maximize size={20} />}
+        </button>
       </div>
 
-      {showRooms ? <RoomNavigationPanel hotspots={payload.hotspots} activeHotspot={activeHotspot} mode={mode} setMode={setMode} onNavigate={navigateTo} /> : null}
+      <div className="absolute bottom-28 left-4 top-40 z-20 hidden w-[310px] flex-col gap-3 lg:flex">
+        {showRooms ? <RoomNavigationPanel hotspots={payload.hotspots} activeHotspot={activeHotspot} mode={mode} setMode={setMode} onNavigate={navigateTo} /> : null}
+        <Minimap
+          hotspots={payload.hotspots}
+          activeId={activeHotspot?.hotspot_id}
+          cameraStateRef={cameraStateRef}
+          dollhouse={dollhouse}
+          onNavigate={navigateTo}
+          onToggleDollhouse={toggleDollhouse}
+        />
+      </div>
       <GuidedTourTimeline payload={payload} activeHotspot={activeHotspot} onNavigate={navigateTo} />
       <XRSessionStatus webxrSupported={webxrSupported} comfortMode={comfortMode} setComfortMode={setComfortMode} />
       {showTranscript ? <TourTranscriptPanel transcript={transcript} onClose={() => setShowTranscript(false)} /> : null}
@@ -343,6 +387,8 @@ function GaussianSplatScene({
   payload,
   activeHotspot,
   cameraTargetRef,
+  cameraStateRef,
+  dollhouseRef,
   comfortMode,
   onReady,
   onAssetFailed,
@@ -351,6 +397,8 @@ function GaussianSplatScene({
   payload: XRPayload;
   activeHotspot: XRHotspot | null;
   cameraTargetRef: React.MutableRefObject<{ position?: XRVector; lookAt?: XRVector; hotspotId?: string } | null>;
+  cameraStateRef: React.MutableRefObject<{ position: XRVector; target: XRVector } | null>;
+  dollhouseRef: React.MutableRefObject<boolean>;
   comfortMode: boolean;
   onReady: () => void;
   onAssetFailed: () => void;
@@ -483,9 +531,13 @@ function GaussianSplatScene({
           const look = new THREE.Vector3(command.lookAt.x, command.lookAt.y, command.lookAt.z);
           controls.target.lerp(look, comfortMode ? 0.025 : 0.055);
         }
-        if (comfortMode) {
+        if (comfortMode && !dollhouseRef.current) {
           camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.max(1.25, Math.min(1.85, camera.position.y)), 0.2);
         }
+        cameraStateRef.current = {
+          position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+          target: { x: controls.target.x, y: controls.target.y, z: controls.target.z },
+        };
         hotspotMeshes.forEach((mesh, id) => {
           const material = mesh.material as import("three").MeshStandardMaterial;
           const active = activeHotspot?.hotspot_id === id || cameraTargetRef.current?.hotspotId === id;
@@ -513,7 +565,7 @@ function GaussianSplatScene({
       mounted = false;
       cleanup();
     };
-  }, [payload, comfortMode, activeHotspot?.hotspot_id, cameraTargetRef, onAssetFailed, onHotspotSelect, onReady]);
+  }, [payload, comfortMode, activeHotspot?.hotspot_id, cameraTargetRef, cameraStateRef, dollhouseRef, onAssetFailed, onHotspotSelect, onReady]);
 
   return <div ref={mountRef} className="absolute inset-0" />;
 }
@@ -635,8 +687,8 @@ function AutoTourDock({
 
 function RoomNavigationPanel({ hotspots, activeHotspot, mode, setMode, onNavigate }: { hotspots: XRHotspot[]; activeHotspot: XRHotspot | null; mode: TourMode; setMode: (mode: TourMode) => void; onNavigate: (hotspot: XRHotspot) => void }) {
   return (
-    <aside className="absolute bottom-28 left-4 top-40 z-20 hidden w-[310px] overflow-hidden rounded-[28px] border border-white/12 bg-black/48 shadow-2xl backdrop-blur-xl lg:block">
-      <div className="border-b border-white/10 p-4">
+    <aside className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-white/12 bg-black/48 shadow-2xl backdrop-blur-xl">
+      <div className="shrink-0 border-b border-white/10 p-4">
         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">Rooms and modes</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           {[
@@ -650,7 +702,7 @@ function RoomNavigationPanel({ hotspots, activeHotspot, mode, setMode, onNavigat
           ))}
         </div>
       </div>
-      <div className="h-[calc(100%-132px)] overflow-auto p-3">
+      <div className="min-h-0 flex-1 overflow-auto p-3">
         {hotspots.map((hotspot) => (
           <button key={hotspot.hotspot_id} onClick={() => onNavigate(hotspot)} className={clsx("mb-2 w-full rounded-2xl border p-3 text-left transition", activeHotspot?.hotspot_id === hotspot.hotspot_id ? "border-emerald-300/40 bg-emerald-400/16" : "border-white/10 bg-white/7 hover:bg-white/12")}>
             <p className="text-sm font-black text-white">{hotspot.label}</p>
@@ -659,6 +711,82 @@ function RoomNavigationPanel({ hotspots, activeHotspot, mode, setMode, onNavigat
         ))}
       </div>
     </aside>
+  );
+}
+
+function Minimap({
+  hotspots,
+  activeId,
+  cameraStateRef,
+  dollhouse,
+  onNavigate,
+  onToggleDollhouse,
+}: {
+  hotspots: XRHotspot[];
+  activeId?: string;
+  cameraStateRef: React.MutableRefObject<{ position: XRVector; target: XRVector } | null>;
+  dollhouse: boolean;
+  onNavigate: (hotspot: XRHotspot) => void;
+  onToggleDollhouse: () => void;
+}) {
+  const markerRef = useRef<HTMLDivElement | null>(null);
+  const toPct = (value: number) => Math.max(4, Math.min(96, ((value + 7) / 14) * 100));
+
+  useEffect(() => {
+    let raf = 0;
+    const clampPct = (value: number) => Math.max(2, Math.min(98, ((value + 7) / 14) * 100));
+    const tick = () => {
+      const state = cameraStateRef.current;
+      const el = markerRef.current;
+      if (state && el) {
+        el.style.left = `${clampPct(state.position.x)}%`;
+        el.style.top = `${clampPct(state.position.z)}%`;
+        const angle = Math.atan2(state.target.z - state.position.z, state.target.x - state.position.x) * (180 / Math.PI);
+        el.style.transform = `translate(-50%, -50%) rotate(${angle + 90}deg)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [cameraStateRef]);
+
+  const dotColor = (type: string) => (type === "legal" ? "bg-amber-400" : type === "finance" ? "bg-sky-400" : "bg-emerald-400");
+
+  return (
+    <div className="shrink-0 overflow-hidden rounded-[28px] border border-white/12 bg-black/48 p-4 shadow-2xl backdrop-blur-xl">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">Floor map</p>
+        <button
+          onClick={onToggleDollhouse}
+          className={clsx("inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider transition", dollhouse ? "bg-amber-400 text-slate-950" : "bg-white/8 text-white/70 hover:bg-white/14")}
+        >
+          <Maximize size={12} />
+          {dollhouse ? "Exit" : "Overview"}
+        </button>
+      </div>
+      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.1),transparent_70%)]">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:25%_25%]" />
+        {hotspots.map((hotspot) => (
+          <button
+            key={hotspot.hotspot_id}
+            onClick={() => onNavigate(hotspot)}
+            title={hotspot.label}
+            className={clsx(
+              "absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/40 transition",
+              dotColor(hotspot.hotspot_type),
+              activeId === hotspot.hotspot_id ? "z-10 scale-150 ring-2 ring-white" : "opacity-70 hover:scale-125 hover:opacity-100"
+            )}
+            style={{ left: `${toPct(hotspot.position_json.x)}%`, top: `${toPct(hotspot.position_json.z)}%` }}
+          />
+        ))}
+        <div
+          ref={markerRef}
+          className="pointer-events-none absolute h-0 w-0 border-x-[6px] border-b-[12px] border-x-transparent border-b-rose-400 drop-shadow-[0_0_4px_rgba(244,63,94,0.8)]"
+          style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
+        />
+      </div>
+      <p className="mt-2 text-[10px] font-semibold text-white/45">Tap a marker to jump · red arrow is your view</p>
+    </div>
   );
 }
 
