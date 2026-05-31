@@ -20,6 +20,7 @@ import {
   Minimize,
   Mic,
   MicOff,
+  Moon,
   Move3D,
   Network,
   Pause,
@@ -32,6 +33,9 @@ import {
   SkipForward,
   Sparkles,
   Star,
+  Sun,
+  Sunrise,
+  Sunset,
   Volume2,
   X,
 } from "lucide-react";
@@ -57,6 +61,31 @@ type SpeechWindow = Window & {
   webkitSpeechRecognition?: new () => SpeechRecognitionLike;
 };
 
+type LightingPreset = {
+  keyColor: number;
+  keyIntensity: number;
+  keyPos: [number, number, number];
+  hemiSky: number;
+  hemiGround: number;
+  hemiIntensity: number;
+  bg: number;
+  fog: number;
+};
+
+const LIGHTING_PRESETS: Record<"morning" | "noon" | "evening" | "night", LightingPreset> = {
+  morning: { keyColor: 0xffe2b0, keyIntensity: 2.4, keyPos: [-7, 4, 5], hemiSky: 0xbcd6ff, hemiGround: 0x2a2014, hemiIntensity: 1.05, bg: 0x0a1018, fog: 0x0a1018 },
+  noon: { keyColor: 0xfff2d6, keyIntensity: 2.8, keyPos: [4, 8, 5], hemiSky: 0xffffff, hemiGround: 0x223344, hemiIntensity: 1.2, bg: 0x050608, fog: 0x050608 },
+  evening: { keyColor: 0xff8a4d, keyIntensity: 2.3, keyPos: [7, 3, -3], hemiSky: 0xffb27a, hemiGround: 0x241812, hemiIntensity: 0.85, bg: 0x140d0a, fog: 0x140d0a },
+  night: { keyColor: 0x9ab4ff, keyIntensity: 0.9, keyPos: [-4, 7, -5], hemiSky: 0x2a3f6b, hemiGround: 0x05070d, hemiIntensity: 0.45, bg: 0x03050a, fog: 0x03050a },
+};
+
+const TIME_OF_DAY_OPTIONS: Array<{ key: keyof typeof LIGHTING_PRESETS; label: string; icon: typeof Sun }> = [
+  { key: "morning", label: "Morning", icon: Sunrise },
+  { key: "noon", label: "Noon", icon: Sun },
+  { key: "evening", label: "Evening", icon: Sunset },
+  { key: "night", label: "Night", icon: Moon },
+];
+
 export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: string; role?: Role }) {
   const [payload, setPayload] = useState<XRPayload | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -76,7 +105,9 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
   const [autoIndex, setAutoIndex] = useState(0);
   const [dollhouse, setDollhouse] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [timeOfDay, setTimeOfDay] = useState<keyof typeof LIGHTING_PRESETS>("noon");
   const cameraTargetRef = useRef<{ position?: XRVector; lookAt?: XRVector; hotspotId?: string } | null>(null);
+  const lightingRef = useRef<LightingPreset>(LIGHTING_PRESETS.noon);
   const cameraStateRef = useRef<{ position: XRVector; target: XRVector } | null>(null);
   const dollhouseRef = useRef(false);
   const speakCancelRef = useRef(false);
@@ -248,6 +279,11 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
     }
   }
 
+  function setTime(key: keyof typeof LIGHTING_PRESETS) {
+    setTimeOfDay(key);
+    lightingRef.current = LIGHTING_PRESETS[key];
+  }
+
   function flashToast(message: string) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast(message);
@@ -366,6 +402,7 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
         cameraStateRef={cameraStateRef}
         dollhouseRef={dollhouseRef}
         captureRef={captureRef}
+        lightingRef={lightingRef}
         comfortMode={comfortMode}
         onReady={() => setViewerReady(true)}
         onAssetFailed={() => setAssetFailed(true)}
@@ -420,7 +457,7 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
         />
       </div>
       <GuidedTourTimeline payload={payload} activeHotspot={activeHotspot} onNavigate={navigateTo} />
-      <XRSessionStatus webxrSupported={webxrSupported} comfortMode={comfortMode} setComfortMode={setComfortMode} />
+      <XRSessionStatus webxrSupported={webxrSupported} comfortMode={comfortMode} setComfortMode={setComfortMode} timeOfDay={timeOfDay} onSetTime={setTime} />
       {showTranscript ? <TourTranscriptPanel transcript={transcript} onClose={() => setShowTranscript(false)} /> : null}
 
       <XRVoiceGuide
@@ -474,6 +511,7 @@ function GaussianSplatScene({
   cameraStateRef,
   dollhouseRef,
   captureRef,
+  lightingRef,
   comfortMode,
   onReady,
   onAssetFailed,
@@ -485,6 +523,7 @@ function GaussianSplatScene({
   cameraStateRef: React.MutableRefObject<{ position: XRVector; target: XRVector } | null>;
   dollhouseRef: React.MutableRefObject<boolean>;
   captureRef: React.MutableRefObject<(() => string | null) | null>;
+  lightingRef: React.MutableRefObject<LightingPreset>;
   comfortMode: boolean;
   onReady: () => void;
   onAssetFailed: () => void;
@@ -615,7 +654,21 @@ function GaussianSplatScene({
       };
       window.addEventListener("resize", onResize);
 
+      const tmpColor = new THREE.Color();
+      const tmpVec = new THREE.Vector3();
+
       renderer.setAnimationLoop(() => {
+        const lighting = lightingRef.current;
+        if (lighting) {
+          key.color.lerp(tmpColor.set(lighting.keyColor), 0.05);
+          key.intensity = THREE.MathUtils.lerp(key.intensity, lighting.keyIntensity, 0.05);
+          key.position.lerp(tmpVec.set(lighting.keyPos[0], lighting.keyPos[1], lighting.keyPos[2]), 0.05);
+          ambient.color.lerp(tmpColor.set(lighting.hemiSky), 0.05);
+          ambient.groundColor.lerp(tmpColor.set(lighting.hemiGround), 0.05);
+          ambient.intensity = THREE.MathUtils.lerp(ambient.intensity, lighting.hemiIntensity, 0.05);
+          if (scene.background instanceof THREE.Color) scene.background.lerp(tmpColor.set(lighting.bg), 0.05);
+          if (scene.fog instanceof THREE.Fog) scene.fog.color.lerp(tmpColor.set(lighting.fog), 0.05);
+        }
         const command = cameraTargetRef.current;
         if (command?.position) {
           const targetPos = new THREE.Vector3(command.position.x, command.position.y, command.position.z);
@@ -660,7 +713,7 @@ function GaussianSplatScene({
       mounted = false;
       cleanup();
     };
-  }, [payload, comfortMode, activeHotspot?.hotspot_id, cameraTargetRef, cameraStateRef, dollhouseRef, captureRef, onAssetFailed, onHotspotSelect, onReady]);
+  }, [payload, comfortMode, activeHotspot?.hotspot_id, cameraTargetRef, cameraStateRef, dollhouseRef, captureRef, lightingRef, onAssetFailed, onHotspotSelect, onReady]);
 
   return <div ref={mountRef} className="absolute inset-0" />;
 }
@@ -901,14 +954,40 @@ function GuidedTourTimeline({ payload, activeHotspot, onNavigate }: { payload: X
   );
 }
 
-function XRSessionStatus({ webxrSupported, comfortMode, setComfortMode }: { webxrSupported: boolean; comfortMode: boolean; setComfortMode: (value: boolean) => void }) {
+function XRSessionStatus({
+  webxrSupported,
+  comfortMode,
+  setComfortMode,
+  timeOfDay,
+  onSetTime,
+}: {
+  webxrSupported: boolean;
+  comfortMode: boolean;
+  setComfortMode: (value: boolean) => void;
+  timeOfDay: keyof typeof LIGHTING_PRESETS;
+  onSetTime: (key: keyof typeof LIGHTING_PRESETS) => void;
+}) {
   return (
-    <section className="absolute right-4 top-24 z-20 hidden rounded-[24px] border border-white/12 bg-black/42 p-3 text-xs font-black text-white/74 backdrop-blur-xl md:right-6 lg:block">
+    <section className="absolute right-4 top-24 z-20 hidden w-[220px] rounded-[24px] border border-white/12 bg-black/42 p-3 text-xs font-black text-white/74 backdrop-blur-xl md:right-6 lg:block">
       <div className="flex items-center gap-2"><Headphones size={15} className="text-emerald-200" />WebXR {webxrSupported ? "supported" : "fallback"}</div>
       <button onClick={() => setComfortMode(!comfortMode)} className="mt-2 flex w-full items-center gap-2 rounded-2xl bg-white/8 px-3 py-2 text-left hover:bg-white/14">
         <Compass size={14} />
         Comfort {comfortMode ? "on" : "off"}
       </button>
+      <p className="mt-3 mb-2 text-[10px] uppercase tracking-[0.22em] text-emerald-200">Daylight</p>
+      <div className="grid grid-cols-4 gap-1.5">
+        {TIME_OF_DAY_OPTIONS.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => onSetTime(key)}
+            title={label}
+            aria-label={label}
+            className={clsx("flex h-10 items-center justify-center rounded-xl transition", timeOfDay === key ? "bg-amber-400 text-slate-950" : "bg-white/8 text-white/70 hover:bg-white/16")}
+          >
+            <Icon size={16} />
+          </button>
+        ))}
+      </div>
     </section>
   );
 }
