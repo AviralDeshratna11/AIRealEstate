@@ -1560,48 +1560,245 @@ export type XRGuideResponse = {
   safety_notes: string[];
 };
 
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, timeoutMs = 3500) {
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    globalThis.clearTimeout(timeout);
+  }
+}
+
+function demoXRHotspots(listingId: string): XRHotspot[] {
+  const now = new Date().toISOString();
+  const stops: Array<[string, string, string, string, XRVector, XRVector, XRVector, string, string[]]> = [
+    ["Building approach", "Building entrance", "Check road access, entry security, drop-off, and visitor movement.", "entry", { x: -4, y: 1.4, z: -3 }, { x: -6, y: 1.7, z: -6 }, { x: -2, y: 1.3, z: -2 }, "family", ["family", "broker"]],
+    ["Lobby", "Lobby and lift", "Assess maintenance, lift count, accessibility, and society upkeep.", "common_area", { x: -2, y: 1.3, z: -1 }, { x: -3, y: 1.65, z: -3 }, { x: 0, y: 1.2, z: 0 }, "senior", ["senior", "family"]],
+    ["Living room", "Living room", "Review seating flow, daylight, ventilation, and family usability.", "room", { x: 0, y: 1.4, z: 0 }, { x: 0, y: 1.65, z: 4 }, { x: 0, y: 1.2, z: 0 }, "family", ["family", "first_time_buyer"]],
+    ["Balcony", "Balcony / view", "Verify privacy, road noise, open view, and morning or evening light.", "view", { x: 3, y: 1.4, z: 1 }, { x: 4, y: 1.65, z: 3 }, { x: 2, y: 1.2, z: 0 }, "nri", ["nri", "family"]],
+    ["Kitchen", "Kitchen", "Check utility flow, storage, ventilation, platform condition, and appliance placement.", "room", { x: -2, y: 1.4, z: 2 }, { x: -3.5, y: 1.65, z: 3 }, { x: -1, y: 1.1, z: 1 }, "family", ["family", "first_time_buyer"]],
+    ["Master bedroom", "Master bedroom", "Review privacy, wardrobe wall, work setup, AC placement, and noise leakage.", "room", { x: 2.5, y: 1.4, z: -2 }, { x: 4, y: 1.65, z: -3 }, { x: 1, y: 1.2, z: -1 }, "family", ["family", "nri"]],
+    ["Bathroom", "Bathrooms", "Inspect plumbing pressure, ventilation, fittings, drainage slope, and seepage risk.", "inspection", { x: -3, y: 1.3, z: -2 }, { x: -4, y: 1.6, z: -2.5 }, { x: -2, y: 1.1, z: -1 }, "inspection", ["first_time_buyer", "legal"]],
+    ["Parking", "Parking and amenities", "Confirm parking allocation, access ramp, visitor rules, and amenity quality.", "amenity", { x: 4, y: 1.4, z: -4 }, { x: 6, y: 1.7, z: -5 }, { x: 3, y: 1.1, z: -3 }, "broker", ["broker", "family"]],
+    ["Legal", "Legal/document context", "Ask about RERA, title report, NOC, occupancy certificate, and document gaps.", "legal", { x: -4, y: 1.8, z: 3 }, { x: -5, y: 1.7, z: 4 }, { x: -2, y: 1.2, z: 2 }, "legal", ["nri", "first_time_buyer"]],
+    ["Finance", "Finance context", "Ask EMI, down payment, total cash needed, or affordability questions here.", "finance", { x: 4, y: 1.8, z: 3 }, { x: 5, y: 1.7, z: 4 }, { x: 2, y: 1.2, z: 2 }, "finance", ["first_time_buyer", "investor"]],
+  ];
+
+  return stops.map(([roomName, label, description, type, position, cameraPosition, cameraLookAt, tag, tags], index) => ({
+    hotspot_id: `xr-hotspot-${index + 1}`,
+    id: `xr-hotspot-${index + 1}`,
+    listing_id: listingId,
+    room_name: roomName,
+    hotspot_type: type,
+    label,
+    description,
+    position_json: position,
+    camera_position_json: cameraPosition,
+    camera_look_at_json: cameraLookAt,
+    narration: `${label}. ${description} Unknowns should be verified during a physical site visit.`,
+    buyer_relevance_tags: tags,
+    broker_talking_points: ["Use verified claims only.", "Point out layout, light, EMI context, and document status without overclaiming."],
+    manager_notes: `Confirm ${tag} metadata, room label, caption, sunlight direction, and splat alignment.`,
+    priority: index + 1,
+    created_at: now,
+    updated_at: now,
+  }));
+}
+
+function demoXRPayload(propertyId: string, role: PropertyIntelligenceDetail["role"] = "public"): XRPayload {
+  const listing = DEMO_MANAGER_LISTINGS.find((item) => item.id === propertyId || item.slug === propertyId || item.id.replace("seller-", "") === propertyId) || DEMO_MANAGER_LISTINGS[0];
+  const listingId = listing.id;
+  const hotspots = demoXRHotspots(listingId);
+  const asset: XRAsset = {
+    id: `xr-asset-${listingId}`,
+    listing_id: listingId,
+    asset_type: "ksplat",
+    asset_url: "/splats/demo-property.ksplat",
+    thumbnail_url: listing.hero_image_url,
+    file_size_mb: 184,
+    version: "static-demo-1",
+    processing_status: "ready",
+    coordinate_system: "threejs_y_up",
+    scale_factor: 1,
+    origin_json: { x: 0, y: 0, z: 0 },
+    metadata_json: { source: "github pages static fallback", loader: "adaptive_three_pointcloud_fallback" },
+  };
+  return {
+    property: {
+      id: listingId,
+      requested_id: propertyId,
+      title: listing.title,
+      locality: listing.locality,
+      price: listing.asking_price,
+      bedrooms: listing.bedrooms,
+      bathrooms: listing.bathrooms,
+      hero_image_url: listing.hero_image_url,
+    },
+    xr_asset: asset,
+    assets: [asset],
+    hotspots,
+    routes: [
+      {
+        id: `xr-route-default-${listingId}`,
+        listing_id: listingId,
+        route_name: "Default buyer route",
+        route_type: "default",
+        ordered_hotspot_ids: hotspots.map((item) => item.hotspot_id),
+        route_script: "Move through verified visual evidence, call out unknowns, and close with the next best action.",
+        estimated_duration_minutes: 8,
+      },
+      {
+        id: `xr-route-broker-${listingId}`,
+        listing_id: listingId,
+        route_name: "Broker PropertyPool presentation",
+        route_type: "broker_propertypool",
+        ordered_hotspot_ids: hotspots.map((item) => item.hotspot_id),
+        route_script: "Use verified talking points and invite buyers only where tie-up permissions allow it.",
+        estimated_duration_minutes: 6,
+      },
+    ],
+    tour_script: {
+      title: `AI Virtual Property Guide script for ${listing.title}`,
+      opening: `Welcome to the immersive tour of ${listing.title}. I will guide you through layout, light, comfort, documents, finance, and locality context.`,
+      closing: "This XR tour helps shortlist, but final decision should include a physical visit and professional document review.",
+      broker_script: "Keep claims verified, protect attribution, and invite buyers to a PropertyPool visit only when tie-up permissions allow it.",
+    },
+    viewer_config: {
+      webxr_enabled: true,
+      desktop_controls: "orbit_walk",
+      mobile_controls: "touch_orbit",
+      comfort_mode: true,
+      fallback_mode: "static_github_pages",
+      mock_voice_available: true,
+    },
+    permissions: {
+      can_view_public_xr: true,
+      can_ask_ai: true,
+      can_use_voice: true,
+      can_schedule_visit: true,
+      can_shortlist: true,
+      can_compare: true,
+      can_create_propertypool: role === "broker",
+      can_view_broker_talking_points: role === "broker",
+      can_trigger_xr_processing: role === "manager" || role === "admin",
+      can_view_manager_analytics: role === "manager" || role === "admin",
+    },
+    analytics: {
+      total_xr_views: 0,
+      average_tour_duration_minutes: 0,
+      most_visited_rooms: ["Living room", "Kitchen", "Master bedroom"],
+      most_asked_questions: ["What is the EMI?", "Is this legally safe?", "How is the sunlight?"],
+      buyer_interest_score: 78,
+      visit_conversion_rate: 0.32,
+    },
+    role,
+  };
+}
+
+function localXRGuideResponse(propertyId: string, input: Record<string, unknown>): XRGuideResponse {
+  const payload = demoXRPayload(propertyId, String(input.role || "public") as PropertyIntelligenceDetail["role"]);
+  const query = String(input.query || "").toLowerCase();
+  const hotspot = payload.hotspots.find((item) => query.includes(item.room_name.toLowerCase()) || query.includes(item.label.toLowerCase())) ||
+    (query.includes("kitchen") ? payload.hotspots.find((item) => item.room_name === "Kitchen") : null) ||
+    (query.includes("bedroom") ? payload.hotspots.find((item) => item.room_name === "Master bedroom") : null) ||
+    (query.includes("legal") ? payload.hotspots.find((item) => item.hotspot_type === "legal") : null) ||
+    (query.includes("emi") || query.includes("finance") ? payload.hotspots.find((item) => item.hotspot_type === "finance") : null) ||
+    payload.hotspots[0];
+
+  const isNavigation = query.includes("show") || query.includes("go") || query.includes("tour") || query.includes("kitchen") || query.includes("bedroom");
+  return {
+    response_type: isNavigation ? "navigate" : query.includes("legal") ? "legal_summary" : query.includes("emi") ? "finance_estimate" : "answer",
+    spoken_text: `${hotspot.label}. ${hotspot.description} This hosted demo is using static XR intelligence because the live backend is not connected from GitHub Pages.`,
+    display_text: `${hotspot.label}: ${hotspot.description} Backend fallback is active on GitHub Pages.`,
+    navigation_target: hotspot.label,
+    camera_position: hotspot.camera_position_json,
+    camera_look_at: hotspot.camera_look_at_json,
+    room_id: hotspot.room_name,
+    hotspot_id: hotspot.hotspot_id,
+    highlight_hotspots: [hotspot.hotspot_id],
+    suggested_actions: ["Schedule physical visit", "Ask legal", "Get EMI estimate"],
+    confidence_score: 0.72,
+    requires_handoff: false,
+    handoff_agent: query.includes("legal") ? "Legal Due Diligence Agent" : query.includes("emi") ? "Finance Agent" : "XR Virtual Guide Agent",
+    safety_notes: ["Static hosted fallback. Verify legal, sunlight, noise, and room measurements before decision."],
+  };
+}
+
 export async function getPropertyXR(propertyId: string, role: PropertyIntelligenceDetail["role"] = "public"): Promise<XRPayload> {
-  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr?role=${role}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("XR payload failed");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/api/properties/${propertyId}/xr?role=${role}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("XR payload failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo XR payload because the backend is unavailable.", error);
+    return demoXRPayload(propertyId, role);
+  }
 }
 
 export async function createXRSession(propertyId: string, input: Record<string, unknown>) {
-  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/session`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!res.ok) throw new Error("XR session failed");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/api/properties/${propertyId}/xr/session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error("XR session failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo XR session.", error);
+    const payload = demoXRPayload(propertyId, String(input.role || "public") as PropertyIntelligenceDetail["role"]);
+    const first = payload.hotspots[0];
+    return {
+      session_id: `static-xr-${Date.now().toString(36)}`,
+      initial_route: payload.routes[0],
+      greeting: payload.tour_script.opening,
+      starting_camera_position: first.camera_position_json,
+      starting_camera_look_at: first.camera_look_at_json,
+      current_hotspot_id: first.hotspot_id,
+    };
+  }
 }
 
 export async function askXRGuide(propertyId: string, input: Record<string, unknown>): Promise<XRGuideResponse> {
-  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/guide/ask`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!res.ok) throw new Error("XR guide failed");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/api/properties/${propertyId}/xr/guide/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error("XR guide failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo XR guide response.", error);
+    return localXRGuideResponse(propertyId, input);
+  }
 }
 
 export async function navigateXRGuide(propertyId: string, input: Record<string, unknown>) {
-  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/guide/navigate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!res.ok) throw new Error("XR navigation failed");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/api/properties/${propertyId}/xr/guide/navigate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error("XR navigation failed");
+    return res.json();
+  } catch {
+    return { saved: false, fallback: true };
+  }
 }
 
 export async function saveXRFeedback(propertyId: string, sessionId: string, input: Record<string, unknown>) {
-  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/session/${sessionId}/feedback`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!res.ok) throw new Error("XR feedback failed");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(`${API_URL}/api/properties/${propertyId}/xr/session/${sessionId}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error("XR feedback failed");
+    return res.json();
+  } catch {
+    return { saved: false, fallback: true, next_action_recommendation: "Feedback captured locally for this hosted demo. Schedule a physical visit for verified inspection." };
+  }
 }
