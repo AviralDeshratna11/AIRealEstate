@@ -11,8 +11,11 @@
   --teal: #006d77;
   --brass: #b8832f;
   --coral: #d6532c;
-  --font-body: "IBM Plex Sans", "Inter", "Segoe UI", Arial, sans-serif;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --gold: #a8813c;
+  --gold-soft: #c8a35a;
+  --espresso: #14110d;
+  --ivory: #f7f3ea;
+  --sand: #efe7d7;
 }
 
 body {
@@ -326,5 +329,101 @@ body {
   .agent-orbit,
   .lift-in {
     animation: none;
+  }
+}
+
+/* ============================================================
+   Luxury landing (lx-) — refined editorial estate-house system
+   ============================================================ */
+
+.lx-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+.lx-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.lx-hairline {
+  background: linear-gradient(90deg, transparent, rgba(168, 129, 60, 0.55) 14%, rgba(168, 129, 60, 0.55) 86%, transparent);
+}
+
+/* Above-the-fold load reveal */
+.lx-rise {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: lxRise 0.95s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes lxRise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slow hero image settle */
+.lx-ken {
+  animation: lxKen 12s ease-out forwards;
+}
+
+@keyframes lxKen {
+  from {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Scroll-revealed sections */
+.lx-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 1s cubic-bezier(0.22, 0.61, 0.36, 1), transform 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.lx-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Underline that grows from the left on hover */
+.lx-link {
+  position: relative;
+}
+
+.lx-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.lx-link:hover::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-rise,
+  .lx-ken,
+  .lx-reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
   }
 }
