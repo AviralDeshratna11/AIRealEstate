@@ -1,11 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Bot, Loader2, MessageSquareText, SendHorizontal, X } from "lucide-react";
 import { AssistantMessage, askAssistant } from "@/lib/api";
 
 export function AIAssistant() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export function AIAssistant() {
     try {
       const reply = await askAssistant({
         message: text,
-        context: currentContext(),
+        context: currentContext(pathname),
         history: nextMessages.slice(-8),
       });
       setConfigured(reply.configured);
@@ -116,8 +118,10 @@ export function AIAssistant() {
   );
 }
 
-function currentContext() {
+function currentContext(pathname: string) {
+  // usePathname() returns the route without basePath, so "/" works on GitHub
+  // Pages too (where window.location.pathname is "/AIRealEstate/").
+  if (pathname === "/") return "home";
   if (typeof window === "undefined") return "workspace";
-  if (window.location.pathname === "/") return "home";
   return new URLSearchParams(window.location.search).get("tab") || "workspace";
 }

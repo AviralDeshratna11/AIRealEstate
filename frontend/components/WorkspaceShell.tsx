@@ -91,7 +91,9 @@ export function WorkspaceShell() {
 
   function selectTab(tab: TabId) {
     setActiveTab(tab);
-    window.history.replaceState(null, "", `/workspace/?tab=${tab}`);
+    // Preserve the current pathname (incl. any basePath, e.g. /AIRealEstate on
+    // GitHub Pages) instead of hardcoding /workspace/, which would 404 on reload.
+    window.history.replaceState(null, "", `${window.location.pathname}?tab=${tab}`);
   }
 
   return (
