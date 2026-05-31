@@ -121,6 +121,34 @@ async def save_propertypool_feedback(event_id: str, buyer_id: str = Body(..., em
     return (await broker_portal_service.feedback(event_id, buyer_id, feedback)).model_dump(mode="json")
 
 
+@router.post("/api/propertypool/{event_id}/xr/start")
+async def start_propertypool_xr(event_id: str, payload: dict = Body(default_factory=dict)):
+    from app.services.property_xr import property_xr_service
+
+    return await property_xr_service.propertypool_xr(event_id, "start", payload)
+
+
+@router.post("/api/propertypool/{event_id}/xr/broadcast-navigation")
+async def broadcast_propertypool_xr_navigation(event_id: str, payload: dict = Body(default_factory=dict)):
+    from app.services.property_xr import property_xr_service
+
+    return await property_xr_service.propertypool_xr(event_id, "broadcast_navigation", payload)
+
+
+@router.post("/api/propertypool/{event_id}/xr/question")
+async def propertypool_xr_question(event_id: str, payload: dict = Body(default_factory=dict)):
+    from app.services.property_xr import property_xr_service
+
+    return await property_xr_service.propertypool_xr(event_id, "question", payload)
+
+
+@router.post("/api/propertypool/{event_id}/xr/summary")
+async def propertypool_xr_summary(event_id: str, payload: dict = Body(default_factory=dict)):
+    from app.services.property_xr import property_xr_service
+
+    return await property_xr_service.propertypool_xr(event_id, "summary", payload)
+
+
 @router.get("/api/broker/commissions")
 async def get_broker_commissions():
     return [item.model_dump(mode="json") for item in await broker_portal_service.commissions()]
@@ -159,4 +187,3 @@ async def reject_manager_tieup_request(request_id: str, request: ManagerTieupDec
 @router.post("/api/manager/tieup-requests/{request_id}/update-terms")
 async def update_manager_tieup_terms(request_id: str, request: ManagerTieupDecisionRequest):
     return (await broker_portal_service.manager_decide_tieup(request_id, request, "terms_updated")).model_dump(mode="json")
-

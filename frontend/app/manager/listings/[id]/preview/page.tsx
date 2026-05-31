@@ -5,7 +5,7 @@ export function generateStaticParams() {
   return propertyDetailStaticParams();
 }
 
-export default async function BrokerPropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ManagerListingPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <PropertyIntelligencePage propertyId={id} role="broker" />;
+  return <PropertyIntelligencePage propertyId={id} role="manager" />;
 }

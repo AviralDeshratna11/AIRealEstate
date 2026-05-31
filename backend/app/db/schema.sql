@@ -190,6 +190,12 @@ create table if not exists seller_listings (
   published_at timestamptz
 );
 
+alter table seller_listings add column if not exists unit_number text;
+alter table seller_listings add column if not exists building_name text;
+alter table seller_listings add column if not exists super_builtup_area_sqft int;
+alter table seller_listings add column if not exists floor_number int;
+alter table seller_listings add column if not exists total_floors int;
+
 create table if not exists listing_documents (
   id text primary key default gen_random_uuid()::text,
   listing_id text references seller_listings(id) on delete cascade,
@@ -218,6 +224,11 @@ create table if not exists listing_media (
   quality_score numeric default 0,
   created_at timestamptz not null default now()
 );
+
+alter table listing_media add column if not exists room_area_sqft numeric;
+alter table listing_media add column if not exists room_name text;
+alter table listing_media add column if not exists display_order int default 0;
+alter table listing_media add column if not exists media_url text;
 
 create table if not exists listing_leads (
   id text primary key default gen_random_uuid()::text,
@@ -490,5 +501,131 @@ create table if not exists broker_audit_logs (
   actor_type text,
   actor_name text,
   details_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists property_visit_feedback (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  buyer_id text,
+  broker_id text,
+  visit_id text,
+  feedback_json jsonb not null default '{}'::jsonb,
+  interest_level text,
+  public_summary_allowed boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists property_faqs (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  question text not null,
+  answer text not null,
+  source text not null default 'ai_suggestion',
+  verified_status text not null default 'needs_manager_confirmation',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists property_area_breakdowns (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  room_name text not null,
+  area_sqft numeric,
+  notes text,
+  verified_status text not null default 'unverified',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists listing_xr_assets (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  asset_type text not null check (asset_type in ('ksplat','splat','ply','glb','video_fallback')),
+  asset_url text,
+  thumbnail_url text,
+  file_size_mb numeric,
+  version text,
+  processing_status text not null default 'pending' check (processing_status in ('pending','processing','ready','failed')),
+  coordinate_system text,
+  scale_factor numeric not null default 1,
+  origin_json jsonb not null default '{}'::jsonb,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists listing_xr_hotspots (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  room_name text,
+  hotspot_type text,
+  label text not null,
+  description text,
+  position_json jsonb not null default '{}'::jsonb,
+  camera_position_json jsonb not null default '{}'::jsonb,
+  camera_look_at_json jsonb not null default '{}'::jsonb,
+  narration text,
+  buyer_relevance_tags text[] not null default '{}',
+  broker_talking_points text[] not null default '{}',
+  manager_notes text,
+  linked_media_id text,
+  linked_document_id text,
+  priority int not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists listing_xr_routes (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  route_name text not null,
+  route_type text not null check (route_type in ('default','family_buyer','investor','nri','broker_propertypool','manager_preview')),
+  ordered_hotspot_ids text[] not null default '{}',
+  route_script text,
+  estimated_duration_minutes numeric,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists xr_tour_sessions (
+  id text primary key default gen_random_uuid()::text,
+  listing_id text references seller_listings(id) on delete cascade,
+  user_id text,
+  role text not null default 'public',
+  buyer_id text,
+  broker_id text,
+  manager_id text,
+  started_at timestamptz,
+  ended_at timestamptz,
+  session_status text not null default 'active',
+  current_hotspot_id text,
+  transcript_json jsonb not null default '[]'::jsonb,
+  events_json jsonb not null default '[]'::jsonb,
+  feedback_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists xr_voice_interactions (
+  id text primary key default gen_random_uuid()::text,
+  session_id text,
+  listing_id text references seller_listings(id) on delete cascade,
+  user_id text,
+  role text not null default 'public',
+  transcript text,
+  agent_response_json jsonb not null default '{}'::jsonb,
+  spoken_text text,
+  response_type text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists xr_navigation_events (
+  id text primary key default gen_random_uuid()::text,
+  session_id text,
+  listing_id text references seller_listings(id) on delete cascade,
+  event_type text,
+  from_hotspot_id text,
+  to_hotspot_id text,
+  camera_position_json jsonb not null default '{}'::jsonb,
+  timestamp timestamptz,
   created_at timestamptz not null default now()
 );

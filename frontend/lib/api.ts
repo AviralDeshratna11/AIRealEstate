@@ -150,6 +150,8 @@ export type ManagerListing = {
   manager_id: string;
   title: string;
   slug: string;
+  unit_number?: string | null;
+  building_name?: string | null;
   status: ManagerListingStatus;
   property_type: string;
   transaction_type: string;
@@ -1324,3 +1326,282 @@ export async function decideManagerTieup(requestId: string, action: "approve" | 
 }
 
 export { MANAGER_DEMO_LISTING_IDS };
+
+export type PropertyIntelligenceDetail = {
+  id: string;
+  slug: string;
+  role: "public" | "buyer" | "broker" | "manager" | "admin";
+  listing: ManagerListing;
+  media: Array<Record<string, unknown>>;
+  media_warning?: string | null;
+  documents: Record<string, unknown>;
+  badges: Array<{ label: string; status: "positive" | "warning" | "missing"; detail: string }>;
+  actions: string[];
+  facts: Array<{ label: string; value: string }>;
+  amenities: Record<string, string[]>;
+  area: {
+    carpet_area_sqft?: number;
+    builtup_area_sqft?: number;
+    super_builtup_area_sqft?: number | null;
+    room_wise_verified: boolean;
+    message?: string | null;
+    rooms: Array<{ room_name: string; area_sqft: number; verified_status: string }>;
+    area_efficiency_score: number;
+    layout_quality_score: number;
+    privacy_score: number;
+    work_from_home_suitability: number;
+    senior_citizen_suitability: number;
+    family_suitability: number;
+    room_flow_explanation: string;
+  };
+  vastu: Record<string, unknown>;
+  environment: Record<string, unknown>;
+  price_breakdown: Record<string, unknown>;
+  finance: Record<string, unknown>;
+  market_intelligence: Record<string, unknown>;
+  tour_route: { route_name?: string; waypoints?: Array<{ label: string; focus: string }>; broker_script?: string; objection_handling?: string[]; next_action?: string };
+  similar_properties: ManagerListing[];
+  visit_feedback: Record<string, unknown>;
+  ai_summary: {
+    confidence_score: number;
+    why_consider: string;
+    best_for: string[];
+    strengths: string[];
+    concerns: string[];
+    buyer_questions: string[];
+    broker_talking_points: string[];
+    manager_suggestions: string[];
+    final_recommendation: string;
+  };
+  broker_propertypool: Record<string, unknown>;
+  map: { latitude: number; longitude: number; locality: string; nearby: Array<Record<string, unknown>>; fallback_label?: string };
+  agent_routes: string[];
+};
+
+export type PropertyAIAnswer = {
+  route: string;
+  answer: string;
+  agent: string;
+  confidence_score: number;
+  data?: Record<string, unknown>;
+};
+
+export async function getPropertyIntelligence(propertyId: string, role: PropertyIntelligenceDetail["role"] = "public"): Promise<PropertyIntelligenceDetail> {
+  try {
+    const res = await fetch(`${API_URL}/api/properties/${propertyId}/detail?role=${role}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Property intelligence failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo property intelligence.", error);
+    const listing = DEMO_MANAGER_LISTINGS.find((item) => item.id === propertyId || item.slug === propertyId || item.id.replace("seller-", "") === propertyId) || DEMO_MANAGER_LISTINGS[0];
+    const price = listing.asking_price || 0;
+    const carpet = listing.carpet_area_sqft || listing.builtup_area_sqft || 1000;
+    return {
+      id: listing.id,
+      slug: listing.slug,
+      role,
+      listing,
+      media: listing.hero_image_url ? [{ media_url: listing.hero_image_url, thumbnail_url: listing.hero_image_url, room_name: "Living Area", room_area_sqft: 295, caption: "Morning light, open view", is_hero: true }] : [],
+      media_warning: listing.hero_image_url ? null : "Media pending from manager.",
+      documents: { rera_number: listing.rera_number, rera_status: listing.rera_number ? "verified" : "RERA not verified", legal_risk_score: listing.legal_risk_score, uploaded_documents: listing.documents || [], missing_documents: listing.missing_fields || ["Title report"], ai_legal_summary: "Legal verification incomplete. Professional legal review recommended." },
+      badges: [
+        { label: "RERA verified", status: listing.rera_number ? "positive" : "missing", detail: listing.rera_number || "RERA not verified" },
+        { label: "Documents available", status: (listing.documents || []).length ? "positive" : "missing", detail: (listing.documents || []).length ? "Documents uploaded" : "Documents pending" },
+        { label: "Broker tie-up", status: "positive", detail: "Broker tie-up available" },
+        { label: "PropertyPool", status: "positive", detail: "PropertyPool eligible" },
+      ],
+      actions: role === "broker" ? ["Request Tie-Up", "Add Buyer", "Create PropertyPool", "Share Pitch", "Book Visit", "Generate Buyer Match", "View Commission Terms"] : role === "manager" ? ["Edit Listing", "Run AI Review", "Publish/Unpublish", "Generate Listing Copy", "View Leads", "View Broker Requests"] : ["Talk to an Expert", "Schedule a Visit", "WhatsApp Assistant", "Shortlist", "Compare", "Ask AI", "Get EMI Estimate", "Make Offer"],
+      facts: [
+        { label: "Bedrooms", value: `${listing.bedrooms || "-"} Bed` },
+        { label: "Bathrooms", value: `${listing.bathrooms || "-"} Bath` },
+        { label: "Carpet area", value: `${carpet} sq ft usable` },
+        { label: "Floor", value: "3rd of 13" },
+        { label: "Parking", value: `${listing.parking_count || 0} covered` },
+        { label: "Possession", value: listing.possession_status || "Needs manager confirmation" },
+      ],
+      amenities: { Building: ["Lift", "Security", "Parking"], Apartment: ["Natural light", "Cross ventilation"], Lifestyle: ["Garden"], Location: ["Metro nearby", "Retail nearby"] },
+      area: { carpet_area_sqft: carpet, builtup_area_sqft: listing.builtup_area_sqft || carpet, room_wise_verified: false, message: "Room-wise area not verified.", rooms: [{ room_name: "Living room", area_sqft: Math.round(carpet * 0.23), verified_status: "estimated" }, { room_name: "Kitchen", area_sqft: Math.round(carpet * 0.09), verified_status: "estimated" }, { room_name: "Master bedroom", area_sqft: Math.round(carpet * 0.15), verified_status: "estimated" }], area_efficiency_score: 82, layout_quality_score: 78, privacy_score: 76, work_from_home_suitability: 80, senior_citizen_suitability: 72, family_suitability: 84, room_flow_explanation: "Room flow is estimated from listing facts and should be verified during the site visit." },
+      vastu: { available: false, message: "Vastu information not provided." },
+      environment: { window_direction: "Needs manager confirmation", morning_light_estimate: "Medium to good, site verification needed", cross_ventilation_score: 72, road_noise_risk: "Moderate", view_quality: "Media analysis pending" },
+      price_breakdown: { asking_price: price, price_per_sqft: listing.price_per_sqft, recommended_price: listing.recommended_price, fair_value_estimate: listing.recommended_price, fast_sale_price: listing.fast_sale_price, optimistic_price: listing.optimistic_price, negotiation_buffer: Math.round(price * 0.03), stamp_duty_estimate: Math.round(price * 0.06), registration_estimate: 30000, total_acquisition_estimate: Math.round(price * 1.061), locality_comparison: "Fair", price_confidence_score: 78 },
+      finance: { property_price: price, down_payment: Math.round(price * 0.2), loan_amount: Math.round(price * 0.8), monthly_emi: Math.round(price * 0.8 * 0.0085), emi_per_lakh: 850, affordability_score: 74, warnings: ["Consider increasing down payment to reduce EMI."] },
+      market_intelligence: { locality: listing.locality, locality_demand_score: listing.lead_quality_score, market_heat_score: listing.market_heat_score, price_bucket: price >= 100000000 ? "Above INR 10 Cr" : price >= 50000000 ? "INR 5-10 Cr" : "Below INR 5 Cr", redevelopment_activity: listing.redevelopment_score, investment_score: 76, family_buyer_score: 82, nri_buyer_score: 70, ai_explanation: `${listing.locality} has useful Mumbai demand and redevelopment signals, subject to document readiness and exact building quality.` },
+      tour_route: { route_name: `${listing.locality} guided visit`, waypoints: [{ label: "Building approach", focus: "Road access, security, drop-off" }, { label: "Living room", focus: "Light, ventilation, layout" }, { label: "Documents and close", focus: "EMI, RERA, offer readiness" }] },
+      similar_properties: DEMO_MANAGER_LISTINGS.filter((item) => item.id !== listing.id).slice(0, 4),
+      visit_feedback: { visit_count: 6, buyer_interest_level: "Warm to hot", common_positives: ["Usable area", "Connectivity"], common_concerns: ["Documents", "Peak-hour noise"], most_asked_questions: ["Is price negotiable?", "Are documents available?"] },
+      ai_summary: { confidence_score: listing.rera_number ? 82 : 68, why_consider: `${listing.title} is worth considering for buyers focused on ${listing.locality}.`, best_for: ["Family buyer", "NRI buyer", "Investor"], strengths: ["Locality context", "Finance estimate", "Broker workflow"], concerns: listing.missing_fields || ["Needs manager confirmation"], buyer_questions: ["Can I review documents?", "How much negotiation room exists?"], broker_talking_points: ["Use verified claims only", "Lead with EMI and visit checklist"], manager_suggestions: ["Upload floor plan and room-wise media"], final_recommendation: "Proceed to site visit and legal review before offer." },
+      broker_propertypool: { join_propertypool_available: true, tieup_status: "open", propertypool_eligibility: true },
+      map: { latitude: listing.latitude, longitude: listing.longitude, locality: listing.locality, nearby: [{ type: "Metro", name: "Mock fallback - configure POI API" }], fallback_label: "External POI APIs are not configured; locality POIs are mock fallback." },
+      agent_routes: ["Property Page Agent", "Finance Agent", "Legal Agent", "Market Intelligence Agent", "Tour Guide Agent", "Broker Tie-Up Agent", "PropertyPool Agent"],
+    };
+  }
+}
+
+export async function askPropertyAI(propertyId: string, message: string, role: PropertyIntelligenceDetail["role"] = "public"): Promise<PropertyAIAnswer> {
+  try {
+    const res = await fetch(`${API_URL}/api/properties/${propertyId}/ask-ai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, role }),
+    });
+    if (!res.ok) throw new Error("Property AI failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo property AI.", error);
+    return { route: "property_page_agent", agent: "Property Page Agent", confidence_score: 70, answer: "This property needs a site visit and document review before any offer. I can help with EMI, legal checks, negotiation, or broker PropertyPool planning." };
+  }
+}
+
+export async function runPropertyAction(propertyId: string, action: string, payload: Record<string, unknown> = {}) {
+  const endpoint: Record<string, string> = {
+    schedule_visit: "schedule-visit",
+    shortlist: "shortlist",
+    compare: "compare",
+    request_documents: "request-documents",
+    generate_negotiation: "generate-negotiation",
+    broker_request_tieup: "broker/request-tieup",
+    broker_create_propertypool: "broker/create-propertypool",
+  };
+  try {
+    const res = await fetch(`${API_URL}/api/properties/${propertyId}/${endpoint[action] || action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error("Property action failed");
+    return res.json();
+  } catch (error) {
+    console.warn("Using demo property action.", error);
+    return { id: `${action}-${Date.now().toString(36)}`, listing_id: propertyId, action, status: "created", message: `${action.replace(/_/g, " ")} recorded locally.` };
+  }
+}
+
+export type XRVector = { x: number; y: number; z: number };
+
+export type XRAsset = {
+  id: string;
+  listing_id: string;
+  asset_type: "ksplat" | "splat" | "ply" | "glb" | "video_fallback";
+  asset_url?: string | null;
+  thumbnail_url?: string | null;
+  file_size_mb?: number | null;
+  version?: string | null;
+  processing_status: "pending" | "processing" | "ready" | "failed";
+  coordinate_system?: string | null;
+  scale_factor: number;
+  origin_json: XRVector;
+  metadata_json: Record<string, unknown>;
+};
+
+export type XRHotspot = {
+  hotspot_id: string;
+  id: string;
+  listing_id: string;
+  room_name: string;
+  label: string;
+  description: string;
+  position_json: XRVector;
+  camera_position_json: XRVector;
+  camera_look_at_json: XRVector;
+  hotspot_type: string;
+  priority: number;
+  narration: string;
+  buyer_relevance_tags: string[];
+  broker_talking_points: string[];
+  manager_notes: string;
+};
+
+export type XRRoute = {
+  id: string;
+  listing_id: string;
+  route_name: string;
+  route_type: string;
+  ordered_hotspot_ids: string[];
+  route_script: string;
+  estimated_duration_minutes: number;
+};
+
+export type XRPayload = {
+  property: {
+    id: string;
+    requested_id: string;
+    title: string;
+    locality: string;
+    price?: number | null;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    hero_image_url?: string | null;
+  };
+  xr_asset?: XRAsset | null;
+  assets: XRAsset[];
+  hotspots: XRHotspot[];
+  routes: XRRoute[];
+  tour_script: Record<string, unknown>;
+  viewer_config: Record<string, unknown>;
+  permissions: Record<string, boolean>;
+  analytics: Record<string, unknown>;
+  role: PropertyIntelligenceDetail["role"];
+};
+
+export type XRGuideResponse = {
+  response_type: string;
+  spoken_text: string;
+  display_text: string;
+  navigation_target?: string | null;
+  camera_position?: XRVector | null;
+  camera_look_at?: XRVector | null;
+  room_id?: string | null;
+  hotspot_id?: string | null;
+  highlight_hotspots: string[];
+  suggested_actions: string[];
+  confidence_score: number;
+  requires_handoff: boolean;
+  handoff_agent?: string | null;
+  safety_notes: string[];
+};
+
+export async function getPropertyXR(propertyId: string, role: PropertyIntelligenceDetail["role"] = "public"): Promise<XRPayload> {
+  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr?role=${role}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("XR payload failed");
+  return res.json();
+}
+
+export async function createXRSession(propertyId: string, input: Record<string, unknown>) {
+  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("XR session failed");
+  return res.json();
+}
+
+export async function askXRGuide(propertyId: string, input: Record<string, unknown>): Promise<XRGuideResponse> {
+  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/guide/ask`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("XR guide failed");
+  return res.json();
+}
+
+export async function navigateXRGuide(propertyId: string, input: Record<string, unknown>) {
+  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/guide/navigate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("XR navigation failed");
+  return res.json();
+}
+
+export async function saveXRFeedback(propertyId: string, sessionId: string, input: Record<string, unknown>) {
+  const res = await fetch(`${API_URL}/api/properties/${propertyId}/xr/session/${sessionId}/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("XR feedback failed");
+  return res.json();
+}

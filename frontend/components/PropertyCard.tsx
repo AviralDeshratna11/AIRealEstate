@@ -2,8 +2,9 @@
 
 import clsx from "clsx";
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { Building2, CalendarDays, IndianRupee, MapPin, TrendingUp } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, IndianRupee, MapPin, TrendingUp } from "lucide-react";
 import { Property, formatCr, formatInr } from "@/lib/api";
 
 export function PropertyCard({
@@ -17,9 +18,11 @@ export function PropertyCard({
   onCompare: (property: Property) => void;
   onFocus: (property: Property) => void;
 }) {
+  const detailHref = `/properties/${property.id}`;
+
   return (
     <article className="group overflow-hidden rounded-lg border border-ink/15 bg-[#fffaf0]/92 shadow-sm transition hover:-translate-y-1 hover:border-coral hover:shadow-crisp">
-      <button onClick={() => onFocus(property)} className="block w-full text-left">
+      <Link href={detailHref} className="block w-full text-left">
         <div className="relative h-52 overflow-hidden bg-ink">
           {property.image_url && (
             <Image
@@ -37,10 +40,12 @@ export function PropertyCard({
             <p className="text-xs font-semibold text-white/68">{property.bedrooms}BHK - {property.area_sqft} sq ft</p>
           </div>
         </div>
-      </button>
+      </Link>
       <div className="space-y-4 p-5">
         <div>
-          <h3 className="font-display text-2xl font-black leading-none text-ink">{property.title}</h3>
+          <Link href={detailHref} className="block">
+            <h3 className="font-display text-2xl font-black leading-none text-ink transition group-hover:text-coral">{property.title}</h3>
+          </Link>
           <p className="mt-2 flex items-center gap-1 text-sm font-semibold text-ink/52"><MapPin size={14} /> {property.locality}, Mumbai</p>
         </div>
         <p className="line-clamp-3 text-sm font-medium leading-6 text-ink/62">{property.description}</p>
@@ -57,8 +62,12 @@ export function PropertyCard({
             </span>
           ))}
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => onFocus(property)} className="flex-1 rounded-md bg-ink px-4 py-3 text-sm font-black text-[#fffaf0] transition hover:bg-peacock">View on map</button>
+        <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+          <Link href={detailHref} className="inline-flex items-center justify-center gap-2 rounded-md bg-ink px-4 py-3 text-sm font-black text-[#fffaf0] transition hover:bg-coral">
+            View details
+            <ArrowRight size={15} />
+          </Link>
+          <button onClick={() => onFocus(property)} className="rounded-md border border-ink/15 bg-[#fffaf0] px-4 py-3 text-sm font-black text-ink transition hover:border-peacock hover:text-peacock">Map</button>
           <button
             onClick={() => onCompare(property)}
             className={clsx(
