@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import {
@@ -24,6 +24,8 @@ import {
   RotateCcw,
   Send,
   ShieldAlert,
+  SkipBack,
+  SkipForward,
   Sparkles,
   Star,
   Volume2,
@@ -66,8 +68,11 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
   const [showTranscript, setShowTranscript] = useState(true);
   const [viewerReady, setViewerReady] = useState(false);
   const [assetFailed, setAssetFailed] = useState(false);
+  const [autoPlaying, setAutoPlaying] = useState(false);
+  const [autoIndex, setAutoIndex] = useState(0);
   const cameraTargetRef = useRef<{ position?: XRVector; lookAt?: XRVector; hotspotId?: string } | null>(null);
   const speakCancelRef = useRef(false);
+  const navigateToRef = useRef<((hotspot: XRHotspot) => void) | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -145,6 +150,8 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
 
   async function navigateTo(hotspot: XRHotspot) {
     setActiveHotspot(hotspot);
+    const orderedIndex = orderedHotspots.findIndex((item) => item.hotspot_id === hotspot.hotspot_id);
+    if (orderedIndex >= 0) setAutoIndex(orderedIndex);
     cameraTargetRef.current = {
       position: hotspot.camera_position_json,
       lookAt: hotspot.camera_look_at_json,
@@ -157,6 +164,52 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
     } catch {
       // Local camera navigation still works without the backend event.
     }
+  }
+
+  const orderedHotspots = useMemo(() => {
+    const route = payload?.routes?.[0];
+    if (!payload || !route) return [] as XRHotspot[];
+    return route.ordered_hotspot_ids
+      .map((id) => payload.hotspots.find((hotspot) => hotspot.hotspot_id === id))
+      .filter(Boolean) as XRHotspot[];
+  }, [payload]);
+
+  useEffect(() => {
+    navigateToRef.current = navigateTo;
+  });
+
+  useEffect(() => {
+    if (!autoPlaying || orderedHotspots.length === 0) return;
+    const timer = setTimeout(() => {
+      const next = autoIndex + 1;
+      if (next >= orderedHotspots.length) {
+        setAutoPlaying(false);
+        return;
+      }
+      setAutoIndex(next);
+      navigateToRef.current?.(orderedHotspots[next]);
+    }, 8200);
+    return () => clearTimeout(timer);
+  }, [autoPlaying, autoIndex, orderedHotspots]);
+
+  function toggleAutoTour() {
+    if (autoPlaying) {
+      setAutoPlaying(false);
+      return;
+    }
+    if (orderedHotspots.length === 0) return;
+    const current = orderedHotspots.findIndex((hotspot) => hotspot.hotspot_id === activeHotspot?.hotspot_id);
+    const start = current >= 0 ? current : 0;
+    setAutoIndex(start);
+    navigateTo(orderedHotspots[start]);
+    setAutoPlaying(true);
+  }
+
+  function stepAutoTour(direction: number) {
+    if (orderedHotspots.length === 0) return;
+    const next = Math.min(Math.max(autoIndex + direction, 0), orderedHotspots.length - 1);
+    setAutoIndex(next);
+    navigateTo(orderedHotspots[next]);
   }
 
   function startVoice() {
@@ -243,6 +296,16 @@ export function XRPropertyViewer({ propertyId, role = "public" }: { propertyId: 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.18)_62%,rgba(0,0,0,0.58)_100%)]" />
 
       <TopBar payload={payload} roleLabel={roleLabel} viewerReady={viewerReady} hasReadyAsset={hasReadyAsset} assetFailed={assetFailed} />
+
+      <AutoTourDock
+        playing={autoPlaying}
+        index={autoIndex}
+        total={orderedHotspots.length}
+        current={orderedHotspots[autoIndex]?.label}
+        onToggle={toggleAutoTour}
+        onPrev={() => stepAutoTour(-1)}
+        onNext={() => stepAutoTour(1)}
+      />
 
       <div className="absolute left-4 top-24 z-20 flex flex-col gap-3 md:left-6">
         <button onClick={() => setShowRooms((value) => !value)} className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-black/42 text-white backdrop-blur-xl transition hover:bg-white/12">
@@ -520,6 +583,54 @@ function TopBar({ payload, roleLabel, viewerReady, hasReadyAsset, assetFailed }:
 function StatusPill({ icon: Icon, label, tone = "slate" }: { icon: typeof Home; label?: string | null; tone?: "slate" | "emerald" | "amber" }) {
   const classes = tone === "emerald" ? "bg-emerald-400/16 text-emerald-100 border-emerald-300/20" : tone === "amber" ? "bg-amber-400/16 text-amber-100 border-amber-300/20" : "bg-white/10 text-white border-white/10";
   return <span className={clsx("inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-black", classes)}><Icon size={14} />{label || "-"}</span>;
+}
+
+function AutoTourDock({
+  playing,
+  index,
+  total,
+  current,
+  onToggle,
+  onPrev,
+  onNext,
+}: {
+  playing: boolean;
+  index: number;
+  total: number;
+  current?: string;
+  onToggle: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  if (total === 0) return null;
+  const progress = total > 1 ? (index / (total - 1)) * 100 : 0;
+  return (
+    <div className="pointer-events-auto absolute left-1/2 top-[92px] z-20 hidden w-[340px] -translate-x-1/2 rounded-[22px] border border-white/12 bg-black/52 p-3 shadow-2xl backdrop-blur-xl md:block">
+      <div className="flex items-center gap-2">
+        <button onClick={onPrev} className="grid h-10 w-10 place-items-center rounded-xl bg-white/8 text-white transition hover:bg-white/16">
+          <SkipBack size={16} />
+        </button>
+        <button
+          onClick={onToggle}
+          className={clsx("grid h-11 w-11 place-items-center rounded-xl font-black transition", playing ? "bg-rose-500 text-white" : "bg-amber-400 text-slate-950")}
+        >
+          {playing ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+        <button onClick={onNext} className="grid h-10 w-10 place-items-center rounded-xl bg-white/8 text-white transition hover:bg-white/16">
+          <SkipForward size={16} />
+        </button>
+        <div className="ml-1 min-w-0 flex-1">
+          <p className="truncate text-xs font-black text-white">
+            {playing ? "Auto-tour playing" : "Cinematic tour"} · {index + 1}/{total}
+          </p>
+          <p className="truncate text-[11px] font-semibold text-white/60">{current || "Ready to play"}</p>
+        </div>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-full rounded-full bg-emerald-400 transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  );
 }
 
 function RoomNavigationPanel({ hotspots, activeHotspot, mode, setMode, onNavigate }: { hotspots: XRHotspot[]; activeHotspot: XRHotspot | null; mode: TourMode; setMode: (mode: TourMode) => void; onNavigate: (hotspot: XRHotspot) => void }) {
