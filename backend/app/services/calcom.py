@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import httpx
+import logging
 
 from app.config import get_settings
 
@@ -37,6 +38,7 @@ class CalComService:
             params["username"] = self.settings.calcom_username
             params["eventTypeSlug"] = self.settings.calcom_event_type_slug
 
+        log = logging.getLogger(__name__)
         async with httpx.AsyncClient(timeout=20) as client:
             try:
                 response = await client.get(
@@ -47,7 +49,14 @@ class CalComService:
                 response.raise_for_status()
                 payload = response.json()
                 return payload.get("data") or payload.get("slots") or []
+            except httpx.HTTPStatusError as e:
+                try:
+                    log.error("Cal.com slots request failed: %s %s", e.response.status_code, e.response.text)
+                except Exception:
+                    log.exception("Cal.com slots request failed with HTTPStatusError")
+                return self._demo_slots(days)
             except httpx.HTTPError:
+                log.exception("Cal.com slots request failed")
                 return self._demo_slots(days)
 
     async def create_booking(self, name: str, email: str, start_time: str, property_title: str) -> dict[str, Any]:
@@ -79,7 +88,20 @@ class CalComService:
                 )
                 response.raise_for_status()
                 return response.json()
+            except httpx.HTTPStatusError as e:
+                try:
+                    logging.getLogger(__name__).error("Cal.com booking failed: %s %s", e.response.status_code, e.response.text)
+                except Exception:
+                    logging.getLogger(__name__).exception("Cal.com booking HTTPStatusError")
+                return {
+                    "id": "demo-booking",
+                    "status": "accepted",
+                    "start": start_time,
+                    "title": f"Viewing: {property_title}",
+                    "demo": True,
+                }
             except httpx.HTTPError:
+                logging.getLogger(__name__).exception("Cal.com booking request failed")
                 return {
                     "id": "demo-booking",
                     "status": "accepted",
@@ -95,3 +117,6 @@ class CalComService:
             {"time": (base + timedelta(days=i, hours=i % 4)).isoformat(), "available": True}
             for i in range(1, min(days, 5) + 1)
         ]
+
+
+calcom_service = CalComService()

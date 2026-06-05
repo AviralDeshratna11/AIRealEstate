@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import assistant, agents, bookings, broker, documents, finance, manager, market, negotiation, properties, tour, vapi, whatsapp
+from app.api.routes import assistant, agents, bookings, broker, crm, documents, finance, manager, market, negotiation, properties, tour, vapi, voice, whatsapp
 from app.config import get_settings
 from app.db.session import close_pool
 
@@ -31,11 +31,13 @@ app.include_router(agents.router)
 app.include_router(finance.router)
 app.include_router(manager.router)
 app.include_router(broker.router)
+app.include_router(crm.router)
 app.include_router(market.router)
 app.include_router(tour.router)
 app.include_router(negotiation.router)
 app.include_router(documents.router)
 app.include_router(vapi.router)
+app.include_router(voice.router)
 app.include_router(whatsapp.router)
 
 

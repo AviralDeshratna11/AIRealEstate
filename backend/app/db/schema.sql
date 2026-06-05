@@ -629,3 +629,311 @@ create table if not exists xr_navigation_events (
   timestamp timestamptz,
   created_at timestamptz not null default now()
 );
+
+create table if not exists crm_leads (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  full_name text not null,
+  phone text,
+  email text,
+  source text,
+  source_detail text,
+  buyer_type text,
+  budget_min numeric,
+  budget_max numeric,
+  preferred_localities text[] not null default '{}',
+  property_type_preference text,
+  bhk_preference text,
+  buying_timeline text,
+  loan_required boolean not null default true,
+  down_payment_available numeric,
+  family_size int,
+  purpose text,
+  assigned_user_id text,
+  broker_id text,
+  manager_id text,
+  lead_score numeric default 0,
+  qualification_status text,
+  duplicate_status text,
+  status text,
+  last_contacted_at timestamptz,
+  next_follow_up_at timestamptz,
+  notes text,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists crm_leads_org_idx on crm_leads (organization_id);
+create index if not exists crm_leads_source_idx on crm_leads (source);
+create index if not exists crm_leads_score_idx on crm_leads (lead_score desc);
+
+create table if not exists crm_contacts (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  full_name text not null,
+  phone text,
+  email text,
+  contact_type text,
+  linked_buyer_id text,
+  linked_broker_id text,
+  linked_manager_id text,
+  source text,
+  tags text[] not null default '{}',
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists crm_accounts (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  account_name text not null,
+  account_type text,
+  company_name text,
+  primary_contact_id text,
+  phone text,
+  email text,
+  address text,
+  gst_number text,
+  rera_id text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists crm_opportunities (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  lead_id text,
+  contact_id text,
+  buyer_id text,
+  property_id text,
+  broker_id text,
+  manager_id text,
+  title text not null,
+  stage text,
+  opportunity_value numeric,
+  expected_commission numeric,
+  probability numeric,
+  weighted_value numeric,
+  source text,
+  assigned_user_id text,
+  next_activity_id text,
+  expected_close_date timestamptz,
+  lost_reason text,
+  won_at timestamptz,
+  lost_at timestamptz,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists crm_opportunities_org_idx on crm_opportunities (organization_id);
+create index if not exists crm_opportunities_stage_idx on crm_opportunities (stage);
+create index if not exists crm_opportunities_value_idx on crm_opportunities (opportunity_value desc);
+
+create table if not exists crm_pipeline_stages (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  stage_name text not null,
+  display_order int,
+  default_probability numeric,
+  color text,
+  is_closed_won boolean not null default false,
+  is_closed_lost boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists crm_activities (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  lead_id text,
+  opportunity_id text,
+  contact_id text,
+  property_id text,
+  assigned_user_id text,
+  activity_type text,
+  title text,
+  description text,
+  due_at timestamptz,
+  status text,
+  priority text,
+  created_by_agent boolean not null default false,
+  completed_at timestamptz,
+  outcome text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists crm_activities_due_idx on crm_activities (due_at);
+create index if not exists crm_activities_status_idx on crm_activities (status);
+
+create table if not exists crm_interactions (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  lead_id text,
+  opportunity_id text,
+  contact_id text,
+  property_id text,
+  channel text,
+  direction text,
+  summary text,
+  transcript text,
+  sentiment text,
+  intent_score numeric,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists crm_proposals (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  opportunity_id text,
+  property_id text,
+  buyer_id text,
+  proposal_type text,
+  title text,
+  content_json jsonb not null default '{}'::jsonb,
+  pdf_url text,
+  status text,
+  version int not null default 1,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists crm_commissions (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  opportunity_id text,
+  broker_id text,
+  agent_id text,
+  manager_id text,
+  property_id text,
+  deal_value numeric,
+  commission_percentage numeric,
+  expected_commission numeric,
+  approved_commission numeric,
+  payout_status text,
+  dispute_status text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists crm_campaigns (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  campaign_name text,
+  campaign_type text,
+  target_segment text,
+  property_id text,
+  message_template text,
+  status text,
+  sent_count int not null default 0,
+  reply_count int not null default 0,
+  visit_count int not null default 0,
+  offer_count int not null default 0,
+  revenue_pipeline numeric not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists crm_audit_logs (
+  id text primary key default gen_random_uuid()::text,
+  organization_id text,
+  actor_type text,
+  actor_id text,
+  action text,
+  entity_type text,
+  entity_id text,
+  details_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists crm_audit_logs_entity_idx on crm_audit_logs (entity_type, entity_id);
+
+create table if not exists voice_call_configs (
+  id text primary key default gen_random_uuid()::text,
+  provider text not null default 'elevenlabs',
+  mode text not null default 'mock',
+  elevenlabs_agent_id text,
+  elevenlabs_phone_number_id text,
+  max_calls_per_day int not null default 10,
+  max_call_seconds int not null default 240,
+  allowed_start_hour int not null default 10,
+  allowed_end_hour int not null default 19,
+  cooldown_hours int not null default 24,
+  enabled boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists voice_call_records (
+  id text primary key default gen_random_uuid()::text,
+  provider text not null default 'elevenlabs',
+  mode text not null default 'mock',
+  buyer_id text,
+  lead_id text,
+  property_id text,
+  broker_id text,
+  manager_id text,
+  crm_opportunity_id text,
+  trigger_source text,
+  trigger_reason text,
+  call_goal text,
+  to_number text,
+  provider_call_id text,
+  provider_conversation_id text,
+  status text,
+  started_at timestamptz,
+  ended_at timestamptz,
+  duration_seconds int not null default 0,
+  transcript text,
+  summary_json jsonb not null default '{}'::jsonb,
+  outcome text,
+  intent_score numeric,
+  next_action text,
+  error_message text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists voice_call_records_buyer_idx on voice_call_records (buyer_id);
+create index if not exists voice_call_records_property_idx on voice_call_records (property_id);
+create index if not exists voice_call_records_status_idx on voice_call_records (status);
+
+create table if not exists voice_call_consent (
+  id text primary key default gen_random_uuid()::text,
+  buyer_id text,
+  phone text not null,
+  consent_status text,
+  consent_source text,
+  consent_timestamp timestamptz,
+  opt_out boolean not null default false,
+  opt_out_reason text,
+  last_called_at timestamptz,
+  calls_last_7_days int not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create unique index if not exists voice_call_consent_phone_idx on voice_call_consent (phone);
+
+create table if not exists voice_call_events (
+  id text primary key default gen_random_uuid()::text,
+  call_id text,
+  event_type text,
+  payload_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists voice_agent_tool_calls (
+  id text primary key default gen_random_uuid()::text,
+  call_id text,
+  tool_name text,
+  input_json jsonb not null default '{}'::jsonb,
+  output_json jsonb not null default '{}'::jsonb,
+  status text,
+  error_message text,
+  created_at timestamptz not null default now()
+);

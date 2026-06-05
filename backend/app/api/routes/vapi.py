@@ -46,15 +46,16 @@ def _latest_property_id(payload: dict[str, Any]) -> str:
 async def vapi_server_events(payload: VapiMessage):
     """Receives Vapi server events.
 
-    Most Vapi events are informational. For events that expect a response, this endpoint
-    returns a compact assistant object and lets `/custom-llm` handle streamed generation.
+    Deprecated compatibility endpoint. ElevenLabs is now the primary calling provider.
+    For events that expect a response, this endpoint returns a compact assistant object
+    and lets `/custom-llm` handle streamed generation.
     """
     event_type = payload.message.get("type")
     if event_type in {"assistant-request", "tool-calls"}:
         return JSONResponse(
             {
                 "assistant": {
-                    "firstMessage": "Hi, this is ASTRA Estate. I can help qualify your requirement and book a viewing.",
+                    "firstMessage": "Hi, this is ASTRA Voice Closer. ElevenLabs is now ASTRA's primary calling provider; I can qualify your requirement and book a viewing.",
                     "serverMessages": ["end-of-call-report", "transcript"],
                 }
             }

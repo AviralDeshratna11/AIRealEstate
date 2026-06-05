@@ -4,6 +4,7 @@ from pydantic import BaseModel, EmailStr
 from fastapi import APIRouter
 
 from app.services.calcom import CalComService
+from app.config import get_settings
 
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 calcom = CalComService()
@@ -29,4 +30,14 @@ async def create_booking(request: BookingRequest):
         start_time=request.start_time,
         property_title=request.property_title,
     )
-    return {"booking": booking}
+    result = {"booking": booking}
+    # If we returned a demo booking, provide a direct Cal.com booking page URL
+    try:
+        if booking.get("demo"):
+            settings = get_settings()
+            if settings.calcom_username and settings.calcom_event_type_slug:
+                result["booking_page"] = f"https://cal.com/{settings.calcom_username}/{settings.calcom_event_type_slug}"
+    except Exception:
+        pass
+
+    return result

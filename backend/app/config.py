@@ -39,6 +39,18 @@ class Settings(BaseSettings):
     calcom_timezone: str = "Asia/Kolkata"
 
     vapi_webhook_secret: str | None = None
+
+    elevenlabs_api_key: str | None = None
+    elevenlabs_agent_id: str | None = None
+    elevenlabs_agent_phone_number_id: str | None = None
+    elevenlabs_webhook_secret: str | None = None
+    elevenlabs_mode: str = "mock"
+    elevenlabs_max_calls_per_day: int = 10
+    elevenlabs_max_call_seconds: int = 240
+    elevenlabs_allowed_call_start_hour: int = 10
+    elevenlabs_allowed_call_end_hour: int = 19
+    elevenlabs_cooldown_hours: int = 24
+
     allowed_origins: str = Field(default="http://localhost:3000,http://127.0.0.1:3000")
 
     @property

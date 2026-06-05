@@ -12,8 +12,8 @@ import {
   getBookingSlots,
   qualifyWhatsAppLead,
   sendWhatsAppMessage,
-  runVoiceGuide,
-  VoiceGuideResult,
+  triggerElevenLabsInterestCall,
+  VoiceCallResult,
 } from "@/lib/api";
 
 type Slot = { time: string; available?: boolean };
@@ -24,8 +24,10 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
   const [whatsapp, setWhatsapp] = useState<LeadQualification | null>(null);
   const [whatsappSend, setWhatsappSend] = useState<WhatsAppSendResult | null>(null);
   const [whatsAppSending, setWhatsAppSending] = useState(false);
-  const [callText, setCallText] = useState("Caller wants a site visit this weekend and asks about EMI for the focused property.");
-  const [callResult, setCallResult] = useState<VoiceGuideResult | null>(null);
+  const [callPhone, setCallPhone] = useState("+919000002001");
+  const [callConsent, setCallConsent] = useState(true);
+  const [callResult, setCallResult] = useState<VoiceCallResult | null>(null);
+  const [callBusy, setCallBusy] = useState(false);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
   const [booking, setBooking] = useState<BookingResponse | null>(null);
@@ -58,7 +60,24 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
   }
 
   async function runCall() {
-    setCallResult(await runVoiceGuide({ message: callText, propertyId: focused?.id }));
+    if (!focused) return;
+    setCallBusy(true);
+    setCallResult(null);
+    try {
+      setCallResult(await triggerElevenLabsInterestCall({
+        buyer_id: "buyer-channel-demo",
+        buyer_name: "Demo Buyer",
+        buyer_phone: callPhone,
+        property_id: focused.id,
+        interest_source: "Talk to Expert",
+        consent_confirmed: callConsent,
+        preferred_language: "Hinglish",
+        trigger_reason: "Buyer asked channel assistant for a call about property details, EMI, and visit slots.",
+        call_goal: "property_detail",
+      }));
+    } finally {
+      setCallBusy(false);
+    }
   }
 
   async function bookSlot() {
@@ -123,20 +142,29 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         </p>
         <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Voice triage and handoff</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
-          This calls the live XR voice guide endpoint, which is the same decision logic used by the Vapi voice route.
+          ElevenLabs is now the primary provider. Mock mode records the call, transcript, CRM activity, and follow-up without spending credits.
         </p>
-        <textarea
-          value={callText}
-          onChange={(event) => setCallText(event.target.value)}
-          className="mt-4 min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+        <input
+          value={callPhone}
+          onChange={(event) => setCallPhone(event.target.value)}
+          className="mt-4 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+          placeholder="+91 buyer phone"
         />
-        <button onClick={runCall} className="mt-3 w-full rounded-md bg-ink px-4 py-3 text-sm font-black text-[#fffaf0] shadow-crisp transition hover:-translate-y-0.5">
-          Run voice triage
+        <label className="mt-3 flex items-start gap-2 text-sm font-bold text-ink/66"><input type="checkbox" checked={callConsent} onChange={(event) => setCallConsent(event.target.checked)} className="mt-1" />Buyer consent confirmed for ASTRA AI call.</label>
+        <button onClick={runCall} disabled={callBusy || !focused} className="mt-3 w-full rounded-md bg-ink px-4 py-3 text-sm font-black text-[#fffaf0] shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50">
+          {callBusy ? "Starting call..." : "Trigger ElevenLabs call"}
         </button>
         {callResult && (
-          <div className="mt-4 rounded-md border border-ink/12 bg-white/62 p-4 text-sm font-medium leading-6 text-ink/62">
-            <p className="font-black text-ink">{callResult.response_type}</p>
-            <p className="mt-2">{callResult.spoken_text}</p>
+          <div className={`mt-4 rounded-md border p-4 text-sm font-medium leading-6 ${
+            callResult.call_status === "calling" || callResult.call_status === "completed"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : callResult.call_status === "failed" || callResult.call_status === "blocked"
+                ? "border-red-200 bg-red-50 text-red-900"
+                : "border-ink/12 bg-white/62 text-ink/62"
+          }`}>
+            <p className="font-black text-ink">{callResult.provider} · {callResult.call_status} · {callResult.mode}</p>
+            <p className="mt-2">{callResult.reason}</p>
+            {callResult.call_id ? <p className="mt-2 text-xs font-black">Call ID: {callResult.call_id}</p> : null}
           </div>
         )}
       </div>

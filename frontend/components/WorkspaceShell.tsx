@@ -10,6 +10,7 @@ import {
   CalendarClock,
   ChevronRight,
   FileText,
+  GanttChartSquare,
   Home,
   IndianRupee,
   LayoutGrid,
@@ -111,6 +112,10 @@ export function WorkspaceShell() {
                   <Link href="/manager" className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-800 hover:bg-emerald-100">
                     <Building2 size={14} />
                     Manager portal
+                  </Link>
+                  <Link href="/crm" className="inline-flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-orange-900 hover:bg-orange-100">
+                    <GanttChartSquare size={14} />
+                    Sales OS
                   </Link>
                   <span className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#fffaf0]">
                     <RadioTower size={14} />

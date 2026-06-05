@@ -17,6 +17,7 @@ import {
   Layers3,
   MapPin,
   Network,
+  PhoneCall,
   Play,
   Route,
   Scale,
@@ -29,7 +30,7 @@ import {
   Sun,
 } from "lucide-react";
 import type { PropertyIntelligenceDetail } from "@/lib/api";
-import { askPropertyAI, formatCr, formatInr, getPropertyIntelligence, runPropertyAction } from "@/lib/api";
+import { askPropertyAI, formatCr, formatInr, getPropertyIntelligence, runPropertyAction, triggerElevenLabsInterestCall, type VoiceCallResult } from "@/lib/api";
 
 type Role = PropertyIntelligenceDetail["role"];
 
@@ -57,6 +58,10 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
   const [question, setQuestion] = useState("Is this property good for a family?");
   const [answer, setAnswer] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [callPhone, setCallPhone] = useState("+919000002001");
+  const [callConsent, setCallConsent] = useState(true);
+  const [callLanguage, setCallLanguage] = useState<"English" | "Hindi" | "Hinglish">("Hinglish");
+  const [voiceCall, setVoiceCall] = useState<VoiceCallResult | null>(null);
 
   useEffect(() => {
     getPropertyIntelligence(propertyId, role).then(setData).catch(console.error);
@@ -102,6 +107,29 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
     try {
       const result = await askPropertyAI(data.id, question, role);
       setAnswer(`${result.agent}: ${result.answer}`);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function onVoiceCall(goal: "property_detail" | "visit_scheduling" = "property_detail") {
+    if (!data) return;
+    setBusy("voice-call");
+    try {
+      const result = await triggerElevenLabsInterestCall({
+        buyer_id: "buyer-demo-property-page",
+        buyer_name: "Demo Buyer",
+        buyer_phone: callPhone,
+        property_id: data.id,
+        interest_source: goal === "visit_scheduling" ? "Schedule Visit" : "Talk to Expert",
+        consent_confirmed: callConsent,
+        preferred_language: callLanguage,
+        trigger_reason: goal === "visit_scheduling" ? "Buyer clicked Schedule Visit but wants help booking" : "Buyer clicked Talk to AI Property Expert",
+        call_goal: goal,
+        metadata: { page: "property_detail", role },
+      });
+      setVoiceCall(result);
+      setActionMessage(`${result.provider} ${result.mode} call: ${result.reason}`);
     } finally {
       setBusy(null);
     }
@@ -166,7 +194,7 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
               <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Asking price</p>
               <p className="mt-2 text-4xl font-black">{formatCr(listing.asking_price)}</p>
               <p className="mt-2 text-sm font-semibold text-white/68">{formatInr(listing.price_per_sqft)} / sq ft - Updated {listing.updated_at ? new Date(listing.updated_at).toLocaleDateString("en-IN") : "recently"}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black">No false legal claims</span>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black">AI confidence {data.ai_summary.confidence_score}%</span>
               </div>
@@ -179,6 +207,8 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
 
           <div className="sticky top-0 z-20 mt-5 rounded-[22px] border border-slate-200 bg-white/95 p-3 shadow-[0_12px_36px_rgba(15,23,42,0.08)] backdrop-blur">
             <div className="flex gap-2 overflow-x-auto pb-1">
+              <ActionButton label="Talk to AI Property Expert" loading={busy === "voice-call"} onClick={() => onVoiceCall("property_detail")} />
+              <ActionButton label="Call me with visit slots" loading={busy === "voice-call"} onClick={() => onVoiceCall("visit_scheduling")} />
               {data.actions.map((label) => <ActionButton key={label} label={label} loading={busy === label} onClick={() => onAction(label)} />)}
             </div>
             {actionMessage ? <p className="mt-3 rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-800">{actionMessage}</p> : null}
@@ -312,6 +342,21 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
               </div>
             </section>
 
+            <section className="rounded-[28px] border border-orange-200 bg-orange-50 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-orange-900"><PhoneCall size={16} />ASTRA Voice Closer</div>
+              <h3 className="mt-2 text-2xl font-black text-slate-950">Get an ElevenLabs AI call</h3>
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Mock mode is credit-safe. Live calls only start when `ELEVENLABS_MODE=live` and keys are configured.</p>
+              <input value={callPhone} onChange={(event) => setCallPhone(event.target.value)} className="mt-4 w-full rounded-2xl border border-orange-200 bg-white p-3 text-sm font-bold text-slate-900 outline-none" placeholder="+91 phone number" />
+              <select value={callLanguage} onChange={(event) => setCallLanguage(event.target.value as "English" | "Hindi" | "Hinglish")} className="mt-3 w-full rounded-2xl border border-orange-200 bg-white p-3 text-sm font-bold text-slate-900 outline-none">
+                <option>Hinglish</option>
+                <option>Hindi</option>
+                <option>English</option>
+              </select>
+              <label className="mt-3 flex items-start gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={callConsent} onChange={(event) => setCallConsent(event.target.checked)} className="mt-1" />I consent to receive an AI call from ASTRA about this property.</label>
+              <button onClick={() => onVoiceCall("property_detail")} disabled={busy === "voice-call"} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-4 py-3 text-sm font-black text-white disabled:opacity-60"><PhoneCall size={16} />{busy === "voice-call" ? "Starting..." : "Call me with details"}</button>
+              {voiceCall ? <div className="mt-4 rounded-2xl bg-white p-4 text-sm font-bold leading-6 text-slate-700"><p className="text-slate-950">{voiceCall.call_status} · {voiceCall.mode}</p><p className="mt-1">{voiceCall.reason}</p>{voiceCall.call_id ? <p className="mt-1 text-xs">Call ID: {voiceCall.call_id}</p> : null}</div> : null}
+            </section>
+
             <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
               <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Agent routes</p>
               <div className="mt-4 space-y-2">
@@ -344,7 +389,7 @@ function Badge({ badge }: { badge: { label: string; status: string; detail: stri
 }
 
 function ActionButton({ label, onClick, loading }: { label: string; onClick?: () => void; loading?: boolean }) {
-  const primary = ["Talk to an Expert", "Schedule a Visit", "Request Tie-Up", "Create PropertyPool", "Run AI Review"].includes(label);
+  const primary = ["Talk to an Expert", "Schedule a Visit", "Request Tie-Up", "Create PropertyPool", "Run AI Review", "Talk to AI Property Expert", "Call me with visit slots"].includes(label);
   return <button onClick={onClick} className={clsx("inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-black transition hover:-translate-y-0.5", primary ? "bg-amber-500 text-slate-950" : "border border-slate-200 bg-white text-slate-700")}><CheckCircle2 size={15} />{loading ? "Working..." : label}</button>;
 }
 

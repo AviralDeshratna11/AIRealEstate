@@ -35,8 +35,10 @@ import type {
   BrokerProperty,
   BrokerTieup,
   PropertyPoolEvent,
+  VoiceCallResult,
 } from "@/lib/api";
 import {
+  callBrokerBuyerWithElevenLabs,
   createBrokerBuyer,
   createPropertyPool,
   formatCr,
@@ -593,7 +595,18 @@ function EventCard({ event }: { event: PropertyPoolEvent }) {
 }
 
 function BuyerCard({ buyer }: { buyer: BrokerBuyer }) {
-  return <Link href={`/broker/buyers/${buyer.id}`} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_18px_56px_rgba(15,23,42,0.07)] transition hover:-translate-y-1"><div className="flex items-start justify-between gap-3"><div><p className="text-xl font-black text-slate-950">{buyer.full_name}</p><p className="mt-1 text-sm text-slate-500">{buyer.phone} · {buyer.communication_channel}</p></div><StatusBadge status={buyer.lead_temperature} /></div><div className="mt-4 grid gap-2 md:grid-cols-2"><MiniMetric label="Budget" value={formatCr(buyer.budget_max)} /><MiniMetric label="Qualification" value={`${buyer.qualification_score}/100`} /></div><p className="mt-3 text-sm text-slate-500">{buyer.preferred_localities.join(", ")} · {buyer.follow_up_status}</p></Link>;
+  const [callResult, setCallResult] = useState<VoiceCallResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  async function callBuyer(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      setCallResult(await callBrokerBuyerWithElevenLabs(buyer.id, { property_id: buyer.assigned_properties[0] || "seller-demo-powai-1", broker_id: buyer.broker_id, call_goal: "property_detail", preferred_language: "Hinglish" }));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return <Link href={`/broker/buyers/${buyer.id}`} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_18px_56px_rgba(15,23,42,0.07)] transition hover:-translate-y-1"><div className="flex items-start justify-between gap-3"><div><p className="text-xl font-black text-slate-950">{buyer.full_name}</p><p className="mt-1 text-sm text-slate-500">{buyer.phone} · {buyer.communication_channel}</p></div><StatusBadge status={buyer.lead_temperature} /></div><div className="mt-4 grid gap-2 md:grid-cols-2"><MiniMetric label="Budget" value={formatCr(buyer.budget_max)} /><MiniMetric label="Qualification" value={`${buyer.qualification_score}/100`} /></div><p className="mt-3 text-sm text-slate-500">{buyer.preferred_localities.join(", ")} · {buyer.follow_up_status}</p><button onClick={callBuyer} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-3 py-2 text-xs font-black text-white"><MessageCircle size={14} />{busy ? "Calling..." : "Call buyer with ASTRA Voice Closer"}</button>{callResult ? <p className="mt-3 rounded-2xl bg-orange-50 p-3 text-xs font-black text-orange-900">{callResult.call_status}: {callResult.reason}</p> : null}</Link>;
 }
 
 function Panel({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {

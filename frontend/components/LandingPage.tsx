@@ -6,9 +6,11 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   Bot,
+  BriefcaseBusiness,
   Building2,
   CalendarClock,
   FileText,
+  GanttChartSquare,
   IndianRupee,
   Map as MapIcon,
   MessageCircle,
@@ -21,6 +23,7 @@ type Property = (typeof DEMO_PROPERTIES)[number];
 
 const navLinks = [
   { label: "Workspace", href: "/workspace" },
+  { label: "Sales OS", href: "/crm" },
   { label: "Market", href: "/workspace/?tab=market" },
   { label: "Brokers", href: "/broker" },
   { label: "Managers", href: "/manager" },
@@ -41,6 +44,9 @@ const workflows = [
   { title: "Channels", href: "/workspace/?tab=channels", icon: MessageCircle, copy: "WhatsApp, call triage, slot lookup, and booking handoff in one lane." },
   { title: "Documents", href: "/workspace/?tab=documents", icon: FileText, copy: "Extraction and negotiation logic quietly protect the transaction." },
   { title: "Agents", href: "/workspace/?tab=agents", icon: Bot, copy: "Ten specialists route the desk without ever losing the thread." },
+  { title: "Sales OS", href: "/crm", icon: GanttChartSquare, copy: "CRM, ERP, pipeline, leads, commissions, and reports stay one click away." },
+  { title: "Broker Portal", href: "/broker", icon: BriefcaseBusiness, copy: "Partner tie-ups, buyer attribution, PropertyPool visits, and commission trails." },
+  { title: "Manager Portal", href: "/manager", icon: Building2, copy: "Listing controls, approvals, audit logs, and seller-side automation." },
 ];
 
 export function LandingPage() {
@@ -152,6 +158,12 @@ function Hero({ property }: { property: Property }) {
               className="lx-link inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/70 transition-colors hover:text-ink"
             >
               Survey the Mumbai map
+            </Link>
+            <Link
+              href="/crm"
+              className="lx-link inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink/70 transition-colors hover:text-ink"
+            >
+              Open Sales OS
             </Link>
           </div>
 
