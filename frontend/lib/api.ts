@@ -1931,3 +1931,242 @@ export async function saveXRFeedback(propertyId: string, sessionId: string, inpu
     return { saved: false, fallback: true, next_action_recommendation: "Feedback captured locally for this hosted demo. Schedule a physical visit for verified inspection." };
   }
 }
+
+export type CRMSummaryCard = { label: string; value: string; detail?: string | null; tone?: string };
+export type CRMPipelineStage = { id: string; stage_name: string; display_order: number; default_probability: number; color: string; opportunity_count: number; total_value: number; weighted_value: number; average_age_days: number; stale_count: number };
+export type CRMLead = { id: string; full_name: string; phone: string; email?: string | null; source: string; buyer_type: string; budget_min?: number | null; budget_max?: number | null; preferred_localities: string[]; property_type_preference?: string; bhk_preference?: string | null; buying_timeline?: string | null; loan_required: boolean; down_payment_available?: number | null; family_size?: number | null; purpose?: string | null; assigned_user_id?: string | null; broker_id?: string | null; manager_id?: string | null; lead_score: number; qualification_status: string; duplicate_status: string; status: string; last_contacted_at?: string | null; next_follow_up_at?: string | null; notes?: string | null; created_at: string };
+export type CRMOpportunity = { id: string; lead_id?: string | null; contact_id?: string | null; property_id?: string | null; broker_id?: string | null; title: string; buyer_name: string; property_name?: string | null; locality?: string | null; stage: string; opportunity_value: number; expected_commission: number; probability: number; weighted_value: number; source: string; assigned_agent_name?: string | null; next_activity?: string | null; expected_close_date?: string | null; lead_score: number; broker_attribution?: string | null; last_interaction?: string | null; warning_badges: string[] };
+export type CRMActivity = { id: string; lead_id?: string | null; opportunity_id?: string | null; activity_type: string; title: string; description?: string | null; due_at?: string | null; status: string; priority: string; created_by_agent: boolean; completed_at?: string | null; outcome?: string | null; created_at: string };
+export type CRMContact = { id: string; full_name: string; phone?: string | null; email?: string | null; contact_type: string; source?: string | null; tags: string[]; notes?: string | null; created_at: string };
+export type CRMAccount = { id: string; account_name: string; account_type: string; company_name?: string | null; phone?: string | null; email?: string | null; notes?: string | null; created_at: string };
+export type CRMCampaign = { id: string; campaign_name: string; campaign_type: string; target_segment: string; property_id?: string | null; message_template: string; status: string; sent_count: number; reply_count: number; visit_count: number; offer_count: number; revenue_pipeline: number; created_at: string };
+export type CRMProposal = { id: string; proposal_type: string; title: string; content_json: Record<string, unknown>; status: string; version: number; created_at: string };
+export type CRMCommission = { id: string; opportunity_id?: string | null; broker_id?: string | null; agent_id?: string | null; deal_value: number; commission_percentage: number; expected_commission: number; approved_commission?: number | null; payout_status: string; dispute_status: string; created_at: string };
+export type CRMAudit = { id: string; actor_type: string; actor_id?: string | null; action: string; entity_type: string; entity_id?: string | null; details_json: Record<string, unknown>; created_at: string };
+export type CRMNextBestAction = { id: string; title: string; reason: string; recommended_action: string; entity_type: string; entity_id?: string | null; priority: string; agent_name: string };
+export type CRMDashboard = { summary_cards: CRMSummaryCard[]; pipeline_stages: CRMPipelineStage[]; priority_inbox: CRMNextBestAction[]; activity_feed: CRMAudit[]; hot_leads: CRMLead[]; open_opportunities: CRMOpportunity[]; reports: Record<string, unknown> };
+export type CRMPipelinePayload = { stages: CRMPipelineStage[]; opportunities: CRMOpportunity[] };
+
+const CRM_STAGE_NAMES = ["New Lead", "Qualified", "Property Matched", "Visit Scheduled", "Visit Completed", "Offer Discussed", "Negotiation", "Documents Shared", "Agreement Drafting", "Closed Won", "Closed Lost"];
+
+const DEMO_CRM_LEADS: CRMLead[] = [
+  { id: "crm-lead-demo-1", full_name: "Rahul Mehta", phone: "+91 90000 02001", source: "WhatsApp", buyer_type: "family buyer", budget_min: 30000000, budget_max: 42000000, preferred_localities: ["Chembur", "Ghatkopar"], property_type_preference: "apartment", bhk_preference: "3 BHK", buying_timeline: "ready", loan_required: true, family_size: 4, assigned_user_id: "agent-demo-1", manager_id: "manager-demo-1", lead_score: 91, qualification_status: "hot", duplicate_status: "unique", status: "open", last_contacted_at: new Date().toISOString(), next_follow_up_at: new Date(Date.now() + 3600000).toISOString(), notes: "Visited Chembur 3BHK and asked EMI twice.", created_at: new Date().toISOString() },
+  { id: "crm-lead-demo-2", full_name: "Priya Nair", phone: "+91 90000 02002", source: "PropertyPool", buyer_type: "NRI buyer", budget_min: 47000000, budget_max: 66000000, preferred_localities: ["Bandra", "Worli"], property_type_preference: "apartment", bhk_preference: "2.5-3 BHK", buying_timeline: "30 days", loan_required: false, assigned_user_id: "agent-demo-1", broker_id: "broker-demo-1", manager_id: "manager-demo-1", lead_score: 94, qualification_status: "hot", duplicate_status: "unique", status: "open", next_follow_up_at: new Date(Date.now() + 7200000).toISOString(), notes: "Needs revised offer near INR 4.85 Cr.", created_at: new Date().toISOString() },
+  { id: "crm-lead-demo-3", full_name: "Kabir Merchant", phone: "+91 90000 02003", source: "XR tour", buyer_type: "investor", budget_min: 24000000, budget_max: 31500000, preferred_localities: ["Powai", "Andheri"], property_type_preference: "apartment", bhk_preference: "2-3 BHK", buying_timeline: "30-60 days", loan_required: true, assigned_user_id: "agent-demo-2", manager_id: "manager-demo-1", lead_score: 86, qualification_status: "hot", duplicate_status: "unique", status: "open", next_follow_up_at: new Date(Date.now() + 86400000).toISOString(), notes: "Completed XR tour and asked for site visit.", created_at: new Date().toISOString() },
+  { id: "crm-lead-demo-4", full_name: "Ananya Rao", phone: "+91 90000 02004", source: "Broker referral", buyer_type: "first-time buyer", budget_min: 14000000, budget_max: 20800000, preferred_localities: ["Borivali", "Malad"], property_type_preference: "apartment", bhk_preference: "2 BHK", buying_timeline: "90 days", loan_required: true, assigned_user_id: "agent-demo-2", broker_id: "broker-demo-1", manager_id: "manager-demo-1", lead_score: 76, qualification_status: "qualified", duplicate_status: "unique", status: "open", next_follow_up_at: new Date(Date.now() - 3600000).toISOString(), notes: "Send EMI sheet and cheaper alternatives.", created_at: new Date().toISOString() },
+];
+
+const DEMO_CRM_OPPORTUNITIES: CRMOpportunity[] = [
+  { id: "crm-opp-demo-1", lead_id: "crm-lead-demo-1", property_id: "mumbai-chembur-1", title: "Rahul Mehta - Chembur Garden-View 3BHK", buyer_name: "Rahul Mehta", property_name: "Chembur Garden-View 3BHK", locality: "Chembur", stage: "Visit Completed", opportunity_value: 42000000, expected_commission: 840000, probability: 48, weighted_value: 20160000, source: "WhatsApp", assigned_agent_name: "Asha Kulkarni", next_activity: "Call after Chembur visit", lead_score: 91, broker_attribution: null, last_interaction: new Date().toISOString(), warning_badges: ["Hot lead", "XR engaged"] },
+  { id: "crm-opp-demo-2", lead_id: "crm-lead-demo-2", property_id: "mumbai-bandra-1", broker_id: "broker-demo-1", title: "Priya Nair - Bandra West Sea-Breeze", buyer_name: "Priya Nair", property_name: "Bandra West Sea-Breeze 2.5BHK", locality: "Bandra", stage: "Negotiation", opportunity_value: 66000000, expected_commission: 1320000, probability: 72, weighted_value: 47520000, source: "PropertyPool", assigned_agent_name: "Asha Kulkarni", next_activity: "Send revised offer", lead_score: 94, broker_attribution: "protected", last_interaction: new Date().toISOString(), warning_badges: ["Hot lead", "Offer ready", "Broker attributed", "PropertyPool source"] },
+  { id: "crm-opp-demo-3", lead_id: "crm-lead-demo-3", property_id: "mumbai-powai-1", title: "Kabir Merchant - Powai Lakeview Smart 3BHK", buyer_name: "Kabir Merchant", property_name: "Powai Lakeview Smart 3BHK", locality: "Powai", stage: "Visit Scheduled", opportunity_value: 31500000, expected_commission: 630000, probability: 40, weighted_value: 12600000, source: "XR tour", assigned_agent_name: "Rohan Shah", next_activity: "Confirm Saturday visit", lead_score: 86, last_interaction: new Date().toISOString(), warning_badges: ["Visit booked", "XR engaged"] },
+  { id: "crm-opp-demo-4", lead_id: "crm-lead-demo-4", property_id: "mumbai-malad-1", broker_id: "broker-demo-1", title: "Ananya Rao - Malad West Growth-Corridor", buyer_name: "Ananya Rao", property_name: "Malad West Growth-Corridor 2BHK", locality: "Malad", stage: "Property Matched", opportunity_value: 20800000, expected_commission: 416000, probability: 28, weighted_value: 5824000, source: "Broker referral", assigned_agent_name: "Rohan Shah", next_activity: "Follow-up overdue", lead_score: 76, broker_attribution: "protected", last_interaction: new Date(Date.now() - 5 * 86400000).toISOString(), warning_badges: ["Broker attributed", "Follow-up overdue"] },
+  { id: "crm-opp-demo-5", lead_id: "crm-lead-demo-5", property_id: "mumbai-worli-1", title: "Nisha Iyer - Worli Sea-Link Luxury", buyer_name: "Nisha Iyer", property_name: "Worli Sea-Link Luxury 4BHK", locality: "Worli", stage: "Offer Discussed", opportunity_value: 185000000, expected_commission: 3700000, probability: 64, weighted_value: 118400000, source: "Vapi call", assigned_agent_name: "Asha Kulkarni", next_activity: "Prepare negotiation brief", lead_score: 89, last_interaction: new Date().toISOString(), warning_badges: ["Hot lead", "Legal risk", "Finance risk"] },
+];
+
+function demoCRMStages(): CRMPipelineStage[] {
+  return CRM_STAGE_NAMES.map((name, index) => {
+    const opps = DEMO_CRM_OPPORTUNITIES.filter((item) => item.stage === name);
+    return {
+      id: name.toLowerCase().replace(/\s+/g, "_"),
+      stage_name: name,
+      display_order: index + 1,
+      default_probability: [5, 18, 28, 38, 48, 58, 68, 78, 88, 100, 0][index],
+      color: ["#64748b", "#0f766e", "#059669", "#2563eb", "#7c3aed", "#b45309", "#ea580c", "#0891b2", "#16a34a", "#15803d", "#dc2626"][index],
+      opportunity_count: opps.length,
+      total_value: opps.reduce((sum, item) => sum + item.opportunity_value, 0),
+      weighted_value: opps.reduce((sum, item) => sum + item.weighted_value, 0),
+      average_age_days: 3 + index,
+      stale_count: opps.filter((item) => item.warning_badges.includes("Follow-up overdue")).length,
+    };
+  });
+}
+
+function demoCRMDashboard(): CRMDashboard {
+  const pipelineValue = DEMO_CRM_OPPORTUNITIES.reduce((sum, item) => sum + item.opportunity_value, 0);
+  const weighted = DEMO_CRM_OPPORTUNITIES.reduce((sum, item) => sum + item.weighted_value, 0);
+  return {
+    summary_cards: [
+      ["Total leads", "124", "Unified inbox", "slate"],
+      ["New leads today", "7", "WhatsApp + XR", "emerald"],
+      ["Hot leads", "18", "Score above 80", "emerald"],
+      ["Open opportunities", String(DEMO_CRM_OPPORTUNITIES.length), "Active deals", "slate"],
+      ["Pipeline value", formatCr(pipelineValue), "Open pipeline", "gold"],
+      ["Expected revenue", formatCr(weighted), "Weighted", "gold"],
+      ["Expected commission", formatCr(DEMO_CRM_OPPORTUNITIES.reduce((sum, item) => sum + item.expected_commission, 0)), "Broker + agent", "amber"],
+      ["Site visits this week", "18", "11 AI booked", "emerald"],
+      ["Offers active", "6", "3 approvals", "amber"],
+      ["Closings expected", "4", "June 2026", "emerald"],
+      ["Stale leads", "9", "Need nurture", "amber"],
+      ["Follow-ups due", "14", "SLA watch", "amber"],
+      ["AI tasks completed", "128", "This week", "slate"],
+      ["Avg response time", "8m", "WhatsApp/call", "emerald"],
+      ["Conversion rate", "31%", "Visit to offer", "gold"],
+    ].map(([label, value, detail, tone]) => ({ label, value, detail, tone })),
+    pipeline_stages: demoCRMStages(),
+    priority_inbox: [
+      { id: "nba-1", title: "Call Rahul", reason: "Visited Chembur 3BHK yesterday and asked EMI twice.", recommended_action: "Call and send EMI estimate.", entity_type: "lead", entity_id: "crm-lead-demo-1", priority: "high", agent_name: "Lead Scoring Agent" },
+      { id: "nba-2", title: "Send revised offer to Priya", reason: "Negotiation likely to close at INR 4.85 Cr.", recommended_action: "Generate counter summary.", entity_type: "opportunity", entity_id: "crm-opp-demo-2", priority: "high", agent_name: "Proposal and Offer Agent" },
+      { id: "nba-3", title: "Invite Andheri buyers", reason: "8 buyers match Saturday PropertyPool.", recommended_action: "Launch WhatsApp campaign.", entity_type: "campaign", entity_id: "crm-campaign-demo-1", priority: "medium", agent_name: "Activity Automation Agent" },
+      { id: "nba-4", title: "Confirm broker Aman attribution", reason: "3 leads pending attribution confirmation.", recommended_action: "Review audit timestamps.", entity_type: "broker", entity_id: "broker-demo-1", priority: "medium", agent_name: "Commission Agent" },
+      { id: "nba-5", title: "Upload missing OC", reason: "Bandra legal summary is blocked.", recommended_action: "Create legal executive task.", entity_type: "document", priority: "high", agent_name: "CRM Hygiene Agent" },
+    ],
+    activity_feed: ["New WhatsApp lead created", "Call summary saved", "Site visit booked", "PropertyPool RSVP received", "Buyer shortlisted property", "Broker tie-up approved", "Offer generated", "Commission forecast updated", "AI scored lead as hot", "Legal agent flagged document risk"].map((action, index) => ({ id: `crm-audit-demo-${index}`, actor_type: index % 2 ? "user" : "agent", actor_id: "crm-agent", action: action.toLowerCase().replace(/\s+/g, "_"), entity_type: "crm", details_json: { summary: action }, created_at: new Date(Date.now() - index * 3600000).toISOString() })),
+    hot_leads: DEMO_CRM_LEADS.filter((lead) => lead.lead_score >= 80),
+    open_opportunities: DEMO_CRM_OPPORTUNITIES,
+    reports: { sales_forecast: { pipeline_value: pipelineValue, weighted_forecast: weighted }, lead_sources: { WhatsApp: 42, "Vapi call": 17, "XR tour": 13, PropertyPool: 19, "Broker referral": 23, Campaign: 10 } },
+  };
+}
+
+async function crmFetch<T>(path: string, fallback: T, init: RequestInit = {}): Promise<T> {
+  try {
+    const res = await fetchWithTimeout(`${API_URL}${path}`, { cache: "no-store", ...init });
+    if (!res.ok) throw new Error(`CRM request failed: ${path}`);
+    return res.json();
+  } catch (error) {
+    console.warn(`Using demo CRM fallback for ${path}.`, error);
+    return fallback;
+  }
+}
+
+async function voiceFetch(path: string, init: RequestInit = {}): Promise<VoiceCallResult> {
+  try {
+    const res = await fetchWithTimeout(`${API_URL}${path}`, { cache: "no-store", ...init }, 15000);
+    if (!res.ok) {
+      const detail = await res.text();
+      throw new Error(detail || `HTTP ${res.status}`);
+    }
+    return res.json();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown request error";
+    return {
+      call_status: "failed",
+      call_id: null,
+      provider: "elevenlabs",
+      reason: `Voice backend request failed at ${API_URL}${path}: ${message}. Start the FastAPI backend, confirm NEXT_PUBLIC_API_URL, and retry.`,
+      scheduled_or_started: null,
+      mode: "unknown",
+    };
+  }
+}
+
+export async function getCRMDashboard(): Promise<CRMDashboard> {
+  return crmFetch("/api/crm/dashboard", demoCRMDashboard());
+}
+
+export async function getCRMPipeline(): Promise<CRMPipelinePayload> {
+  return crmFetch("/api/crm/pipeline", { stages: demoCRMStages(), opportunities: DEMO_CRM_OPPORTUNITIES });
+}
+
+export async function getCRMLeads(): Promise<CRMLead[]> {
+  return crmFetch("/api/crm/leads", DEMO_CRM_LEADS);
+}
+
+export async function getCRMOpportunities(): Promise<CRMOpportunity[]> {
+  return crmFetch("/api/crm/opportunities", DEMO_CRM_OPPORTUNITIES);
+}
+
+export async function getCRMActivities(): Promise<CRMActivity[]> {
+  const demo = DEMO_CRM_OPPORTUNITIES.map((opp, index) => ({ id: `crm-act-demo-${index}`, lead_id: opp.lead_id, opportunity_id: opp.id, activity_type: index % 2 ? "WhatsApp" : "Call", title: opp.next_activity || "Follow up", description: "AI generated next activity", due_at: new Date(Date.now() + (index - 1) * 3600000).toISOString(), status: index === 3 ? "overdue" : "open", priority: index < 2 ? "high" : "medium", created_by_agent: true, created_at: new Date().toISOString() }));
+  return crmFetch("/api/crm/activities", demo);
+}
+
+export async function getCRMContacts(): Promise<CRMContact[]> {
+  return crmFetch("/api/crm/contacts", DEMO_CRM_LEADS.map((lead) => ({ id: `contact-${lead.id}`, full_name: lead.full_name, phone: lead.phone, contact_type: "buyer", source: lead.source, tags: [lead.qualification_status], notes: lead.notes, created_at: lead.created_at })));
+}
+
+export async function getCRMAccounts(): Promise<CRMAccount[]> {
+  return crmFetch("/api/crm/accounts", [{ id: "account-demo-1", account_name: "Shah Homes Network", account_type: "broker agency", company_name: "Shah Homes Network", phone: "+91 90000 01001", notes: "Broker partner account with PropertyPool rights.", created_at: new Date().toISOString() }]);
+}
+
+export async function getCRMCampaigns(): Promise<CRMCampaign[]> {
+  return crmFetch("/api/crm/campaigns", [{ id: "crm-campaign-demo-1", campaign_name: "Andheri Saturday PropertyPool", campaign_type: "WhatsApp", target_segment: "Andheri/Powai hot buyers", property_id: "mumbai-property-demo-3", message_template: "Verified group visit invite with EMI and route checklist.", status: "active", sent_count: 84, reply_count: 29, visit_count: 11, offer_count: 3, revenue_pipeline: 94500000, created_at: new Date().toISOString() }]);
+}
+
+export async function getCRMCommissions(): Promise<CRMCommission[]> {
+  return crmFetch("/api/crm/commissions", DEMO_CRM_OPPORTUNITIES.map((opp) => ({ id: `commission-${opp.id}`, opportunity_id: opp.id, broker_id: opp.broker_id, agent_id: "agent-demo-1", deal_value: opp.opportunity_value, commission_percentage: 2, expected_commission: opp.expected_commission, payout_status: "pending", dispute_status: "none", created_at: new Date().toISOString() })));
+}
+
+export async function getCRMReports(): Promise<Record<string, unknown>> {
+  return crmFetch("/api/crm/reports/sales", demoCRMDashboard().reports);
+}
+
+export async function runCRMAutomation(input: Record<string, unknown> = {}) {
+  return crmFetch("/api/crm/automation/run", { dashboard: demoCRMDashboard(), automation_state: { messages: ["CRM automation demo fallback completed."] } }, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+
+export type VoiceCallResult = {
+  call_status: string;
+  call_id?: string | null;
+  provider: "elevenlabs";
+  reason: string;
+  crm_task_id?: string | null;
+  scheduled_or_started?: string | null;
+  mode: "mock" | "live" | "unknown";
+  payload_preview?: Record<string, unknown>;
+};
+
+export type VoiceAnalytics = {
+  calls_today: number;
+  calls_this_week: number;
+  estimated_credits_used: number;
+  remaining_call_budget: number;
+  conversion_from_calls: number;
+  visits_booked_from_calls: number;
+  mode: "mock" | "live";
+};
+
+export type VoiceCallRecord = {
+  id: string;
+  provider: "elevenlabs";
+  mode: "mock" | "live";
+  property_id?: string | null;
+  buyer_id?: string | null;
+  lead_id?: string | null;
+  status: string;
+  transcript?: string | null;
+  summary_json: Record<string, unknown>;
+  outcome?: string | null;
+  intent_score: number;
+  next_action?: string | null;
+  created_at: string;
+};
+
+export async function triggerElevenLabsInterestCall(input: {
+  buyer_id?: string;
+  lead_id?: string;
+  buyer_name?: string;
+  buyer_phone?: string;
+  property_id: string;
+  interest_source: string;
+  consent_confirmed: boolean;
+  preferred_language?: "English" | "Hindi" | "Hinglish";
+  trigger_reason?: string;
+  call_goal?: "property_detail" | "visit_scheduling" | "xr_follow_up" | "propertypool_invite" | "offer_follow_up" | "stale_lead_reactivation";
+  force_call?: boolean;
+  broker_id?: string;
+  crm_opportunity_id?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<VoiceCallResult> {
+  return voiceFetch("/api/voice/elevenlabs/trigger-interest-call", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ preferred_language: "Hinglish", call_goal: "property_detail", ...input }),
+  });
+}
+
+export async function callCRMLeadWithElevenLabs(leadId: string, input: Record<string, unknown>): Promise<VoiceCallResult> {
+  return crmFetch(`/api/crm/leads/${leadId}/call`, { call_status: "mock_completed", call_id: `voice-lead-${Date.now().toString(36)}`, provider: "elevenlabs", reason: "Mock CRM lead call completed.", mode: "mock" }, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+
+export async function callBrokerBuyerWithElevenLabs(buyerId: string, input: Record<string, unknown>): Promise<VoiceCallResult> {
+  return crmFetch(`/api/broker/buyers/${buyerId}/call`, { call_status: "mock_completed", call_id: `voice-broker-${Date.now().toString(36)}`, provider: "elevenlabs", reason: "Mock broker-attributed call completed.", mode: "mock" }, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+
+export async function getVoiceAnalytics(): Promise<VoiceAnalytics> {
+  return crmFetch("/api/voice/elevenlabs/analytics", { calls_today: 0, calls_this_week: 0, estimated_credits_used: 0, remaining_call_budget: 10, conversion_from_calls: 0, visits_booked_from_calls: 0, mode: "mock" });
+}
+
+export async function getVoiceCall(callId: string): Promise<VoiceCallRecord | null> {
+  return crmFetch(`/api/voice/calls/${callId}`, null);
+}
