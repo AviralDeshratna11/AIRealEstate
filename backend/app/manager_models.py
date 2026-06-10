@@ -288,6 +288,7 @@ class ManagerListingDetail(ManagerListingSummary):
 
 class ManagerCreateListingRequest(BaseModel):
     manager_id: str = "manager-demo-1"
+    publish_immediately: bool = True
     title: str
     property_type: str = "apartment"
     transaction_type: str = "sale"

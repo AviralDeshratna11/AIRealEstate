@@ -17,12 +17,15 @@ class EmbeddingService:
         client = get_openai_client()
         dimensions = self.settings.openai_embedding_dimensions
         if client:
-            result = await client.embeddings.create(
-                model=self.settings.openai_embedding_model,
-                input=text[:8000],
-                dimensions=dimensions,
-            )
-            return list(result.data[0].embedding)
+            try:
+                result = await client.embeddings.create(
+                    model=self.settings.openai_embedding_model,
+                    input=text[:8000],
+                    dimensions=dimensions,
+                )
+                return list(result.data[0].embedding)
+            except Exception:
+                pass
         return self._hash_embedding(text, dimensions)
 
     @staticmethod

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from app.agents.nl2sql import PropertyQueryPlan, compile_property_sql, property_select_columns
@@ -36,6 +37,9 @@ class PropertyRepository:
                 return [Property(**self._normalize_row(dict(row))) for row in rows]
         except Exception:
             pass
+        seller_properties = await self._list_published_seller_properties(limit)
+        if seller_properties:
+            return seller_properties
         return [Property(**p) for p in SAMPLE_PROPERTIES[:limit]]
 
     async def get_property(self, property_id: str) -> Property | None:
@@ -56,6 +60,9 @@ class PropertyRepository:
                 return Property(**self._normalize_row(dict(row)))
         except Exception:
             pass
+        seller = await self._get_published_seller_property(property_id)
+        if seller:
+            return seller
         item = next((p for p in SAMPLE_PROPERTIES if str(p["id"]) == str(property_id)), None)
         return Property(**item) if item else None
 
@@ -138,6 +145,52 @@ class PropertyRepository:
             for p in properties
         ]
 
+    async def _list_published_seller_properties(self, limit: int = 12) -> list[Property]:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if pool is None:
+            return []
+        try:
+            async with pool.acquire() as conn:
+                rows = await conn.fetch(
+                    """
+                    select * from seller_listings
+                    where public_visibility = true
+                       or status in ('published', 'leads_active', 'offer_stage', 'negotiation')
+                    order by updated_at desc
+                    limit $1
+                    """,
+                    limit,
+                )
+            return [Property(**self._seller_listing_to_property(dict(row))) for row in rows]
+        except Exception:
+            return []
+
+    async def _get_published_seller_property(self, property_id: str) -> Property | None:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if pool is None:
+            return None
+        try:
+            async with pool.acquire() as conn:
+                row = await conn.fetchrow(
+                    """
+                    select * from seller_listings
+                    where id::text = $1
+                      and (public_visibility = true
+                           or status in ('published', 'leads_active', 'offer_stage', 'negotiation'))
+                    limit 1
+                    """,
+                    property_id,
+                )
+            return Property(**self._seller_listing_to_property(dict(row))) if row else None
+        except Exception:
+            return None
+
     def _search_in_memory(self, plan: PropertyQueryPlan) -> list[Property]:
         query = plan.semantic_query.lower()
         scored: list[tuple[float, dict[str, Any]]] = []
@@ -193,3 +246,58 @@ class PropertyRepository:
             # Pydantic accepts dicts; this branch documents that JSONB is expected from DB.
             pass
         return row
+
+    @staticmethod
+    def _seller_listing_to_property(row: dict[str, Any]) -> dict[str, Any]:
+        def as_float(value: Any, default: float = 0.0) -> float:
+            if isinstance(value, Decimal):
+                return float(value)
+            try:
+                return float(value)
+            except Exception:
+                return default
+
+        def as_int(value: Any, default: int = 0) -> int:
+            try:
+                return int(value)
+            except Exception:
+                return default
+
+        price = as_float(row.get("asking_price"))
+        area = as_int(row.get("builtup_area_sqft") or row.get("carpet_area_sqft"), 1)
+        legal_notes = row.get("legal_notes") if isinstance(row.get("legal_notes"), list) else []
+        return enrich_property_market_fields(
+            {
+                "id": row["id"],
+                "title": row["title"],
+                "address": row["address"],
+                "city": "Mumbai",
+                "locality": row["locality"],
+                "micro_market": row["locality"],
+                "property_type": row.get("property_type") or "apartment",
+                "transaction_type": "buy" if row.get("transaction_type") == "sale" else (row.get("transaction_type") or "buy"),
+                "price": price,
+                "price_per_sqft": as_float(row.get("price_per_sqft")) or round(price / max(area, 1), 0),
+                "bedrooms": as_int(row.get("bedrooms")),
+                "bathrooms": as_int(row.get("bathrooms")),
+                "area_sqft": area,
+                "carpet_area_sqft": row.get("carpet_area_sqft"),
+                "built_up_area_sqft": row.get("builtup_area_sqft"),
+                "latitude": as_float(row.get("latitude"), 19.076),
+                "longitude": as_float(row.get("longitude"), 72.8777),
+                "status": "available",
+                "availability": row.get("availability_date") or "Viewing slots available this week",
+                "possession": row.get("possession_status"),
+                "builder": None,
+                "description": row.get("description_long") or row.get("description_short") or row["title"],
+                "amenities": [],
+                "tags": ["manager_listing", row.get("status") or "published", row.get("locality") or "Mumbai"],
+                "image_url": row.get("hero_image_url"),
+                "splat_url": None,
+                "rera_id": row.get("rera_number"),
+                "redevelopment_score": as_float(row.get("redevelopment_score")),
+                "walkability_score": as_float(row.get("market_heat_score")),
+                "commute_score": None,
+                "risk_flags": legal_notes,
+            }
+        )

@@ -7,7 +7,7 @@ const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
 const repoBasePath = isGithubActions ? '/AIRealEstate' : '';
 
 const nextConfig = {
-  output: 'export',
+  ...(isGithubActions ? { output: 'export' } : {}),
   outputFileTracingRoot: projectRoot,
   trailingSlash: true,
   basePath: repoBasePath,

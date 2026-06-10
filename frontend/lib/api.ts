@@ -1001,13 +1001,18 @@ export async function getManagerListing(listingId: string): Promise<ManagerListi
     if (!res.ok) throw new Error("Manager listing failed");
     return res.json();
   } catch (error) {
-    console.warn("Using demo manager listing.", error);
-    return (DEMO_MANAGER_LISTINGS.find((item) => item.id === listingId) || DEMO_MANAGER_LISTINGS[0]) as ManagerListing;
+    const demo = DEMO_MANAGER_LISTINGS.find((item) => item.id === listingId);
+    if (demo) {
+      console.warn("Using demo manager listing.", error);
+      return demo as ManagerListing;
+    }
+    throw error instanceof Error ? error : new Error("Manager listing failed");
   }
 }
 
 export async function createManagerListing(input: {
   manager_id?: string;
+  publish_immediately?: boolean;
   title: string;
   property_type?: string;
   transaction_type?: string;
@@ -1030,77 +1035,16 @@ export async function createManagerListing(input: {
   owner_email?: string | null;
   notes?: string | null;
 }): Promise<ManagerListing> {
-  try {
-    const res = await fetch(`${API_URL}/api/manager/listings`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    if (!res.ok) throw new Error("Create manager listing failed");
-    return res.json();
-  } catch (error) {
-    console.warn("Using demo create manager listing.", error);
-    const created: ManagerListing = {
-      id: `seller-${Date.now().toString(36)}`,
-      manager_id: input.manager_id || "manager-demo-1",
-      title: input.title,
-      slug: input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
-      status: "draft",
-      property_type: input.property_type || "apartment",
-      transaction_type: input.transaction_type || "sale",
-      locality: input.locality,
-      address: input.address,
-      latitude: input.latitude,
-      longitude: input.longitude,
-      carpet_area_sqft: input.carpet_area_sqft,
-      builtup_area_sqft: input.builtup_area_sqft,
-      bedrooms: input.bedrooms,
-      bathrooms: input.bathrooms,
-      parking_count: input.parking_count,
-      furnishing_status: input.furnishing_status,
-      possession_status: input.possession_status,
-      availability_date: input.availability_date,
-      rera_number: input.rera_number,
-      asking_price: input.asking_price,
-      recommended_price: input.asking_price ? Math.round(input.asking_price * 0.97) : null,
-      fast_sale_price: input.asking_price ? Math.round(input.asking_price * 0.94) : null,
-      optimistic_price: input.asking_price ? Math.round(input.asking_price * 1.05) : null,
-      min_acceptable_price: input.asking_price ? Math.round(input.asking_price * 0.92) : null,
-      price_per_sqft: input.asking_price && input.carpet_area_sqft ? Math.round(input.asking_price / input.carpet_area_sqft) : null,
-      market_heat_score: 60,
-      legal_risk_score: input.rera_number ? 18 : 42,
-      readiness_score: 44,
-      lead_quality_score: 0,
-      redevelopment_score: 50,
-      description_short: input.notes || "Seller-created draft",
-      description_long: input.notes || "Seller-created draft",
-      seo_title: input.title,
-      public_visibility: false,
-      hero_image_url: null,
-      lead_count: 0,
-      pending_tasks: 1,
-      next_visit: null,
-      updated_at: new Date().toISOString(),
-      owner_name: input.owner_name,
-      owner_phone: input.owner_phone,
-      owner_email: input.owner_email,
-      documents: [],
-      media: [],
-      leads: [],
-      site_visits: [],
-      audit_log: [],
-      automation_rules: [],
-      market_comparables: [],
-      pricing: null,
-      listing_copy: null,
-      readiness_breakdown: {},
-      missing_fields: ["Title report", "RERA / legal identifier"],
-      legal_notes: ["Awaiting document intake"],
-      public_preview_url: `/manager/listings/seller-${Date.now().toString(36)}`,
-      map_preview: { latitude: input.latitude, longitude: input.longitude, locality: input.locality },
-    };
-    return created;
+  const res = await fetch(`${API_URL}/api/manager/listings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(detail || "Create manager listing failed");
   }
+  return res.json();
 }
 
 export async function runManagerListingAgents(listingId: string, input?: { manager_id?: string; user_request?: string; auto_publish?: boolean; current_task?: string }) {

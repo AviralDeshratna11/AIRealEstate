@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from copy import deepcopy
 from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -249,6 +251,53 @@ def _as_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _json_safe(value: Any) -> Any:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, dict):
+        return {key: _json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    return value
+
+
+def _as_datetime(value: Any) -> datetime | None:
+    if value is None or isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    return None
+
+
+def _json_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, dict) else {}
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def _json_list(value: Any) -> list[Any]:
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else []
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
 class ManagerPortalService:
     def __init__(self) -> None:
         self.embedder = EmbeddingService()
@@ -288,10 +337,24 @@ class ManagerPortalService:
             if pool is None:
                 return
             async with pool.acquire() as conn:
+                await self._execute_optional_ddl(conn, "create extension if not exists pgcrypto")
+                await self._execute_optional_ddl(conn, "create extension if not exists vector")
                 for statement in DDL_STATEMENTS:
-                    await conn.execute(statement)
+                    try:
+                        await conn.execute(statement)
+                    except Exception:
+                        if "vector(1536)" not in statement:
+                            raise
             await self._seed_database(pool)
+            await self._load_database_state(pool)
             self._seeded = True
+
+    async def _execute_optional_ddl(self, conn: Any, statement: str) -> bool:
+        try:
+            await conn.execute(statement)
+            return True
+        except Exception:
+            return False
 
     def _seed_listings(self) -> dict[str, dict[str, Any]]:
         listings: dict[str, dict[str, Any]] = {}
@@ -434,34 +497,212 @@ class ManagerPortalService:
                 self._manager.operating_localities,
             )
             for listing in self._listings.values():
+                await self._save_listing_row(conn, listing)
+
+    async def _load_database_state(self, pool: Any) -> None:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch("select * from seller_listings order by updated_at desc")
+        if not rows:
+            return
+        publish_on_load: list[str] = []
+        self._listings = {}
+        for row in rows:
+            listing = {key: _json_safe(value) for key, value in dict(row).items()}
+            listing["map_payload"] = _json_dict(listing.get("map_payload"))
+            listing["pricing_json"] = _json_dict(listing.get("pricing_json"))
+            listing["copy_json"] = _json_dict(listing.get("copy_json"))
+            listing["readiness_json"] = _json_dict(listing.get("readiness_json"))
+            listing["legal_notes"] = _json_list(listing.get("legal_notes"))
+            self._listings[listing["id"]] = listing
+            self._seed_listing_relations(listing["id"])
+            if listing.get("status") in {"draft", "data_extraction", "needs_review", "ready_to_publish"} and self._has_public_listing_fields(listing):
+                self._mark_listing_public(listing["id"], action="listing_auto_published_on_startup")
+                publish_on_load.append(listing["id"])
+        if publish_on_load:
+            async with pool.acquire() as conn:
+                for listing_id in publish_on_load:
+                    await self._save_listing_row(conn, self._listings[listing_id])
+                    await self._sync_public_property(listing_id)
+
+    async def _save_listing(self, listing_id: str) -> None:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if pool is None:
+            return
+        async with pool.acquire() as conn:
+            await self._save_listing_row(conn, self._listings[listing_id])
+
+    async def _save_listing_row(self, conn: Any, listing: dict[str, Any]) -> None:
+        await conn.execute(
+            """
+            insert into seller_listings (
+              id, manager_id, title, slug, status, property_type, transaction_type, locality, address,
+              latitude, longitude, carpet_area_sqft, builtup_area_sqft, bedrooms, bathrooms, parking_count,
+              furnishing_status, possession_status, availability_date, rera_number, asking_price, recommended_price,
+              fast_sale_price, optimistic_price, min_acceptable_price, price_per_sqft, market_heat_score,
+              legal_risk_score, readiness_score, lead_quality_score, redevelopment_score, description_short,
+              description_long, seo_title, public_visibility, owner_name, owner_phone, owner_email, hero_image_url,
+              map_payload, pricing_json, copy_json, readiness_json, legal_notes, created_at, updated_at, published_at
+            ) values (
+              $1,$2,$3,$4,$5,$6,$7,$8,$9,
+              $10,$11,$12,$13,$14,$15,$16,
+              $17,$18,$19,$20,$21,$22,
+              $23,$24,$25,$26,$27,
+              $28,$29,$30,$31,$32,$33,
+              $34,$35,$36,$37,$38,
+              $39,$40,$41,$42,$43,$44,$45::timestamptz,$46::timestamptz,$47::timestamptz
+            ) on conflict (id) do update set
+              manager_id = excluded.manager_id,
+              title = excluded.title,
+              slug = excluded.slug,
+              status = excluded.status,
+              property_type = excluded.property_type,
+              transaction_type = excluded.transaction_type,
+              locality = excluded.locality,
+              address = excluded.address,
+              latitude = excluded.latitude,
+              longitude = excluded.longitude,
+              carpet_area_sqft = excluded.carpet_area_sqft,
+              builtup_area_sqft = excluded.builtup_area_sqft,
+              bedrooms = excluded.bedrooms,
+              bathrooms = excluded.bathrooms,
+              parking_count = excluded.parking_count,
+              furnishing_status = excluded.furnishing_status,
+              possession_status = excluded.possession_status,
+              availability_date = excluded.availability_date,
+              rera_number = excluded.rera_number,
+              asking_price = excluded.asking_price,
+              recommended_price = excluded.recommended_price,
+              fast_sale_price = excluded.fast_sale_price,
+              optimistic_price = excluded.optimistic_price,
+              min_acceptable_price = excluded.min_acceptable_price,
+              price_per_sqft = excluded.price_per_sqft,
+              market_heat_score = excluded.market_heat_score,
+              legal_risk_score = excluded.legal_risk_score,
+              readiness_score = excluded.readiness_score,
+              lead_quality_score = excluded.lead_quality_score,
+              redevelopment_score = excluded.redevelopment_score,
+              description_short = excluded.description_short,
+              description_long = excluded.description_long,
+              seo_title = excluded.seo_title,
+              public_visibility = excluded.public_visibility,
+              owner_name = excluded.owner_name,
+              owner_phone = excluded.owner_phone,
+              owner_email = excluded.owner_email,
+              hero_image_url = excluded.hero_image_url,
+              map_payload = excluded.map_payload,
+              pricing_json = excluded.pricing_json,
+              copy_json = excluded.copy_json,
+              readiness_json = excluded.readiness_json,
+              legal_notes = excluded.legal_notes,
+              updated_at = excluded.updated_at,
+              published_at = excluded.published_at
+            """,
+            listing["id"], listing["manager_id"], listing["title"], listing["slug"], listing["status"], listing["property_type"], listing["transaction_type"], listing["locality"], listing["address"],
+            listing["latitude"], listing["longitude"], listing.get("carpet_area_sqft"), listing.get("builtup_area_sqft"), listing.get("bedrooms"), listing.get("bathrooms"), listing.get("parking_count"),
+            listing.get("furnishing_status"), listing.get("possession_status"), listing.get("availability_date"), listing.get("rera_number"), listing.get("asking_price"), listing.get("recommended_price"),
+            listing.get("fast_sale_price"), listing.get("optimistic_price"), listing.get("min_acceptable_price"), listing.get("price_per_sqft"), listing.get("market_heat_score"),
+            listing.get("legal_risk_score"), listing.get("readiness_score"), listing.get("lead_quality_score"), listing.get("redevelopment_score"), listing.get("description_short"),
+            listing.get("description_long"), listing.get("seo_title"), listing.get("public_visibility"), listing.get("owner_name"), listing.get("owner_phone"), listing.get("owner_email"), listing.get("hero_image_url"),
+            json.dumps(listing.get("map_payload") or {}), json.dumps(listing.get("pricing_json") or {}), json.dumps(listing.get("copy_json") or {}), json.dumps(listing.get("readiness_json") or {}), json.dumps(listing.get("legal_notes") or []), _as_datetime(listing.get("created_at")), _as_datetime(listing.get("updated_at")), _as_datetime(listing.get("published_at")),
+        )
+
+    async def _sync_public_property(self, listing_id: str) -> None:
+        listing = self._listings[listing_id]
+        if not listing.get("public_visibility"):
+            return
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if pool is None:
+            return
+        price = _as_float(listing.get("asking_price"))
+        area = _as_int(listing.get("builtup_area_sqft") or listing.get("carpet_area_sqft"), 1)
+        bedrooms = _as_int(listing.get("bedrooms"))
+        bathrooms = _as_int(listing.get("bathrooms"))
+        description = listing.get("description_long") or listing.get("description_short") or listing["title"]
+        embedding = listing.get("embedding")
+        vector_literal = "[" + ",".join(f"{float(value):.6f}" for value in embedding[:1536]) + "]" if embedding else None
+        try:
+            async with pool.acquire() as conn:
                 await conn.execute(
                     """
-                    insert into seller_listings (
-                      id, manager_id, title, slug, status, property_type, transaction_type, locality, address,
-                      latitude, longitude, carpet_area_sqft, builtup_area_sqft, bedrooms, bathrooms, parking_count,
-                      furnishing_status, possession_status, availability_date, rera_number, asking_price, recommended_price,
-                      fast_sale_price, optimistic_price, min_acceptable_price, price_per_sqft, market_heat_score,
-                      legal_risk_score, readiness_score, lead_quality_score, redevelopment_score, description_short,
-                      description_long, seo_title, public_visibility, owner_name, owner_phone, owner_email, hero_image_url,
-                      map_payload, pricing_json, copy_json, readiness_json, legal_notes, created_at, updated_at, published_at
-                    ) values (
-                      $1,$2,$3,$4,$5,$6,$7,$8,$9,
-                      $10,$11,$12,$13,$14,$15,$16,
-                      $17,$18,$19,$20,$21,$22,
-                      $23,$24,$25,$26,$27,
-                      $28,$29,$30,$31,$32,$33,
-                      $34,$35,$36,$37,$38,
-                      $39,$40,$41,$42,$43,$44,$45
-                    ) on conflict (id) do nothing
+                    insert into properties (
+                  id, title, address, city, locality, micro_market, property_type, transaction_type,
+                  price, price_per_sqft, bedrooms, bathrooms, area_sqft, carpet_area_sqft,
+                  built_up_area_sqft, latitude, longitude, status, availability, possession,
+                  builder, description, amenities, tags, image_url, splat_url, rera_id,
+                  redevelopment_score, walkability_score, commute_score, risk_flags, embedding, updated_at
+                ) values (
+                  $1,$2,$3,'Mumbai',$4,$5,$6,$7,
+                  $8,$9,$10,$11,$12,$13,
+                  $14,$15,$16,'available',$17,$18,
+                  $19,$20,$21,$22,$23,$24,$25,
+                  $26,$27,$28,$29,$30::vector,now()
+                ) on conflict (id) do update set
+                  title = excluded.title,
+                  address = excluded.address,
+                  locality = excluded.locality,
+                  micro_market = excluded.micro_market,
+                  property_type = excluded.property_type,
+                  transaction_type = excluded.transaction_type,
+                  price = excluded.price,
+                  price_per_sqft = excluded.price_per_sqft,
+                  bedrooms = excluded.bedrooms,
+                  bathrooms = excluded.bathrooms,
+                  area_sqft = excluded.area_sqft,
+                  carpet_area_sqft = excluded.carpet_area_sqft,
+                  built_up_area_sqft = excluded.built_up_area_sqft,
+                  latitude = excluded.latitude,
+                  longitude = excluded.longitude,
+                  status = excluded.status,
+                  availability = excluded.availability,
+                  possession = excluded.possession,
+                  description = excluded.description,
+                  tags = excluded.tags,
+                  image_url = excluded.image_url,
+                  rera_id = excluded.rera_id,
+                  redevelopment_score = excluded.redevelopment_score,
+                  risk_flags = excluded.risk_flags,
+                  embedding = excluded.embedding,
+                  updated_at = now()
                     """,
-                    listing["id"], listing["manager_id"], listing["title"], listing["slug"], listing["status"], listing["property_type"], listing["transaction_type"], listing["locality"], listing["address"],
-                    listing["latitude"], listing["longitude"], listing["carpet_area_sqft"], listing["builtup_area_sqft"], listing["bedrooms"], listing["bathrooms"], listing["parking_count"],
-                    listing["furnishing_status"], listing["possession_status"], listing["availability_date"], listing["rera_number"], listing["asking_price"], listing["recommended_price"],
-                    listing["fast_sale_price"], listing["optimistic_price"], listing["min_acceptable_price"], listing["price_per_sqft"], listing["market_heat_score"],
-                    listing["legal_risk_score"], listing["readiness_score"], listing["lead_quality_score"], listing["redevelopment_score"], listing["description_short"],
-                    listing["description_long"], listing["seo_title"], listing["public_visibility"], listing["owner_name"], listing["owner_phone"], listing["owner_email"], listing["hero_image_url"],
-                    listing["map_payload"], listing["pricing_json"], listing["copy_json"], listing["readiness_json"], listing["legal_notes"], listing["created_at"], listing["updated_at"], listing["published_at"],
+                    listing["id"],
+                    listing["title"],
+                    listing["address"],
+                    listing["locality"],
+                    listing.get("locality"),
+                    listing.get("property_type") or "apartment",
+                    "buy" if listing.get("transaction_type") == "sale" else (listing.get("transaction_type") or "buy"),
+                    price,
+                    listing.get("price_per_sqft") or round(price / max(area, 1), 0),
+                    bedrooms,
+                    bathrooms,
+                    area,
+                    listing.get("carpet_area_sqft"),
+                    listing.get("builtup_area_sqft"),
+                    listing["latitude"],
+                    listing["longitude"],
+                    listing.get("availability_date") or "Viewing slots available this week",
+                    listing.get("possession_status"),
+                    self._manager.company_name,
+                    description,
+                    [],
+                    [listing.get("status", "published"), "manager_listing", listing.get("locality", "Mumbai")],
+                    listing.get("hero_image_url"),
+                    None,
+                    listing.get("rera_number"),
+                    listing.get("redevelopment_score"),
+                    listing.get("market_heat_score"),
+                    None,
+                    listing.get("legal_notes") or [],
+                    vector_literal,
                 )
+        except Exception:
+            return
 
     def _listing_summary(self, listing: dict[str, Any]) -> ManagerListingSummary:
         lead_count = len(self._leads.get(listing["id"], []))
@@ -473,8 +714,10 @@ class ManagerPortalService:
 
     def _listing_detail(self, listing_id: str) -> ManagerListingDetail:
         listing = deepcopy(self._listings[listing_id])
+        legal_notes = list(listing.pop("legal_notes", []) or [])
         listing["lead_count"] = len(self._leads.get(listing_id, []))
         listing["pending_tasks"] = sum(1 for task in self._tasks.get(listing_id, []) if task.get("status") not in {"done", "completed"})
+        pricing = self._pricing_model(listing)
         return ManagerListingDetail(
             **listing,
             documents=[ListingDocument(**item) for item in self._documents.get(listing_id, [])],
@@ -484,14 +727,36 @@ class ManagerPortalService:
             audit_log=[ListingAuditLog(**item) for item in self._audit.get(listing_id, [])],
             automation_rules=[AutomationRule(**item) for item in self._automation.get(listing_id, [])],
             market_comparables=[ComparableListing(**item) for item in self._comparables if item["locality"] == listing.get("locality")][:6],
-            pricing=ListingPricing(**listing["pricing_json"]) if listing.get("pricing_json") else None,
+            pricing=pricing,
             listing_copy=ListingCopyPack(**listing["copy_json"]) if listing.get("copy_json") else None,
             readiness_breakdown=listing.get("readiness_json") or {},
             missing_fields=self._missing_fields(listing),
-            legal_notes=list(listing.get("legal_notes") or []),
+            legal_notes=legal_notes,
             public_preview_url=f"/manager/listings/{listing_id}",
             map_preview={"latitude": listing.get("latitude"), "longitude": listing.get("longitude"), "locality": listing.get("locality")},
         )
+
+    def _pricing_model(self, listing: dict[str, Any]) -> ListingPricing | None:
+        pricing = _json_dict(listing.get("pricing_json"))
+        if not pricing and not listing.get("asking_price"):
+            return None
+        price = _as_float(listing.get("asking_price"))
+        area = max(_as_int(listing.get("carpet_area_sqft") or listing.get("builtup_area_sqft"), 1), 1)
+        complete = {
+            "recommended_price": pricing.get("recommended_price") or listing.get("recommended_price") or round(price * 0.97, 0),
+            "minimum_acceptable_price": pricing.get("minimum_acceptable_price") or listing.get("min_acceptable_price") or round(price * 0.92, 0),
+            "optimistic_price": pricing.get("optimistic_price") or listing.get("optimistic_price") or round(price * 1.05, 0),
+            "fast_sale_price": pricing.get("fast_sale_price") or listing.get("fast_sale_price") or round(price * 0.94, 0),
+            "price_per_sqft": pricing.get("price_per_sqft") or listing.get("price_per_sqft") or round(price / area, 0),
+            "rental_yield_estimate": pricing.get("rental_yield_estimate") or 2.8,
+            "buyer_affordability_segment": pricing.get("buyer_affordability_segment") or "Mumbai qualified buyers",
+            "negotiation_buffer": pricing.get("negotiation_buffer") or round(price * 0.03, 0),
+            "market_heat_score": pricing.get("market_heat_score") or listing.get("market_heat_score") or 60,
+            "redevelopment_upside_score": pricing.get("redevelopment_upside_score") or listing.get("redevelopment_score") or 45,
+            "confidence_score": pricing.get("confidence_score") or 74,
+            "explanation": pricing.get("explanation") or "Indicative pricing based on listing fields and Mumbai market defaults.",
+        }
+        return ListingPricing(**complete)
 
     def _missing_fields(self, listing: dict[str, Any]) -> list[str]:
         missing = []
@@ -503,12 +768,42 @@ class ManagerPortalService:
             ("longitude", "Longitude"),
             ("carpet_area_sqft", "Carpet area"),
             ("asking_price", "Asking price"),
-            ("rera_number", "RERA / legal identifier"),
         ]
         for key, label in checks:
             if listing.get(key) in {None, "", 0}:
                 missing.append(label)
         return missing
+
+    def _has_public_listing_fields(self, listing: dict[str, Any]) -> bool:
+        return not self._missing_fields(listing)
+
+    def _mark_listing_public(self, listing_id: str, action: str = "listing_published") -> None:
+        listing = self._listings[listing_id]
+        now = _utc_now()
+        price = _as_float(listing.get("asking_price"))
+        area = max(_as_int(listing.get("carpet_area_sqft") or listing.get("builtup_area_sqft"), 1), 1)
+        listing["status"] = "published"
+        listing["public_visibility"] = True
+        listing["published_at"] = listing.get("published_at") or now
+        listing["updated_at"] = now
+        listing["readiness_score"] = max(float(listing.get("readiness_score", 0)), 88)
+        listing["recommended_price"] = listing.get("recommended_price") or round(price * 0.97, 0)
+        listing["fast_sale_price"] = listing.get("fast_sale_price") or round(price * 0.94, 0)
+        listing["optimistic_price"] = listing.get("optimistic_price") or round(price * 1.05, 0)
+        listing["min_acceptable_price"] = listing.get("min_acceptable_price") or round(price * 0.92, 0)
+        listing["price_per_sqft"] = listing.get("price_per_sqft") or round(price / area, 0)
+        listing["pricing_json"] = self._pricing_model(listing).model_dump(mode="json")
+        listing["readiness_json"] = {
+            **(listing.get("readiness_json") or {}),
+            "readiness_score": listing["readiness_score"],
+            "published_by_default": True,
+        }
+        if not listing.get("rera_number"):
+            notes = list(listing.get("legal_notes") or [])
+            if "RERA / legal identifier pending verification" not in notes:
+                notes.append("RERA / legal identifier pending verification")
+            listing["legal_notes"] = notes
+        self._add_audit(listing_id, "manager", self._manager.full_name, action, {"summary": f"Published {listing['title']} as property inventory"})
 
     def _activity_feed(self) -> list[ManagerFeedEvent]:
         items: list[ManagerFeedEvent] = []
@@ -700,6 +995,12 @@ class ManagerPortalService:
         self._seed_listing_relations(listing_id)
         self._add_task(listing_id, "Seller Intake Agent", "intake_validation", "Review mandatory fields before publish", priority="high")
         self._add_audit(listing_id, "manager", self._manager.full_name, "listing_created", {"summary": f"Created {request.title}"})
+        if request.publish_immediately and self._has_public_listing_fields(listing):
+            self._mark_listing_public(listing_id, action="listing_created_and_published")
+            self._add_task(listing_id, "Publishing Agent", "publish", "Listing is live on manager, broker, and buyer property surfaces", priority="high")
+        await self._save_listing(listing_id)
+        if self._listings[listing_id].get("public_visibility"):
+            await self._sync_public_property(listing_id)
         return self._listing_detail(listing_id)
 
     def _add_task(self, listing_id: str, agent_name: str, task_type: str, description: str, priority: str = "medium") -> None:
@@ -755,6 +1056,9 @@ class ManagerPortalService:
         }
         result = await graph.ainvoke(state)
         self._apply_automation_result(listing_id, result)
+        await self._save_listing(listing_id)
+        if self._listings[listing_id].get("public_visibility"):
+            await self._sync_public_property(listing_id)
         return {"listing": self._listing_detail(listing_id).model_dump(mode="json"), "automation_state": result}
 
     async def run_full_automation(self, request: ManagerAutomationRunRequest) -> dict[str, Any]:
@@ -810,24 +1114,13 @@ class ManagerPortalService:
         missing = self._missing_fields(listing)
         if missing:
             raise HTTPException(status_code=422, detail={"missing_items": missing})
-        listing["status"] = "published"
-        listing["public_visibility"] = True
-        listing["published_at"] = _utc_now()
-        listing["updated_at"] = _utc_now()
-        listing["readiness_score"] = max(float(listing.get("readiness_score", 0)), 88)
-        listing["pricing_json"] = listing.get("pricing_json") or {
-            "recommended_price": listing.get("recommended_price"),
-            "minimum_acceptable_price": listing.get("min_acceptable_price"),
-            "optimistic_price": listing.get("optimistic_price"),
-            "fast_sale_price": listing.get("fast_sale_price"),
-            "price_per_sqft": listing.get("price_per_sqft"),
-            "confidence_score": 74,
-        }
+        self._mark_listing_public(listing_id, action="listing_published")
         content = " ".join(filter(None, [listing.get("title"), listing.get("locality"), listing.get("description_short"), listing.get("description_long")]))
         vector = await self.embedder.embed(content)
         listing["embedding"] = vector[:1536]
-        self._add_audit(listing_id, "manager", self._manager.full_name, "listing_published", {"summary": f"Published {listing['title']}"})
         self._add_task(listing_id, "Publishing Agent", "publish", "Verify public listing surfaces and WhatsApp/call routing", priority="high")
+        await self._save_listing(listing_id)
+        await self._sync_public_property(listing_id)
         return ManagerPublishResponse(published=True, missing_items=[], listing=self._listing_detail(listing_id), audit_log=[ListingAuditLog(**item) for item in self._audit.get(listing_id, [])][-6:])
 
     async def upload_documents(self, listing_id: str, files: list[Any], document_type: str) -> dict[str, Any]:

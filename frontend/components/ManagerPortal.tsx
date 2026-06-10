@@ -139,6 +139,8 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
   const [automationRules, setAutomationRules] = useState<ManagerAutomationRule[]>([]);
   const [detailTab, setDetailTab] = useState<(typeof detailTabs)[number]>("overview");
   const [busy, setBusy] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<ListingDraft>({
     title: "",
@@ -200,11 +202,16 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
 
   useEffect(() => {
     if (view !== "detail" || !listingId) return;
+    setListing(null);
+    setDetailError(null);
     getManagerListing(listingId).then((item) => {
       setListing(item);
       setDetailTab("overview");
       setAutomationRules((item.automation_rules as ManagerAutomationRule[] | undefined) || []);
-    }).catch(console.error);
+    }).catch((error) => {
+      console.error(error);
+      setDetailError(error instanceof Error ? error.message : "Listing not found");
+    });
   }, [view, listingId]);
 
   const currentDashboard = dashboard || {
@@ -224,12 +231,14 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
     return listings.filter((item) => [item.title, item.locality, item.address, item.status, item.seo_title].filter(Boolean).some((value) => String(value).toLowerCase().includes(lower)));
   }, [listings, search]);
 
-  const activeListing = listing || filteredListings[0] || DEMO_MANAGER_LISTINGS[0];
+  const activeListing = view === "detail" ? listing : (listing || filteredListings[0] || DEMO_MANAGER_LISTINGS[0]);
   async function onCreateListing(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy("create");
+    setFormError(null);
     try {
       const created = await createManagerListing({
+        publish_immediately: true,
         title: draft.title,
         property_type: draft.property_type,
         transaction_type: draft.transaction_type,
@@ -253,6 +262,9 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
         notes: draft.notes,
       });
       router.push(`/manager/listings/${created.id}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not create listing";
+      setFormError(message);
     } finally {
       setBusy(null);
     }
@@ -353,8 +365,9 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
 
           {view === "dashboard" && <DashboardView dashboard={currentDashboard} listings={currentDashboard.listings} mapPins={currentDashboard.map_pins} onFocus={(id) => router.push(`/manager/listings/${id}`)} />}
           {view === "listings" && <ListingsView listings={filteredListings} search={search} setSearch={setSearch} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
-          {view === "new" && <NewListingView draft={draft} setDraft={setDraft} onSubmit={onCreateListing} busy={busy === "create"} />}
+          {view === "new" && <NewListingView draft={draft} setDraft={setDraft} onSubmit={onCreateListing} busy={busy === "create"} error={formError} />}
           {view === "detail" && activeListing && <ListingDetailView listing={activeListing} tab={detailTab} setTab={setDetailTab} onPublish={onPublish} onRunAutomation={onRunAutomation} onRunAgents={onRunListingAgents} onRefetch={async () => setListing(await getManagerListing(activeListing.id))} />}
+          {view === "detail" && !activeListing && <DetailPlaceholder listingId={listingId || ""} error={detailError} />}
           {view === "leads" && <LeadsView leads={leads.length ? leads : (currentDashboard.listings.flatMap((item) => item.leads || []) as ManagerLead[])} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
           {view === "automation" && <AutomationView rules={automationRules.length ? automationRules : (currentDashboard.listings[0]?.automation_rules as ManagerAutomationRule[] | undefined) || []} />}
           {view === "market" && <MarketView market={market} listings={listings.length ? listings : currentDashboard.listings} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
@@ -457,7 +470,7 @@ function ListingsView({ listings, search, setSearch, onOpen }: { listings: Manag
   );
 }
 
-function NewListingView({ draft, setDraft, onSubmit, busy }: { draft: ListingDraft; setDraft: React.Dispatch<React.SetStateAction<ListingDraft>>; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; busy: boolean }) {
+function NewListingView({ draft, setDraft, onSubmit, busy, error }: { draft: ListingDraft; setDraft: React.Dispatch<React.SetStateAction<ListingDraft>>; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; busy: boolean; error?: string | null }) {
   function update(field: string, value: string | number) {
     setDraft({ ...draft, [field]: value });
   }
@@ -529,6 +542,11 @@ function NewListingView({ draft, setDraft, onSubmit, busy }: { draft: ListingDra
           </div>
         </div>
       </Panel>
+      {error ? (
+        <div className="rounded-[22px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-800">
+          {error}
+        </div>
+      ) : null}
       <div className="flex justify-end">
         <button disabled={busy} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 disabled:opacity-60">
           <Plus size={16} />
@@ -536,6 +554,16 @@ function NewListingView({ draft, setDraft, onSubmit, busy }: { draft: ListingDra
         </button>
       </div>
     </form>
+  );
+}
+
+function DetailPlaceholder({ listingId, error }: { listingId: string; error?: string | null }) {
+  return (
+    <Panel title={error ? "Listing not found" : "Loading listing"} eyebrow="Database listing">
+      <div className={clsx("rounded-[22px] border px-4 py-4 text-sm font-semibold", error ? "border-red-200 bg-red-50 text-red-800" : "border-slate-200 bg-slate-50 text-slate-600")}>
+        {error ? `Could not load ${listingId}: ${error}` : `Fetching ${listingId} from the backend database.`}
+      </div>
+    </Panel>
   );
 }
 
