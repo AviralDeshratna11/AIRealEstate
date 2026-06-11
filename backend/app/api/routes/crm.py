@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends
 
 from app.crm_models import (
     CRMAccountCreate,
@@ -13,9 +13,10 @@ from app.crm_models import (
     CRMOpportunityCreate,
     OpportunityStageUpdateSchema,
 )
+from app.auth.dependencies import require_any_role
 from app.services.crm_erp import crm_erp_service
 
-router = APIRouter(tags=["crm"])
+router = APIRouter(tags=["crm"], dependencies=[Depends(require_any_role("crm_user", "manager"))])
 
 
 @router.get("/api/crm/dashboard")

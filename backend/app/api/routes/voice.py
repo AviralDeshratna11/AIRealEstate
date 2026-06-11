@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
+from app.auth.dependencies import require_any_role
 from app.services.elevenlabs_service import elevenlabs_calling_service
 from app.voice_models import BrokerBuyerCallRequest, ManualLeadCallRequest, VoiceInterestCallRequest, VoiceToolRequest
 
@@ -9,27 +10,27 @@ router = APIRouter(tags=["voice"])
 
 
 @router.get("/api/voice/elevenlabs/config")
-async def get_elevenlabs_config():
+async def get_elevenlabs_config(_=Depends(require_any_role("manager", "crm_user", "admin"))):
     return elevenlabs_calling_service.config().model_dump(mode="json")
 
 
 @router.get("/api/voice/elevenlabs/analytics")
-async def get_voice_analytics():
+async def get_voice_analytics(_=Depends(require_any_role("manager", "crm_user", "admin"))):
     return await elevenlabs_calling_service.analytics()
 
 
 @router.post("/api/voice/elevenlabs/trigger-interest-call")
-async def trigger_interest_call(request: VoiceInterestCallRequest):
+async def trigger_interest_call(request: VoiceInterestCallRequest, _=Depends(require_any_role("manager", "broker", "crm_user", "admin"))):
     return (await elevenlabs_calling_service.trigger_interest_call(request)).model_dump(mode="json")
 
 
 @router.post("/api/crm/leads/{lead_id}/call")
-async def call_crm_lead(lead_id: str, request: ManualLeadCallRequest):
+async def call_crm_lead(lead_id: str, request: ManualLeadCallRequest, _=Depends(require_any_role("manager", "crm_user", "admin"))):
     return (await elevenlabs_calling_service.manual_lead_call(lead_id, request)).model_dump(mode="json")
 
 
 @router.post("/api/broker/buyers/{buyer_id}/call")
-async def call_broker_buyer(buyer_id: str, request: BrokerBuyerCallRequest):
+async def call_broker_buyer(buyer_id: str, request: BrokerBuyerCallRequest, _=Depends(require_any_role("broker", "manager", "admin"))):
     return (await elevenlabs_calling_service.broker_buyer_call(buyer_id, request)).model_dump(mode="json")
 
 
@@ -39,7 +40,7 @@ async def elevenlabs_webhook(request: Request):
 
 
 @router.get("/api/voice/calls/{call_id}")
-async def get_voice_call(call_id: str):
+async def get_voice_call(call_id: str, _=Depends(require_any_role("manager", "broker", "crm_user", "admin"))):
     return (await elevenlabs_calling_service.get_call(call_id)).model_dump(mode="json")
 
 

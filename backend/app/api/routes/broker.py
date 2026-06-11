@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends
 
+from app.auth.dependencies import require_any_role
 from app.broker_models import (
     BrokerAutomationRunRequest,
     BrokerBuyerCreate,
@@ -13,7 +14,7 @@ from app.broker_models import (
 )
 from app.services.broker_portal import broker_portal_service
 
-router = APIRouter(tags=["broker"])
+router = APIRouter(tags=["broker"], dependencies=[Depends(require_any_role("broker", "manager"))])
 
 
 @router.get("/api/broker/dashboard")

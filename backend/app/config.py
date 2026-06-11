@@ -12,6 +12,15 @@ class Settings(BaseSettings):
 
     environment: str = "local"
     database_url: str | None = None
+    app_env: str = "development"
+
+    supabase_url: str | None = None
+    supabase_anon_key: str | None = None
+    supabase_service_role_key: str | None = None
+    supabase_jwt_secret: str | None = None
+    auth_provider: str = "supabase"
+    auth_mock_mode: bool = False
+    backend_cors_origins: str | None = None
 
     openai_api_key: str | None = None
     openai_model: str = "gpt-4.1-mini"
@@ -55,7 +64,8 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> List[str]:
-        return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
+        origins = self.backend_cors_origins or self.allowed_origins
+        return [origin.strip() for origin in origins.split(",") if origin.strip()]
 
     @property
     def has_openai(self) -> bool:

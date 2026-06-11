@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from app.auth.dependencies import require_any_role
 from app.manager_models import (
     ManagerAgentRunRequest,
     ManagerAutomationRunRequest,
@@ -9,7 +10,7 @@ from app.manager_models import (
 )
 from app.services.manager_portal import manager_portal_service
 
-router = APIRouter(prefix="/api/manager", tags=["manager"])
+router = APIRouter(prefix="/api/manager", tags=["manager"], dependencies=[Depends(require_any_role("manager"))])
 
 
 @router.get("/dashboard")

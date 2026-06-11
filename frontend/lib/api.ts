@@ -1,4 +1,5 @@
 import { DEMO_MARKET_INSIGHTS, DEMO_PROPERTIES, searchDemoProperties } from "@/lib/demo";
+import { apiFetch } from "@/lib/api/client";
 import {
   DEMO_MANAGER_AUDIT_LOG,
   DEMO_MANAGER_AUTOMATION_RULES,
@@ -311,6 +312,39 @@ export type ManagerAutomationRule = {
   agent_name: string;
   logs: string[];
   failure_state?: string | null;
+};
+
+export type ManagerMarketResponse = {
+  insights?: {
+    inventory_by_price_bucket?: Array<{
+      cost_range: string;
+      annual_sales_units: number;
+      unsold_units: number;
+      months_inventory: number;
+    }>;
+  };
+};
+
+export type ManagerAuditEntry = {
+  id: string;
+  created_at: string;
+  actor_type: string;
+  actor_name: string;
+  action: string;
+  details: string;
+  tone?: string;
+};
+
+export type ManagerAutomationResponse = {
+  listing?: ManagerListing;
+  automation_state?: Record<string, unknown>;
+};
+
+export type ManagerPublishResponse = {
+  published?: boolean;
+  missing_items?: string[];
+  listing: ManagerListing;
+  audit_log?: Array<Record<string, unknown>>;
 };
 
 export type BrokerProfile = {
@@ -975,9 +1009,7 @@ export function formatCr(value?: number | null) {
 
 export async function getManagerDashboard(): Promise<ManagerDashboard> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/dashboard`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager dashboard failed");
-    return res.json();
+    return await apiFetch<ManagerDashboard>("/api/manager/dashboard");
   } catch (error) {
     console.warn("Using demo manager dashboard.", error);
     return DEMO_MANAGER_DASHBOARD as ManagerDashboard;
@@ -986,9 +1018,7 @@ export async function getManagerDashboard(): Promise<ManagerDashboard> {
 
 export async function getManagerListings(): Promise<ManagerListing[]> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/listings`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager listings failed");
-    return res.json();
+    return await apiFetch<ManagerListing[]>("/api/manager/listings");
   } catch (error) {
     console.warn("Using demo manager listings.", error);
     return DEMO_MANAGER_LISTINGS as ManagerListing[];
@@ -997,9 +1027,7 @@ export async function getManagerListings(): Promise<ManagerListing[]> {
 
 export async function getManagerListing(listingId: string): Promise<ManagerListing> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/listings/${listingId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager listing failed");
-    return res.json();
+    return await apiFetch<ManagerListing>(`/api/manager/listings/${listingId}`);
   } catch (error) {
     const demo = DEMO_MANAGER_LISTINGS.find((item) => item.id === listingId);
     if (demo) {
@@ -1035,27 +1063,18 @@ export async function createManagerListing(input: {
   owner_email?: string | null;
   notes?: string | null;
 }): Promise<ManagerListing> {
-  const res = await fetch(`${API_URL}/api/manager/listings`, {
+  return apiFetch<ManagerListing>("/api/manager/listings", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(detail || "Create manager listing failed");
-  }
-  return res.json();
 }
 
-export async function runManagerListingAgents(listingId: string, input?: { manager_id?: string; user_request?: string; auto_publish?: boolean; current_task?: string }) {
+export async function runManagerListingAgents(listingId: string, input?: { manager_id?: string; user_request?: string; auto_publish?: boolean; current_task?: string }): Promise<ManagerAutomationResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/listings/${listingId}/agent-run`, {
+    return await apiFetch<ManagerAutomationResponse>(`/api/manager/listings/${listingId}/agent-run`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ manager_id: input?.manager_id || "manager-demo-1", user_request: input?.user_request || "Run seller automation", auto_publish: input?.auto_publish || false, current_task: input?.current_task || "seller_automation" }),
     });
-    if (!res.ok) throw new Error("Manager agent run failed");
-    return res.json();
   } catch (error) {
     console.warn("Using demo manager automation response.", error);
     const listing = DEMO_MANAGER_LISTINGS.find((item) => item.id === listingId) || DEMO_MANAGER_LISTINGS[0];
@@ -1063,11 +1082,9 @@ export async function runManagerListingAgents(listingId: string, input?: { manag
   }
 }
 
-export async function publishManagerListing(listingId: string) {
+export async function publishManagerListing(listingId: string): Promise<ManagerPublishResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/listings/${listingId}/publish`, { method: "POST" });
-    if (!res.ok) throw new Error("Publish listing failed");
-    return res.json();
+    return await apiFetch<ManagerPublishResponse>(`/api/manager/listings/${listingId}/publish`, { method: "POST" });
   } catch (error) {
     console.warn("Using demo publish response.", error);
     const listing = DEMO_MANAGER_LISTINGS.find((item) => item.id === listingId) || DEMO_MANAGER_LISTINGS[0];
@@ -1080,9 +1097,7 @@ export async function uploadManagerDocuments(listingId: string, files: File[], d
     const form = new FormData();
     files.forEach((file) => form.append("files", file));
     form.append("document_type", document_type);
-    const res = await fetch(`${API_URL}/api/manager/listings/${listingId}/documents`, { method: "POST", body: form });
-    if (!res.ok) throw new Error("Manager document upload failed");
-    return res.json();
+    return await apiFetch(`/api/manager/listings/${listingId}/documents`, { method: "POST", body: form });
   } catch (error) {
     console.warn("Using demo manager document upload.", error);
     return { listing_id: listingId, documents: files.map((file) => ({ file_name: file.name, document_type, extraction_status: "extracted" })), audit_log: DEMO_MANAGER_AUDIT_LOG.slice(0, 2) };
@@ -1094,9 +1109,7 @@ export async function uploadManagerMedia(listingId: string, files: File[], media
     const form = new FormData();
     files.forEach((file) => form.append("files", file));
     form.append("media_type", media_type);
-    const res = await fetch(`${API_URL}/api/manager/listings/${listingId}/media`, { method: "POST", body: form });
-    if (!res.ok) throw new Error("Manager media upload failed");
-    return res.json();
+    return await apiFetch(`/api/manager/listings/${listingId}/media`, { method: "POST", body: form });
   } catch (error) {
     console.warn("Using demo manager media upload.", error);
     return { listing_id: listingId, media: files.map((file, index) => ({ file_name: file.name, media_type, is_hero: index === 0 })), audit_log: DEMO_MANAGER_AUDIT_LOG.slice(0, 2) };
@@ -1105,9 +1118,7 @@ export async function uploadManagerMedia(listingId: string, files: File[], media
 
 export async function getManagerLeads(): Promise<ManagerLead[]> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/leads`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager leads failed");
-    return res.json();
+    return await apiFetch<ManagerLead[]>("/api/manager/leads");
   } catch (error) {
     console.warn("Using demo manager leads.", error);
     return DEMO_MANAGER_LEADS;
@@ -1116,9 +1127,7 @@ export async function getManagerLeads(): Promise<ManagerLead[]> {
 
 export async function getManagerLead(leadId: string): Promise<ManagerLead> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/leads/${leadId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager lead failed");
-    return res.json();
+    return await apiFetch<ManagerLead>(`/api/manager/leads/${leadId}`);
   } catch (error) {
     console.warn("Using demo manager lead.", error);
     return DEMO_MANAGER_LEADS.find((lead) => lead.id === leadId) || DEMO_MANAGER_LEADS[0];
@@ -1127,46 +1136,37 @@ export async function getManagerLead(leadId: string): Promise<ManagerLead> {
 
 export async function getManagerTasks(): Promise<ManagerTask[]> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/tasks`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager tasks failed");
-    return res.json();
+    return await apiFetch<ManagerTask[]>("/api/manager/tasks");
   } catch (error) {
     console.warn("Using demo manager tasks.", error);
     return DEMO_MANAGER_TASKS;
   }
 }
 
-export async function runManagerAutomation(input: { listing_id: string; manager_id?: string; auto_publish?: boolean; current_task?: string }) {
+export async function runManagerAutomation(input: { listing_id: string; manager_id?: string; auto_publish?: boolean; current_task?: string }): Promise<ManagerAutomationResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/automation/run`, {
+    return await apiFetch<ManagerAutomationResponse>("/api/manager/automation/run", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ manager_id: input.manager_id || "manager-demo-1", listing_id: input.listing_id, auto_publish: input.auto_publish || false, current_task: input.current_task || "seller_automation" }),
     });
-    if (!res.ok) throw new Error("Manager automation failed");
-    return res.json();
   } catch (error) {
     console.warn("Using demo manager automation run.", error);
     return { listing: DEMO_MANAGER_LISTINGS[0], automation_state: { published: false, readiness_score: 74, next_action: "Needs review" } };
   }
 }
 
-export async function getManagerMarket() {
+export async function getManagerMarket(): Promise<ManagerMarketResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/market/mumbai`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager market failed");
-    return res.json();
+    return await apiFetch<ManagerMarketResponse>("/api/manager/market/mumbai");
   } catch (error) {
     console.warn("Using demo manager market.", error);
     return DEMO_MANAGER_MARKET;
   }
 }
 
-export async function getManagerAuditLog() {
+export async function getManagerAuditLog(): Promise<ManagerAuditEntry[]> {
   try {
-    const res = await fetch(`${API_URL}/api/manager/audit-log`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Manager audit log failed");
-    return res.json();
+    return await apiFetch<ManagerAuditEntry[]>("/api/manager/audit-log");
   } catch (error) {
     console.warn("Using demo manager audit log.", error);
     return DEMO_MANAGER_AUDIT_LOG;

@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import assistant, agents, bookings, broker, crm, documents, finance, manager, market, negotiation, properties, tour, vapi, voice, whatsapp
 from app.config import get_settings
 from app.db.session import close_pool
+from app.routers import auth
 
 settings = get_settings()
 
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(properties.router)
+app.include_router(auth.router)
 app.include_router(assistant.router)
 app.include_router(bookings.router)
 app.include_router(agents.router)

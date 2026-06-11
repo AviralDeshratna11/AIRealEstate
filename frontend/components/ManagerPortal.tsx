@@ -271,9 +271,9 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
   }
 
   async function onRunAutomation() {
-    if (!listingId && !activeListing?.id) return;
+    const id = listingId ?? activeListing?.id;
+    if (!id) return;
     setBusy("automation");
-    const id = listingId || activeListing.id;
     const result = await runManagerAutomation({ listing_id: id, auto_publish: true, current_task: "manager_full_automation" });
     if (result?.listing) setListing(result.listing);
     const refreshed = await getManagerDashboard().catch(() => null);

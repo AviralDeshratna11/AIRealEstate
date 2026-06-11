@@ -937,3 +937,168 @@ create table if not exists voice_agent_tool_calls (
   error_message text,
   created_at timestamptz not null default now()
 );
+
+-- ============================================================
+-- ASTRA Auth System
+-- ============================================================
+
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'astra_user_role') then
+    create type astra_user_role as enum ('buyer', 'manager', 'broker', 'crm_user', 'admin');
+  end if;
+end $$;
+
+create table if not exists organizations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  organization_type text check (organization_type in ('brokerage','builder','property_manager','agency','admin')),
+  owner_user_id uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists app_users (
+  id uuid primary key default gen_random_uuid(),
+  auth_user_id uuid unique not null,
+  email text unique not null,
+  full_name text,
+  avatar_url text,
+  phone text,
+  primary_role text not null default 'buyer' check (primary_role in ('buyer','manager','broker','crm_user','admin')),
+  onboarding_completed boolean not null default false,
+  organization_id uuid references organizations(id) on delete set null,
+  status text not null default 'active',
+  whatsapp_consent boolean not null default false,
+  call_consent boolean not null default false,
+  email_marketing_consent boolean not null default false,
+  preferred_contact_channel text,
+  preferred_language text not null default 'English',
+  do_not_call boolean not null default false,
+  do_not_message boolean not null default false,
+  last_login_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'organizations_owner_user_fk') then
+    alter table organizations
+      add constraint organizations_owner_user_fk foreign key (owner_user_id) references app_users(id) on delete set null;
+  end if;
+end $$;
+
+create table if not exists user_roles (
+  id uuid primary key default gen_random_uuid(),
+  app_user_id uuid not null references app_users(id) on delete cascade,
+  role text not null check (role in ('buyer','manager','broker','crm_user','admin')),
+  scope text,
+  organization_id uuid references organizations(id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (app_user_id, role, organization_id, scope)
+);
+
+create table if not exists auth_audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  app_user_id uuid references app_users(id) on delete set null,
+  event_type text check (event_type in ('signup','login','logout','failed_login','role_selected','onboarding_completed','password_reset_requested','password_reset_completed','unauthorized_access')),
+  ip_address text,
+  user_agent text,
+  details_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists user_sessions (
+  id uuid primary key default gen_random_uuid(),
+  app_user_id uuid references app_users(id) on delete cascade,
+  session_id text,
+  provider text,
+  device_info jsonb not null default '{}'::jsonb,
+  last_seen_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists buyer_profiles (
+  id uuid primary key default gen_random_uuid(),
+  app_user_id uuid unique references app_users(id) on delete cascade,
+  full_name text not null,
+  phone text,
+  email text not null,
+  preferences jsonb not null default '{}'::jsonb,
+  budget text,
+  localities text[] not null default '{}',
+  whatsapp_consent boolean not null default false,
+  call_consent boolean not null default false,
+  email_marketing_consent boolean not null default false,
+  preferred_contact_channel text,
+  preferred_language text not null default 'English',
+  do_not_call boolean not null default false,
+  do_not_message boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table manager_profiles add column if not exists app_user_id uuid unique references app_users(id) on delete set null;
+alter table manager_profiles add column if not exists organization_id uuid references organizations(id) on delete set null;
+alter table manager_profiles add column if not exists whatsapp_consent boolean not null default false;
+alter table manager_profiles add column if not exists call_consent boolean not null default false;
+alter table manager_profiles add column if not exists email_marketing_consent boolean not null default false;
+alter table manager_profiles add column if not exists preferred_contact_channel text;
+alter table manager_profiles add column if not exists preferred_language text not null default 'English';
+alter table manager_profiles add column if not exists do_not_call boolean not null default false;
+alter table manager_profiles add column if not exists do_not_message boolean not null default false;
+
+alter table broker_profiles add column if not exists app_user_id uuid unique references app_users(id) on delete set null;
+alter table broker_profiles add column if not exists whatsapp_consent boolean not null default false;
+alter table broker_profiles add column if not exists call_consent boolean not null default false;
+alter table broker_profiles add column if not exists email_marketing_consent boolean not null default false;
+alter table broker_profiles add column if not exists preferred_contact_channel text;
+alter table broker_profiles add column if not exists preferred_language text not null default 'English';
+alter table broker_profiles add column if not exists do_not_call boolean not null default false;
+alter table broker_profiles add column if not exists do_not_message boolean not null default false;
+
+create index if not exists app_users_auth_user_id_idx on app_users(auth_user_id);
+create index if not exists app_users_primary_role_idx on app_users(primary_role);
+create index if not exists user_roles_app_user_idx on user_roles(app_user_id);
+create index if not exists auth_audit_logs_user_idx on auth_audit_logs(app_user_id, created_at desc);
+
+alter table app_users enable row level security;
+alter table user_roles enable row level security;
+alter table organizations enable row level security;
+alter table auth_audit_logs enable row level security;
+alter table buyer_profiles enable row level security;
+alter table manager_profiles enable row level security;
+alter table broker_profiles enable row level security;
+
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'app_users' and policyname = 'app_users_read_own') then
+    create policy app_users_read_own on app_users
+      for select using (auth.uid() = auth_user_id);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'app_users' and policyname = 'app_users_update_own_limited') then
+    create policy app_users_update_own_limited on app_users
+      for update using (auth.uid() = auth_user_id)
+      with check (auth.uid() = auth_user_id and primary_role <> 'admin');
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'user_roles' and policyname = 'user_roles_read_own') then
+    create policy user_roles_read_own on user_roles
+      for select using (app_user_id in (select id from app_users where auth_user_id = auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'buyer_profiles' and policyname = 'buyer_profiles_owner') then
+    create policy buyer_profiles_owner on buyer_profiles
+      for all using (app_user_id in (select id from app_users where auth_user_id = auth.uid()))
+      with check (app_user_id in (select id from app_users where auth_user_id = auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'manager_profiles' and policyname = 'manager_profiles_owner') then
+    create policy manager_profiles_owner on manager_profiles
+      for all using (app_user_id in (select id from app_users where auth_user_id = auth.uid()))
+      with check (app_user_id in (select id from app_users where auth_user_id = auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'broker_profiles' and policyname = 'broker_profiles_owner') then
+    create policy broker_profiles_owner on broker_profiles
+      for all using (app_user_id in (select id from app_users where auth_user_id = auth.uid()))
+      with check (app_user_id in (select id from app_users where auth_user_id = auth.uid()));
+  end if;
+end $$;
