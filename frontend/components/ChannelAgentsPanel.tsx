@@ -92,39 +92,39 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
 
   return (
     <section className="grid gap-5 xl:grid-cols-3">
-      <div className="glass rounded-lg p-5 shadow-soft">
-        <p className="section-kicker flex items-center gap-2">
+      <div className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
           <MessageCircle size={16} />
           WhatsApp assistant
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Lead qualification and auto-reply</h2>
-        <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
+        <h2 className="mt-2 lx-display text-3xl font-light leading-none text-ink">Lead qualification and auto-reply</h2>
+        <p className="mt-2 text-sm font-medium leading-6 text-ink/65">
           This sends a real outbound WhatsApp reply through Twilio from the site after lead qualification.
         </p>
         <input
           value={whatsAppTo}
           onChange={(event) => setWhatsAppTo(event.target.value)}
           placeholder="+918209979629"
-          className="mt-4 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+          className="mt-4 w-full rounded-[3px] border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
         />
         <textarea
           value={leadMessage}
           onChange={(event) => setLeadMessage(event.target.value)}
-          className="mt-3 min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+          className="mt-3 min-h-32 w-full rounded-[3px] border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
         />
-        <button onClick={runWhatsApp} disabled={whatsAppSending} className="mt-3 w-full rounded-md bg-coral px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50">
+        <button onClick={runWhatsApp} disabled={whatsAppSending} className="mt-3 w-full rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32] disabled:opacity-50">
           Send WhatsApp reply
         </button>
         {whatsapp && (
-          <div className="mt-4 rounded-md border border-peacock/20 bg-[#eef8f6] p-4 text-sm font-semibold leading-6 text-peacock">
-            <p className="font-black">Assistant response</p>
+          <div className="mt-4 rounded-[3px] border border-gold/45 bg-gold/10 p-4 text-sm font-semibold leading-6 text-[#8f6d32]">
+            <p className="font-semibold">Assistant response</p>
             <p className="mt-2">Lead score {whatsapp.lead_score}/100 - {whatsapp.intent}</p>
             <p className="mt-2">{whatsapp.suggested_reply}</p>
           </div>
         )}
         {whatsappSend && (
-          <div className={`mt-4 rounded-md border p-4 text-sm font-semibold leading-6 ${whatsappSend.sent ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
-            <p className="font-black">Delivery status</p>
+          <div className={`mt-4 rounded-[3px] border p-4 text-sm font-semibold leading-6 ${whatsappSend.sent ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
+            <p className="font-semibold">Delivery status</p>
             <p className="mt-2">{whatsappSend.sent ? "Sent" : "Not sent"} | {whatsappSend.status || "unknown"}</p>
             <p className="mt-2">To: {whatsappSend.to}</p>
             {whatsappSend.sid ? <p className="mt-1">SID: {whatsappSend.sid}</p> : null}
@@ -135,47 +135,47 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         )}
       </div>
 
-      <div className="glass rounded-lg p-5 shadow-soft">
-        <p className="section-kicker flex items-center gap-2">
+      <div className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
           <PhoneCall size={16} />
           Call agent
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Voice triage and handoff</h2>
-        <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
+        <h2 className="mt-2 lx-display text-3xl font-light leading-none text-ink">Voice triage and handoff</h2>
+        <p className="mt-2 text-sm font-medium leading-6 text-ink/65">
           ElevenLabs is now the primary provider. Mock mode records the call, transcript, CRM activity, and follow-up without spending credits.
         </p>
         <input
           value={callPhone}
           onChange={(event) => setCallPhone(event.target.value)}
-          className="mt-4 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-3 text-sm font-medium text-ink outline-none focus:border-coral"
+          className="mt-4 w-full rounded-[3px] border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
           placeholder="+91 buyer phone"
         />
-        <label className="mt-3 flex items-start gap-2 text-sm font-bold text-ink/66"><input type="checkbox" checked={callConsent} onChange={(event) => setCallConsent(event.target.checked)} className="mt-1" />Buyer consent confirmed for ASTRA AI call.</label>
-        <button onClick={runCall} disabled={callBusy || !focused} className="mt-3 w-full rounded-md bg-ink px-4 py-3 text-sm font-black text-[#fffaf0] shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50">
+        <label className="mt-3 flex items-start gap-2 text-sm font-bold text-ink/65"><input type="checkbox" checked={callConsent} onChange={(event) => setCallConsent(event.target.checked)} className="mt-1" />Buyer consent confirmed for ASTRA AI call.</label>
+        <button onClick={runCall} disabled={callBusy || !focused} className="mt-3 w-full rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#2b251f] disabled:opacity-50">
           {callBusy ? "Starting call..." : "Trigger ElevenLabs call"}
         </button>
         {callResult && (
-          <div className={`mt-4 rounded-md border p-4 text-sm font-medium leading-6 ${
+          <div className={`mt-4 rounded-[3px] border p-4 text-sm font-medium leading-6 ${
             callResult.call_status === "calling" || callResult.call_status === "completed"
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
               : callResult.call_status === "failed" || callResult.call_status === "blocked"
                 ? "border-red-200 bg-red-50 text-red-900"
-                : "border-ink/12 bg-white/62 text-ink/62"
+                : "border-ink/12 bg-ivory text-ink/65"
           }`}>
-            <p className="font-black text-ink">{callResult.provider} · {callResult.call_status} · {callResult.mode}</p>
+            <p className="font-semibold text-ink">{callResult.provider} · {callResult.call_status} · {callResult.mode}</p>
             <p className="mt-2">{callResult.reason}</p>
-            {callResult.call_id ? <p className="mt-2 text-xs font-black">Call ID: {callResult.call_id}</p> : null}
+            {callResult.call_id ? <p className="mt-2 text-xs font-semibold">Call ID: {callResult.call_id}</p> : null}
           </div>
         )}
       </div>
 
-      <div className="glass rounded-lg p-5 shadow-soft">
-        <p className="section-kicker flex items-center gap-2">
+      <div className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
           <CalendarCheck size={16} />
           Booking page
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black leading-none text-ink">Viewing slots and booking</h2>
-        <p className="mt-2 text-sm font-medium leading-6 text-ink/60">
+        <h2 className="mt-2 lx-display text-3xl font-light leading-none text-ink">Viewing slots and booking</h2>
+        <p className="mt-2 text-sm font-medium leading-6 text-ink/65">
           Slot suggestions are shown here now. Add Cal.com keys to turn this into live availability lookup and booking creation.
         </p>
         <div className="mt-4 grid gap-2">
@@ -183,20 +183,20 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
             <button
               key={slot.time}
               onClick={() => setSelectedSlot(slot.time)}
-              className={`rounded-md border px-3 py-2 text-left text-sm font-bold ${
-                selectedSlot === slot.time ? "border-ink bg-ink text-[#fffaf0]" : "border-ink/15 bg-white/62 text-ink/66"
+              className={`rounded-[3px] border px-3 py-2 text-left text-sm font-bold ${
+                selectedSlot === slot.time ? "border-ink bg-ink text-ivory" : "border-ink/15 bg-ivory text-ink/65"
               }`}
             >
               {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(slot.time))}
             </button>
           ))}
         </div>
-        <button onClick={bookSlot} disabled={!selectedSlot} className="mt-3 w-full rounded-md bg-peacock px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-50">
+        <button onClick={bookSlot} disabled={!selectedSlot} className="mt-3 w-full rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32] disabled:opacity-50">
           Book viewing
         </button>
         {booking && (
-          <div className="mt-4 rounded-md border border-peacock/20 bg-[#eef8f6] p-4 text-sm font-semibold leading-6 text-peacock">
-            <p className="font-black">Booking confirmed</p>
+          <div className="mt-4 rounded-[3px] border border-gold/45 bg-gold/10 p-4 text-sm font-semibold leading-6 text-[#8f6d32]">
+            <p className="font-semibold">Booking confirmed</p>
             <p>{booking.booking?.title}</p>
           </div>
         )}

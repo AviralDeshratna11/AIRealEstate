@@ -13,14 +13,17 @@ export function AgentSwarmPanel() {
   ];
 
   return (
-    <section className="glass rounded-lg p-5 shadow-soft">
-      <p className="section-kicker">Agent swarm</p>
-      <h2 className="mb-4 font-display text-3xl font-black leading-none text-ink">Automation agents for Mumbai launch</h2>
+    <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+      <div className="flex items-center gap-2">
+        <span className="h-px w-10 bg-gold" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Agent swarm</p>
+      </div>
+      <h2 className="lx-display mb-4 mt-1 text-3xl font-light leading-none text-ink">Automation agents for Mumbai launch</h2>
       <div className="grid gap-3 md:grid-cols-2">
         {agents.map(([name, desc], index) => (
-          <div key={name} className="mapline rounded-md border border-ink/12 bg-white/62 p-4 pl-6">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-coral">Agent {String(index + 1).padStart(2, "0")}</p>
-            <p className="mt-1 font-black text-ink">{name}</p>
+          <div key={name} className="mapline rounded-[3px] border border-ink/12 bg-ivory p-4 pl-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold">Agent {String(index + 1).padStart(2, "0")}</p>
+            <p className="mt-1 font-semibold text-ink">{name}</p>
             <p className="mt-1 text-sm font-medium leading-5 text-ink/55">{desc}</p>
           </div>
         ))}

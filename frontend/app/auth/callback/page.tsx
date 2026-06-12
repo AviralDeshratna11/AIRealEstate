@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { setBrowserAuthCookies } from "@/lib/auth/mock";
 import { dashboardForRole } from "@/lib/auth/roles";
+import { syncBrowserAuthFromBackend } from "@/lib/auth/session";
 
 function safeNext(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/auth/onboarding";
@@ -19,7 +20,10 @@ export default function AuthCallbackPage() {
       if (code) {
         const { error } = (await supabaseBrowser?.auth.exchangeCodeForSession(code)) ?? {};
         if (error) {
-          window.location.replace(`/login?error=${encodeURIComponent(error.message)}`);
+          const message = error.message.toLowerCase().includes("pkce")
+            ? "That sign-in link was stale. Please start sign in again from this browser."
+            : error.message;
+          window.location.replace(`/login?error=${encodeURIComponent(message)}`);
           return;
         }
       }
@@ -32,8 +36,10 @@ export default function AuthCallbackPage() {
       }
 
       const role = user.user_metadata?.role;
-      setBrowserAuthCookies(role);
-      const destination = user.user_metadata?.onboarding_completed ? dashboardForRole(role) : next;
+      const backendUser = await syncBrowserAuthFromBackend(role);
+      const finalRole = backendUser?.role || role;
+      setBrowserAuthCookies(finalRole);
+      const destination = (backendUser?.onboarding_completed || user.user_metadata?.onboarding_completed) ? dashboardForRole(finalRole) : next;
       window.location.replace(destination);
     }
     void finish();

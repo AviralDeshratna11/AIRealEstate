@@ -8,6 +8,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { MOCK_USERS, isMockAuthEnabled, setBrowserAuthCookies, setBrowserMockUser } from "@/lib/auth/mock";
 import { getAuthCallbackUrl, isLocalPublicAppUrl } from "@/lib/auth/redirects";
 import { dashboardForRole } from "@/lib/auth/roles";
+import { syncBrowserAuthFromBackend } from "@/lib/auth/session";
 
 export function LoginForm({ next = "/auth/onboarding", initialError }: { next?: string; initialError?: string }) {
   const [email, setEmail] = useState("");
@@ -24,8 +25,10 @@ export function LoginForm({ next = "/auth/onboarding", initialError }: { next?: 
       const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
       if (error) throw error;
       const role = data.user?.user_metadata?.role;
-      setBrowserAuthCookies(role);
-      window.location.assign(data.user?.user_metadata?.onboarding_completed ? dashboardForRole(role) : next);
+      const backendUser = await syncBrowserAuthFromBackend(role);
+      const finalRole = backendUser?.role || role;
+      setBrowserAuthCookies(finalRole);
+      window.location.assign((backendUser?.onboarding_completed || data.user?.user_metadata?.onboarding_completed) ? dashboardForRole(finalRole) : next);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to sign in.");
     } finally {

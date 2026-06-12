@@ -12,10 +12,9 @@ export function createSupabaseBrowserClient() {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      flowType: "pkce",
+      flowType: "implicit",
     },
   });
 }
 
 export const supabaseBrowser = createSupabaseBrowserClient();
-

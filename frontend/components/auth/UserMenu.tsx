@@ -6,6 +6,7 @@ import { LogOut, Settings, UserCircle } from "lucide-react";
 import { getBrowserMockUser, clearBrowserMockUser, isMockAuthEnabled, setBrowserAuthCookies, type AppUser } from "@/lib/auth/mock";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { ROLE_LABELS, dashboardForRole, isAuthRole } from "@/lib/auth/roles";
+import { syncBrowserAuthFromBackend } from "@/lib/auth/session";
 
 export function UserMenu() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -21,16 +22,17 @@ export function UserMenu() {
       const authUser = auth?.data.user;
       const role = authUser?.user_metadata?.role;
       if (authUser?.email) {
-        const safeRole = isAuthRole(role) ? role : "buyer";
-        setBrowserAuthCookies(isAuthRole(role) ? role : null);
+        const backendUser = await syncBrowserAuthFromBackend(isAuthRole(role) ? role : null);
+        const safeRole = isAuthRole(backendUser?.role) ? backendUser.role : isAuthRole(role) ? role : "buyer";
+        setBrowserAuthCookies(safeRole);
         setUser({
-          id: authUser.id,
-          email: authUser.email,
-          full_name: authUser.user_metadata?.full_name || authUser.email,
-          avatar_url: authUser.user_metadata?.avatar_url,
+          id: backendUser?.id || authUser.id,
+          email: backendUser?.email || authUser.email,
+          full_name: backendUser?.full_name || authUser.user_metadata?.full_name || authUser.email,
+          avatar_url: backendUser?.avatar_url || authUser.user_metadata?.avatar_url,
           role: safeRole,
           primary_role: safeRole,
-          onboarding_completed: Boolean(authUser.user_metadata?.onboarding_completed),
+          onboarding_completed: Boolean(backendUser?.onboarding_completed || authUser.user_metadata?.onboarding_completed),
         });
       }
     }

@@ -69,22 +69,25 @@ export function PropertyMap({
   }, [properties, focused, onFocus]);
 
   return (
-    <section className="glass overflow-hidden rounded-lg p-5 shadow-soft">
+    <section className="overflow-hidden rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <p className="section-kicker">Mumbai live map</p>
-          <h2 className="font-display text-3xl font-black leading-none text-ink">Locality pins</h2>
+          <div className="flex items-center gap-2">
+            <span className="h-px w-10 bg-gold" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Mumbai live map</p>
+          </div>
+          <h2 className="lx-display mt-1 text-3xl font-light leading-none text-ink">Locality pins</h2>
         </div>
-        <div className="rounded-md bg-ink px-3 py-1 text-xs font-black text-[#fffaf0]">OSM - {properties.length}</div>
+        <div className="rounded-[3px] bg-ink px-3 py-1 text-xs font-semibold text-ivory">OSM - {properties.length}</div>
       </div>
-      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-md border border-ink/15 bg-paper" />
-      <div className="ink-panel mt-4 rounded-md p-4">
-        <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#f1b24a]">
+      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-[3px] border border-ink/15 bg-sand" />
+      <div className="mt-4 rounded-[3px] bg-espresso text-ivory p-4">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-goldsoft">
           <MapPin size={14} />
           Focused property
         </p>
-        <p className="mt-1 font-bold">{focused?.title || "Select a marker to focus"}</p>
-        <p className="text-sm text-white/68">
+        <p className="mt-1 font-semibold">{focused?.title || "Select a marker to focus"}</p>
+        <p className="text-sm text-ivory/65">
           {focused ? `${focused.address} - EMI est. ${formatCr((focused.monthly_emi_estimate || 0) * 12)}/yr` : "Map uses real Mumbai coordinates and OpenStreetMap tiles."}
         </p>
       </div>

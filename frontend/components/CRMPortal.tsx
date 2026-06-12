@@ -138,23 +138,23 @@ export function CRMPortal({ view, id }: { view: CRMView; id?: string | null }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7f8] text-slate-950">
+    <main className="min-h-screen bg-ivory text-ink">
       <div className="mx-auto flex min-h-screen max-w-[1780px] gap-4 px-3 py-3 md:px-5 lg:px-7">
         <aside className="hidden w-[274px] shrink-0 lg:block">
-          <div className="sticky top-3 rounded-lg border border-slate-200 bg-white p-3 shadow-[0_18px_52px_rgba(15,23,42,0.08)]">
-            <div className="rounded-md bg-[#10233f] p-4 text-white">
-              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-200"><Sparkles size={14} /> ASTRA Sales OS</div>
-              <h1 className="mt-3 text-2xl font-black leading-tight">Real Estate CRM / ERP</h1>
-              <p className="mt-2 text-sm leading-6 text-white/70">Leads, pipeline, broker attribution, visits, offers, commissions, reports, and AI next actions.</p>
+          <div className="sticky top-3 rounded-[3px] border border-ink/12 bg-ivory p-3 shadow-lx">
+            <div className="rounded-[3px] bg-espresso p-4 text-ivory">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-goldsoft"><Sparkles size={14} /> ASTRA Sales OS</div>
+              <h1 className="lx-display mt-3 text-2xl font-light leading-tight">Real Estate CRM / ERP</h1>
+              <p className="mt-2 text-sm leading-6 text-ivory/70">Leads, pipeline, broker attribution, visits, offers, commissions, reports, and AI next actions.</p>
             </div>
             <nav className="mt-3 space-y-1">
-              <Link href="/" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50"><Home size={17} /> Home</Link>
+              <Link href="/" className="flex items-center gap-3 rounded-[3px] px-3 py-2.5 text-sm font-semibold text-ink/60 hover:bg-sand"><span className="grid h-7 w-7 place-items-center rounded-[3px] border border-ink/15 bg-ivory text-ink/70"><Home size={16} /></span> Home</Link>
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const selected = item.view === view || (view === "opportunity-detail" && item.view === "opportunities");
                 return (
-                  <Link key={item.href} href={item.href} className={clsx("flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold transition", selected ? "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200" : "text-slate-600 hover:bg-slate-50")}>
-                    <Icon size={17} />
+                  <Link key={item.href} href={item.href} className={clsx("flex items-center gap-3 rounded-[3px] px-3 py-2.5 text-sm font-semibold transition-colors", selected ? "bg-ink text-ivory" : "text-ink/60 hover:bg-sand")}>
+                    <span className={clsx("grid h-7 w-7 place-items-center rounded-[3px]", selected ? "bg-gold text-ivory" : "border border-ink/15 bg-ivory text-ink/70")}><Icon size={16} /></span>
                     <span className="flex-1">{item.label}</span>
                     {selected && <ChevronRight size={15} />}
                   </Link>
@@ -165,18 +165,18 @@ export function CRMPortal({ view, id }: { view: CRMView; id?: string | null }) {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-4 pb-28">
-          <header className="rounded-lg border border-slate-200 bg-white p-4 shadow-[0_18px_52px_rgba(15,23,42,0.08)]">
+          <header className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">Mumbai-first AI command center</p>
-                <h2 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">From lead chaos to closing intelligence.</h2>
+                <div className="flex items-center gap-3"><span className="h-px w-10 bg-gold" /><span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Mumbai-first AI command center</span></div>
+                <h2 className="lx-display mt-3 text-3xl font-light tracking-tight md:text-5xl">From lead chaos to closing intelligence.</h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                <label className="flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-600">
+                <label className="flex min-h-11 items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-3 text-sm font-semibold text-ink/60 focus-within:border-gold">
                   <Search size={17} />
                   <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search leads, properties, brokers" className="w-64 bg-transparent outline-none" />
                 </label>
-                <button onClick={runAutomation} className="inline-flex items-center gap-2 rounded-md bg-[#f97316] px-4 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(249,115,22,0.25)]">
+                <button onClick={runAutomation} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition-colors hover:bg-[#8f6d32]">
                   <Wand2 size={17} />
                   {busy ? "Running..." : "Ask CRM AI"}
                 </button>
@@ -213,20 +213,20 @@ export function CRMPortal({ view, id }: { view: CRMView; id?: string | null }) {
 export function CRMAppLanding() {
   const modules = ["Manager Selling Portal", "Buyer Intelligence Portal", "Broker Partner Portal", "PropertyPool", "XR Property Tour", "WhatsApp Assistant", "Call Agent", "Document Agent", "Finance Agent", "Negotiation Agent", "Market Intelligence Agent"];
   return (
-    <main className="min-h-screen bg-[#f5f7f8] text-slate-950">
-      <section className="border-b border-slate-200 bg-white">
+    <main className="min-h-screen bg-ivory text-ink">
+      <section className="border-b border-ink/12 bg-ivory">
         <div className="mx-auto grid min-h-[86vh] max-w-7xl gap-8 px-4 py-8 md:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">ASTRA CRM / ERP</p>
-            <h1 className="mt-4 text-4xl font-black tracking-tight text-[#10233f] md:text-6xl">Real Estate Sales Teams, From Lead Chaos to Closing Intelligence</h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">ASTRA CRM is an AI-native sales and ERP system built for Mumbai real estate teams. Track leads, automate follow-ups, manage broker tie-ups, schedule visits, forecast revenue, and close property deals faster.</p>
+            <div className="flex items-center gap-3"><span className="h-px w-10 bg-gold" /><span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">ASTRA CRM / ERP</span></div>
+            <h1 className="lx-display mt-4 text-4xl font-light tracking-tight text-ink md:text-6xl">Real Estate Sales Teams, From Lead Chaos to Closing Intelligence</h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-ink/65">ASTRA CRM is an AI-native sales and ERP system built for Mumbai real estate teams. Track leads, automate follow-ups, manage broker tie-ups, schedule visits, forecast revenue, and close property deals faster.</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/crm" className="rounded-md bg-[#f97316] px-5 py-3 text-sm font-black text-white">Start Free</Link>
-              <Link href="/crm/pipeline" className="rounded-md border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800">View Demo</Link>
-              <Link href="/crm/messages" className="rounded-md border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-800">Talk to Sales</Link>
+              <Link href="/crm" className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">Start Free</Link>
+              <Link href="/crm/pipeline" className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">View Demo</Link>
+              <Link href="/crm/messages" className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">Talk to Sales</Link>
             </div>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 shadow-[0_28px_90px_rgba(15,23,42,0.12)]">
+          <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx">
             <PipelineMini />
           </div>
         </div>
@@ -240,13 +240,13 @@ export function CRMAppLanding() {
             ["Real Estate Quotations and Offers", "Buyer proposals, EMI sheets, payment schedules, offer summaries, negotiation briefs, and commission estimates."],
             ["Reporting That Turns Data Into Closings", "Revenue forecast, commission pipeline, demand, conversion, team performance, broker performance, and campaign ROI."],
             ["AI Automation", "Lead scoring, buyer-property matching, follow-up generation, legal summaries, negotiation recommendations, and CRM hygiene cleanup."],
-          ].map(([title, body]) => <Panel key={title} title={title} eyebrow="Sales OS"><p className="text-sm leading-7 text-slate-600">{body}</p></Panel>)}
+          ].map(([title, body]) => <Panel key={title} title={title} eyebrow="Sales OS"><p className="text-sm leading-7 text-ink/55">{body}</p></Panel>)}
         </div>
       </section>
-      <section className="bg-[#10233f] px-4 py-12 text-white md:px-8">
+      <section className="bg-espresso px-4 py-12 text-ivory md:px-8">
         <div className="mx-auto max-w-7xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">Apps that work together</p>
-          <div className="mt-5 grid gap-3 md:grid-cols-3 lg:grid-cols-4">{modules.map((item) => <div key={item} className="rounded-md border border-white/10 bg-white/8 p-4 text-sm font-bold">{item}</div>)}</div>
+          <div className="flex items-center gap-3"><span className="h-px w-10 bg-goldsoft" /><span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-goldsoft">Apps that work together</span></div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3 lg:grid-cols-4">{modules.map((item) => <div key={item} className="rounded-[3px] border border-ivory/15 bg-ivory/5 p-4 text-sm font-semibold">{item}</div>)}</div>
         </div>
       </section>
     </main>
@@ -278,16 +278,16 @@ function DashboardView({ dashboard, pipeline, voiceAnalytics }: { dashboard: CRM
 
 function PipelineView({ pipeline, compact = false }: { pipeline: CRMPipelinePayload; compact?: boolean }) {
   return (
-    <div className={clsx("overflow-x-auto", !compact && "rounded-lg border border-slate-200 bg-white p-4")}>
+    <div className={clsx("overflow-x-auto", !compact && "rounded-[3px] border border-ink/12 bg-ivory p-4")}>
       <div className="flex min-w-[1180px] gap-3">
         {pipeline.stages.filter((stage) => compact ? stage.opportunity_count > 0 : true).map((stage) => {
           const opps = pipeline.opportunities.filter((opp) => opp.stage === stage.stage_name);
           return (
-            <section key={stage.id} className="w-[260px] shrink-0 rounded-md border border-slate-200 bg-slate-50 p-3">
+            <section key={stage.id} className="w-[260px] shrink-0 rounded-[3px] border border-ink/12 bg-sand p-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-black text-slate-950">{stage.stage_name}</p>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">{opps.length} deals · {formatCr(stage.weighted_value)} weighted</p>
+                  <p className="text-sm font-semibold text-ink">{stage.stage_name}</p>
+                  <p className="mt-1 text-xs font-semibold text-ink/55">{opps.length} deals · {formatCr(stage.weighted_value)} weighted</p>
                 </div>
                 <span className="h-3 w-3 rounded-full" style={{ background: stage.color }} />
               </div>
@@ -302,11 +302,11 @@ function PipelineView({ pipeline, compact = false }: { pipeline: CRMPipelinePayl
 
 function OpportunityCard({ opportunity }: { opportunity: CRMOpportunity }) {
   return (
-    <Link href={`/crm/opportunities/${opportunity.id}`} className="block rounded-md border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5">
+    <Link href={`/crm/opportunities/${opportunity.id}`} className="block rounded-[3px] border border-ink/12 bg-ivory p-3 shadow-lx transition hover:-translate-y-0.5">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-black text-slate-950">{opportunity.buyer_name}</p>
-          <p className="mt-1 text-xs font-semibold text-slate-500">{opportunity.property_name}</p>
+          <p className="text-sm font-semibold text-ink">{opportunity.buyer_name}</p>
+          <p className="mt-1 text-xs font-semibold text-ink/55">{opportunity.property_name}</p>
         </div>
         <Score score={opportunity.lead_score} />
       </div>
@@ -314,7 +314,7 @@ function OpportunityCard({ opportunity }: { opportunity: CRMOpportunity }) {
         <MiniMetric label="Value" value={formatCr(opportunity.opportunity_value)} />
         <MiniMetric label="Prob." value={`${opportunity.probability}%`} />
       </div>
-      <p className="mt-3 text-xs font-bold text-slate-600">{opportunity.next_activity}</p>
+      <p className="mt-3 text-xs font-semibold text-ink/60">{opportunity.next_activity}</p>
       <div className="mt-3 flex flex-wrap gap-1">{opportunity.warning_badges.slice(0, 3).map((badge) => <StatusBadge key={badge} status={badge} />)}</div>
     </Link>
   );
@@ -335,7 +335,7 @@ function LeadVoiceRow({ lead }: { lead: CRMLead }) {
       setBusy(false);
     }
   }
-  return <div className="rounded-md border border-slate-200 bg-slate-50 p-4"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><p className="font-black text-slate-950">{lead.full_name}</p><p className="mt-1 text-sm text-slate-500">{lead.source} · {formatCr(lead.budget_max)} · score {lead.lead_score}/100 · {lead.qualification_status}</p></div><button onClick={callLead} className="inline-flex items-center justify-center gap-2 rounded-md bg-orange-500 px-4 py-3 text-sm font-black text-white"><PhoneCall size={16} />{busy ? "Calling..." : "Call with ElevenLabs"}</button></div>{result ? <p className="mt-3 rounded-md bg-white p-3 text-sm font-bold text-slate-700">{result.call_status} · {result.reason}</p> : null}</div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-sand p-4"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><p className="font-semibold text-ink">{lead.full_name}</p><p className="mt-1 text-sm text-ink/55">{lead.source} · {formatCr(lead.budget_max)} · score {lead.lead_score}/100 · {lead.qualification_status}</p></div><button onClick={callLead} className="inline-flex items-center justify-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><PhoneCall size={16} />{busy ? "Calling..." : "Call with ElevenLabs"}</button></div>{result ? <p className="mt-3 rounded-[3px] border border-ink/12 bg-ivory p-3 text-sm font-semibold text-ink/70">{result.call_status} · {result.reason}</p> : null}</div>;
 }
 
 function OpportunitiesView({ opportunities }: { opportunities: CRMOpportunity[] }) {
@@ -349,10 +349,10 @@ function OpportunityDetail({ opportunity, activities, commissions }: { opportuni
     <div className="space-y-4">
       <Panel title={opportunity.title} eyebrow="Opportunity detail">
         <div className="grid gap-3 md:grid-cols-4"><MiniMetric label="Stage" value={opportunity.stage} /><MiniMetric label="Expected value" value={formatCr(opportunity.opportunity_value)} /><MiniMetric label="Probability" value={`${opportunity.probability}%`} /><MiniMetric label="Weighted forecast" value={formatCr(opportunity.weighted_value)} /></div>
-        <p className="mt-4 rounded-md bg-emerald-50 p-4 text-sm leading-7 text-emerald-900">AI summary: {opportunity.buyer_name} is a {opportunity.lead_score >= 85 ? "high-intent" : "qualified"} buyer for {opportunity.locality}. Next action: {opportunity.next_activity}.</p>
+        <p className="mt-4 rounded-[3px] bg-espresso p-4 text-sm leading-7 text-ivory">AI summary: {opportunity.buyer_name} is a {opportunity.lead_score >= 85 ? "high-intent" : "qualified"} buyer for {opportunity.locality}. Next action: {opportunity.next_activity}.</p>
       </Panel>
       <div className="grid gap-4 xl:grid-cols-[0.7fr_1.3fr]">
-        <Panel title="Tabs" eyebrow="CRM record">{tabs.map((tab) => <div key={tab} className="mb-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">{tab}</div>)}</Panel>
+        <Panel title="Tabs" eyebrow="CRM record">{tabs.map((tab) => <div key={tab} className="mb-2 rounded-[3px] border border-ink/12 bg-sand px-3 py-2 text-sm font-semibold text-ink/70">{tab}</div>)}</Panel>
         <Panel title="Live record intelligence" eyebrow="AI + ERP context">
           <div className="grid gap-3 md:grid-cols-2">
             <InfoBlock title="Buyer profile" items={["Budget fit aligned", "Family and EMI needs captured", "Loan readiness affects score"]} />
@@ -375,11 +375,11 @@ function CalendarView({ activities }: { activities: CRMActivity[] }) {
 }
 
 function DirectoryView({ title, items }: { title: string; items: Array<Record<string, unknown>> }) {
-  return <Panel title={title} eyebrow="CRM directory"><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{items.map((item) => <div key={String(item.id)} className="rounded-md border border-slate-200 bg-slate-50 p-4"><p className="font-black">{String(item.full_name || item.account_name)}</p><p className="mt-1 text-sm text-slate-500">{String(item.phone || item.email || item.account_type || "")}</p><div className="mt-3 flex flex-wrap gap-1">{(Array.isArray(item.tags) ? item.tags : [item.source || item.contact_type || item.account_type]).filter(Boolean).map((tag) => <StatusBadge key={String(tag)} status={String(tag)} />)}</div></div>)}</div></Panel>;
+  return <Panel title={title} eyebrow="CRM directory"><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{items.map((item) => <div key={String(item.id)} className="rounded-[3px] border border-ink/12 bg-sand p-4"><p className="font-semibold text-ink">{String(item.full_name || item.account_name)}</p><p className="mt-1 text-sm text-ink/55">{String(item.phone || item.email || item.account_type || "")}</p><div className="mt-3 flex flex-wrap gap-1">{(Array.isArray(item.tags) ? item.tags : [item.source || item.contact_type || item.account_type]).filter(Boolean).map((tag) => <StatusBadge key={String(tag)} status={String(tag)} />)}</div></div>)}</div></Panel>;
 }
 
 function PropertiesCRMView({ opportunities }: { opportunities: CRMOpportunity[] }) {
-  return <Panel title="CRM properties" eyebrow="Manager listings connected to sales"><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{opportunities.map((opp) => <div key={opp.id} className="rounded-md border border-slate-200 bg-slate-50 p-4"><p className="text-lg font-black">{opp.property_name}</p><p className="mt-1 text-sm text-slate-500">{opp.locality} · {formatCr(opp.opportunity_value)} pipeline</p><MiniMetric label="Demand signal" value={`${opp.lead_score}/100`} /></div>)}</div></Panel>;
+  return <Panel title="CRM properties" eyebrow="Manager listings connected to sales"><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{opportunities.map((opp) => <div key={opp.id} className="rounded-[3px] border border-ink/12 bg-sand p-4"><p className="lx-display text-lg font-light text-ink">{opp.property_name}</p><p className="mt-1 text-sm text-ink/55">{opp.locality} · {formatCr(opp.opportunity_value)} pipeline</p><MiniMetric label="Demand signal" value={`${opp.lead_score}/100`} /></div>)}</div></Panel>;
 }
 
 function ProposalView({ type, opportunities }: { type: "quotations" | "offers"; opportunities: CRMOpportunity[] }) {
@@ -388,7 +388,7 @@ function ProposalView({ type, opportunities }: { type: "quotations" | "offers"; 
 
 function CommissionsView({ commissions, opportunities }: { commissions: CRMCommission[]; opportunities: CRMOpportunity[] }) {
   const total = commissions.reduce((sum, item) => sum + item.expected_commission, 0) || opportunities.reduce((sum, item) => sum + item.expected_commission, 0);
-  return <Panel title="Commission management" eyebrow="Attribution-backed payout control"><div className="mb-4 rounded-md bg-[#10233f] p-5 text-white"><p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-200">Expected commission</p><p className="mt-2 text-4xl font-black">{formatCr(total)}</p></div><div className="grid gap-3 md:grid-cols-2">{(commissions.length ? commissions : opportunities.map((opp) => ({ id: opp.id, deal_value: opp.opportunity_value, commission_percentage: 2, expected_commission: opp.expected_commission, payout_status: "pending", dispute_status: "none", created_at: "" }))).map((item) => <InfoBlock key={item.id} title={formatCr(item.expected_commission)} items={[`Deal value: ${formatCr(item.deal_value)}`, `Rule: ${item.commission_percentage}%`, `Payout: ${item.payout_status}`, `Dispute: ${item.dispute_status}`]} />)}</div></Panel>;
+  return <Panel title="Commission management" eyebrow="Attribution-backed payout control"><div className="mb-4 rounded-[3px] bg-espresso p-5 text-ivory"><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-goldsoft">Expected commission</p><p className="lx-display mt-2 text-4xl font-light">{formatCr(total)}</p></div><div className="grid gap-3 md:grid-cols-2">{(commissions.length ? commissions : opportunities.map((opp) => ({ id: opp.id, deal_value: opp.opportunity_value, commission_percentage: 2, expected_commission: opp.expected_commission, payout_status: "pending", dispute_status: "none", created_at: "" }))).map((item) => <InfoBlock key={item.id} title={formatCr(item.expected_commission)} items={[`Deal value: ${formatCr(item.deal_value)}`, `Rule: ${item.commission_percentage}%`, `Payout: ${item.payout_status}`, `Dispute: ${item.dispute_status}`]} />)}</div></Panel>;
 }
 
 function CampaignsView({ campaigns }: { campaigns: Array<Record<string, unknown>> }) {
@@ -396,7 +396,7 @@ function CampaignsView({ campaigns }: { campaigns: Array<Record<string, unknown>
 }
 
 function AutomationView({ dashboard, onRun, busy }: { dashboard: CRMDashboard; onRun: () => void; busy: boolean }) {
-  return <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]"><Panel title="AI automation controls" eyebrow="CRM agent swarm"><button onClick={onRun} className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#f97316] px-4 py-3 text-sm font-black text-white"><Wand2 size={17} />{busy ? "Running..." : "Run CRM Orchestrator"}</button><div className="mt-4 space-y-2">{["Lead score > 80 creates call task within 15 minutes", "XR tour completion asks for a site visit", "Visit completion follows up within 2 hours", "Offer routes to negotiation agent", "Stale lead after 5 days alerts owner"].map((item) => <TaskLine key={item} text={item} />)}</div></Panel><Panel title="Agent recommendations" eyebrow="Command-routed state machines">{dashboard.priority_inbox.map((item) => <ActionRow key={item.id} action={item} />)}</Panel></div>;
+  return <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]"><Panel title="AI automation controls" eyebrow="CRM agent swarm"><button onClick={onRun} className="inline-flex w-full items-center justify-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><Wand2 size={17} />{busy ? "Running..." : "Run CRM Orchestrator"}</button><div className="mt-4 space-y-2">{["Lead score > 80 creates call task within 15 minutes", "XR tour completion asks for a site visit", "Visit completion follows up within 2 hours", "Offer routes to negotiation agent", "Stale lead after 5 days alerts owner"].map((item) => <TaskLine key={item} text={item} />)}</div></Panel><Panel title="Agent recommendations" eyebrow="Command-routed state machines">{dashboard.priority_inbox.map((item) => <ActionRow key={item.id} action={item} />)}</Panel></div>;
 }
 
 function ReportsView({ dashboard, reports }: { dashboard: CRMDashboard; reports: Record<string, unknown> }) {
@@ -425,54 +425,58 @@ function MessagesView({ leads }: { leads: CRMLead[] }) {
 }
 
 function AssistantDock({ actions }: { actions: CRMDashboard["priority_inbox"] }) {
-  return <div className="rounded-lg border border-emerald-200 bg-white p-4 shadow-[0_18px_52px_rgba(15,23,42,0.08)]"><div className="flex items-center gap-2 text-sm font-black text-emerald-800"><Bot size={17} /> CRM assistant</div><p className="mt-2 text-sm leading-6 text-slate-600">Ask: show my hot leads, calculate commission, generate proposal, or explain why pipeline is weak.</p><div className="mt-3 grid gap-2 md:grid-cols-2">{actions.slice(0, 2).map((item) => <TaskLine key={item.id} text={item.title} />)}</div></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-center gap-2 text-sm font-semibold text-gold"><Bot size={17} /> CRM assistant</div><p className="mt-2 text-sm leading-6 text-ink/55">Ask: show my hot leads, calculate commission, generate proposal, or explain why pipeline is weak.</p><div className="mt-3 grid gap-2 md:grid-cols-2">{actions.slice(0, 2).map((item) => <TaskLine key={item.id} text={item.title} />)}</div></div>;
 }
 
 function PipelineMini() {
   const payload = { stages: ["New", "Qualified", "Visit", "Offer", "Won"], cards: ["Rahul", "Priya", "Kabir", "Nisha"] };
-  return <div className="grid gap-3"><div className="grid grid-cols-5 gap-2">{payload.stages.map((stage) => <div key={stage} className="rounded-md bg-white p-3 text-xs font-black text-slate-700 shadow-sm">{stage}</div>)}</div><div className="grid gap-2 md:grid-cols-2">{payload.cards.map((card, index) => <div key={card} className="rounded-md border border-slate-200 bg-white p-4"><p className="font-black">{card}</p><p className="mt-1 text-sm text-slate-500">{["AI score 91", "Offer ready", "XR engaged", "Legal risk"][index]}</p></div>)}</div><div className="rounded-md bg-[#10233f] p-4 text-white"><p className="text-sm font-black">AI lead score card</p><p className="mt-2 text-3xl font-black">94/100</p><p className="mt-1 text-sm text-white/70">PropertyPool buyer, Bandra, ready in 30 days.</p></div></div>;
+  return <div className="grid gap-3"><div className="grid grid-cols-5 gap-2">{payload.stages.map((stage) => <div key={stage} className="rounded-[3px] border border-ink/12 bg-ivory p-3 text-xs font-semibold text-ink/70 shadow-lx">{stage}</div>)}</div><div className="grid gap-2 md:grid-cols-2">{payload.cards.map((card, index) => <div key={card} className="rounded-[3px] border border-ink/12 bg-ivory p-4"><p className="font-semibold text-ink">{card}</p><p className="mt-1 text-sm text-ink/55">{["AI score 91", "Offer ready", "XR engaged", "Legal risk"][index]}</p></div>)}</div><div className="rounded-[3px] bg-espresso p-4 text-ivory"><p className="text-sm font-semibold">AI lead score card</p><p className="lx-display mt-2 text-3xl font-light">94/100</p><p className="mt-1 text-sm text-ivory/70">PropertyPool buyer, Bandra, ready in 30 days.</p></div></div>;
 }
 
 function Panel({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
-  return <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-[0_18px_52px_rgba(15,23,42,0.08)]"><div className="mb-4 flex items-start justify-between gap-4"><div><p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700">{eyebrow}</p><h3 className="mt-1 text-2xl font-black tracking-tight text-slate-950">{title}</h3></div><Sparkles size={19} className="text-[#d6a23b]" /></div>{children}</section>;
+  return <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx"><div className="mb-4 flex items-start justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-gold">{eyebrow}</p><h3 className="lx-display mt-1 text-2xl font-light tracking-tight text-ink">{title}</h3></div><Sparkles size={19} className="text-gold" /></div>{children}</section>;
 }
 
 function MetricCard({ label, value, detail, tone = "slate" }: { label: string; value: string; detail?: string | null; tone?: string }) {
-  const colors = tone === "emerald" ? "bg-emerald-50 text-emerald-900" : tone === "gold" ? "bg-yellow-50 text-yellow-900" : tone === "amber" ? "bg-orange-50 text-orange-900" : "bg-white text-slate-900";
-  return <div className={clsx("rounded-md border border-slate-200 p-4", colors)}><p className="text-[10px] font-black uppercase tracking-[0.18em] opacity-70">{label}</p><p className="mt-2 text-2xl font-black">{value}</p><p className="mt-1 text-xs font-semibold opacity-70">{detail}</p></div>;
+  const highlighted = tone === "emerald" || tone === "gold" || tone === "amber";
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4"><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/45">{label}</p><p className={clsx("lx-display mt-2 text-3xl font-light", highlighted ? "text-gold" : "text-ink")}>{value}</p><p className="mt-1 text-sm text-ink/55">{detail}</p></div>;
 }
 
 function MiniMetric({ label, value }: { label: string; value?: string | number | null }) {
-  return <div className="rounded-md border border-slate-200 bg-white p-3"><p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500">{label}</p><p className="mt-1 text-sm font-black text-slate-950">{value || "-"}</p></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-3"><p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink/45">{label}</p><p className="lx-display mt-1 text-sm font-light text-ink">{value || "-"}</p></div>;
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const tone = status.toLowerCase().includes("hot") || status.toLowerCase().includes("ready") || status.toLowerCase().includes("won") || status.toLowerCase().includes("booked") ? "bg-emerald-100 text-emerald-800" : status.toLowerCase().includes("risk") || status.toLowerCase().includes("overdue") ? "bg-orange-100 text-orange-900" : "bg-slate-100 text-slate-700";
-  return <span className={clsx("rounded-full px-2 py-1 text-[10px] font-black", tone)}>{status}</span>;
+  const lower = status.toLowerCase();
+  const positive = ["won", "active", "approved", "hot", "ready", "scheduled", "qualified", "booked"];
+  const pending = ["review", "pending", "warm", "working"];
+  const negative = ["lost", "cold"];
+  const tone = positive.some((key) => lower.includes(key)) ? "border-gold/45 bg-gold/10 text-[#8f6d32]" : pending.some((key) => lower.includes(key)) ? "border-ink/20 bg-ink/5 text-ink/60" : negative.some((key) => lower.includes(key)) ? "border-coral/40 bg-coral/10 text-coral" : "border-ink/15 text-ink/55";
+  return <span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] capitalize", tone)}>{status}</span>;
 }
 
 function Score({ score }: { score: number }) {
-  return <span className={clsx("rounded-full px-2 py-1 text-[10px] font-black", score >= 85 ? "bg-emerald-100 text-emerald-800" : score >= 70 ? "bg-yellow-100 text-yellow-900" : "bg-slate-100 text-slate-700")}>{score}</span>;
+  return <span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]", score >= 85 ? "border-gold/45 bg-gold/10 text-[#8f6d32]" : score >= 70 ? "border-ink/20 bg-ink/5 text-ink/60" : "border-ink/15 text-ink/55")}>{score}</span>;
 }
 
 function ActionRow({ action }: { action: CRMDashboard["priority_inbox"][number] }) {
-  return <div className="mb-3 rounded-md border border-slate-200 bg-slate-50 p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-slate-950">{action.title}</p><p className="mt-1 text-sm leading-6 text-slate-600">{action.reason}</p><p className="mt-2 text-xs font-black text-emerald-800">{action.recommended_action}</p></div><StatusBadge status={action.priority} /></div></div>;
+  return <div className="mb-3 rounded-[3px] border border-ink/12 bg-sand p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{action.title}</p><p className="mt-1 text-sm leading-6 text-ink/60">{action.reason}</p><p className="mt-2 text-xs font-semibold text-gold">{action.recommended_action}</p></div><StatusBadge status={action.priority} /></div></div>;
 }
 
 function FeedRow({ item }: { item: { action: string; actor_type: string; details_json: Record<string, unknown>; created_at: string } }) {
-  return <div className="rounded-md border border-slate-200 bg-slate-50 p-3"><p className="text-sm font-black capitalize text-slate-950">{item.action.replace(/_/g, " ")}</p><p className="mt-1 text-sm text-slate-600">{String(item.details_json.summary || item.actor_type)}</p><p className="mt-2 text-xs font-bold text-slate-400">{new Date(item.created_at).toLocaleString("en-IN")}</p></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-sand p-3"><p className="text-sm font-semibold capitalize text-ink">{item.action.replace(/_/g, " ")}</p><p className="mt-1 text-sm text-ink/60">{String(item.details_json.summary || item.actor_type)}</p><p className="mt-2 text-xs font-semibold text-ink/40">{new Date(item.created_at).toLocaleString("en-IN")}</p></div>;
 }
 
 function TaskCard({ item }: { item: CRMActivity }) {
-  return <div className="rounded-md border border-slate-200 bg-slate-50 p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-black">{item.title}</p><p className="mt-1 text-sm text-slate-500">{item.activity_type} · {item.due_at ? new Date(item.due_at).toLocaleString("en-IN") : "No due date"}</p></div><StatusBadge status={item.status} /></div><p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-sand p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold text-ink">{item.title}</p><p className="mt-1 text-sm text-ink/55">{item.activity_type} · {item.due_at ? new Date(item.due_at).toLocaleString("en-IN") : "No due date"}</p></div><StatusBadge status={item.status} /></div><p className="mt-3 text-sm leading-6 text-ink/60">{item.description}</p></div>;
 }
 
 function InfoBlock({ title, items }: { title: string; items: string[] }) {
-  return <div className="rounded-md border border-slate-200 bg-slate-50 p-4"><p className="font-black text-slate-950">{title}</p><div className="mt-3 space-y-2">{items.filter(Boolean).map((item) => <TaskLine key={item} text={item} />)}</div></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-sand p-4"><p className="font-semibold text-ink">{title}</p><div className="mt-3 space-y-2">{items.filter(Boolean).map((item) => <TaskLine key={item} text={item} />)}</div></div>;
 }
 
 function TaskLine({ text }: { text: string }) {
-  return <div className="flex items-start gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-700"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-emerald-600" />{text}</div>;
+  return <div className="flex items-start gap-2 rounded-[3px] border border-ink/12 bg-ivory px-3 py-2 text-sm font-semibold text-ink/70"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-gold" />{text}</div>;
 }
 
 function emptyDashboard(): CRMDashboard {

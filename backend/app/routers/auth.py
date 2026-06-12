@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -59,6 +60,15 @@ async def upsert_profile(payload: ProfileUpsert, user: CurrentUser = Depends(get
     role = sanitize_role(payload.role)
     if payload.role == "admin" and user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin role cannot be self-assigned")
+    if role == "admin" and user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin role cannot be self-assigned")
+    if not user.is_mock and user.role != "admin" and role != user.role:
+        metadata_role = sanitize_role(user.metadata.get("role"))
+        if metadata_role != role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Requested role does not match the verified auth profile",
+            )
 
     pool = await get_pool()
     if pool is None or user.is_mock:
@@ -68,6 +78,7 @@ async def upsert_profile(payload: ProfileUpsert, user: CurrentUser = Depends(get
         user.onboarding_completed = True
         return user_payload(user)
 
+    metadata_json = json.dumps(payload.metadata)
     await pool.execute(
         """
         update app_users
@@ -75,28 +86,28 @@ async def upsert_profile(payload: ProfileUpsert, user: CurrentUser = Depends(get
             phone = coalesce($2, phone),
             primary_role = $3,
             onboarding_completed = true,
-            whatsapp_consent = coalesce(($4->>'whatsapp_consent')::boolean, whatsapp_consent),
-            call_consent = coalesce(($4->>'call_consent')::boolean, call_consent),
-            email_marketing_consent = coalesce(($4->>'email_marketing_consent')::boolean, email_marketing_consent),
-            preferred_contact_channel = coalesce($4->>'preferred_contact_channel', preferred_contact_channel),
-            preferred_language = coalesce($4->>'preferred_language', preferred_language),
-            do_not_call = coalesce(($4->>'do_not_call')::boolean, do_not_call),
-            do_not_message = coalesce(($4->>'do_not_message')::boolean, do_not_message),
+            whatsapp_consent = coalesce(($4::jsonb->>'whatsapp_consent')::boolean, whatsapp_consent),
+            call_consent = coalesce(($4::jsonb->>'call_consent')::boolean, call_consent),
+            email_marketing_consent = coalesce(($4::jsonb->>'email_marketing_consent')::boolean, email_marketing_consent),
+            preferred_contact_channel = coalesce($4::jsonb->>'preferred_contact_channel', preferred_contact_channel),
+            preferred_language = coalesce($4::jsonb->>'preferred_language', preferred_language),
+            do_not_call = coalesce(($4::jsonb->>'do_not_call')::boolean, do_not_call),
+            do_not_message = coalesce(($4::jsonb->>'do_not_message')::boolean, do_not_message),
             updated_at = now()
         where id = $5
         """,
         payload.full_name,
         payload.phone,
         role,
-        payload.metadata,
+        metadata_json,
         user.id,
     )
     await pool.execute("insert into user_roles (app_user_id, role) values ($1, $2) on conflict do nothing", user.id, role)
     await _create_role_profile(pool, user, role, payload)
     await pool.execute(
-        "insert into auth_audit_logs (app_user_id, event_type, details_json) values ($1, 'onboarding_completed', $2)",
+        "insert into auth_audit_logs (app_user_id, event_type, details_json) values ($1, 'onboarding_completed', $2::jsonb)",
         user.id,
-        {"role": role},
+        json.dumps({"role": role}),
     )
     user.role = role
     user.full_name = payload.full_name or user.full_name
@@ -135,18 +146,19 @@ async def admin_change_role(app_user_id: str, payload: RoleSelect, _: CurrentUse
 
 async def _create_role_profile(pool: Any, user: CurrentUser, role: str, payload: ProfileUpsert) -> None:
     metadata = payload.metadata
+    metadata_json = json.dumps(metadata)
     if role == "buyer":
         await pool.execute(
             """
             insert into buyer_profiles (app_user_id, full_name, phone, email, preferences, budget, localities)
-            values ($1, $2, $3, $4, $5, $6, $7)
+            values ($1, $2, $3, $4, $5::jsonb, $6, $7)
             on conflict (app_user_id) do update set full_name = excluded.full_name, phone = excluded.phone, preferences = excluded.preferences, updated_at = now()
             """,
             user.id,
             payload.full_name or user.full_name or user.email,
             payload.phone,
             user.email,
-            metadata,
+            metadata_json,
             metadata.get("budget_range") or metadata.get("budget"),
             [v.strip() for v in (metadata.get("preferred_localities") or "").split(",") if v.strip()],
         )
@@ -154,10 +166,11 @@ async def _create_role_profile(pool: Any, user: CurrentUser, role: str, payload:
         await pool.execute(
             """
             insert into manager_profiles (app_user_id, user_id, full_name, company_name, phone, email, operating_localities)
-            values ($1, $1, $2, $3, $4, $5, $6)
+            values ($1, $2, $3, $4, $5, $6, $7)
             on conflict (app_user_id) do update set full_name = excluded.full_name, company_name = excluded.company_name, phone = excluded.phone, updated_at = now()
             """,
             user.id,
+            str(user.id),
             payload.full_name or user.full_name or user.email,
             metadata.get("company_name") or metadata.get("company") or "ASTRA Manager",
             payload.phone,
@@ -168,10 +181,11 @@ async def _create_role_profile(pool: Any, user: CurrentUser, role: str, payload:
         await pool.execute(
             """
             insert into broker_profiles (app_user_id, user_id, full_name, agency_name, phone, email, whatsapp_number, rera_agent_id, operating_localities, years_experience, buyer_network_size, specialization)
-            values ($1, $1, $2, $3, coalesce($4, ''), $5, $6, $7, $8, coalesce(($9)::int, 0), coalesce(($10)::int, 0), $11)
+            values ($1, $2, $3, $4, coalesce($5, ''), $6, $7, $8, $9, coalesce(($10)::int, 0), coalesce(($11)::int, 0), $12)
             on conflict (app_user_id) do update set full_name = excluded.full_name, agency_name = excluded.agency_name, phone = excluded.phone, updated_at = now()
             """,
             user.id,
+            str(user.id),
             payload.full_name or user.full_name or user.email,
             metadata.get("agency_name") or "ASTRA Broker",
             payload.phone,

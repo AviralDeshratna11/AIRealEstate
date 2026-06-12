@@ -10,6 +10,12 @@ const config: Config = {
         brass: "#b8832f",
         coral: "#d6532c",
         peacock: "#006d77",
+        // Landing-page ("lx") editorial palette — shared across every portal/tab.
+        ivory: "#f7f3ea",
+        sand: "#efe7d7",
+        espresso: "#14110d",
+        gold: "#a8813c",
+        goldsoft: "#c8a35a",
         estate: {
           50: "#eef8f6",
           100: "#d6ece8",
@@ -24,7 +30,9 @@ const config: Config = {
       },
       boxShadow: {
         soft: "0 22px 60px rgba(25, 23, 19, 0.13)",
-        crisp: "8px 8px 0 rgba(25, 23, 19, 0.12)"
+        crisp: "8px 8px 0 rgba(25, 23, 19, 0.12)",
+        // Landing-page editorial card/panel lift.
+        lx: "0 30px 70px -40px rgba(25, 23, 19, 0.4)"
       }
     }
   },

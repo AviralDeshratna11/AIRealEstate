@@ -34,18 +34,21 @@ export function AgentConsole({ onProperties }: { onProperties: (items: Property[
   }
 
   return (
-    <section className="glass rounded-lg p-5 shadow-soft">
-      <p className="section-kicker">Natural-language command center</p>
-      <h2 className="mb-3 font-display text-3xl font-black leading-none text-ink">Ask the Mumbai agent swarm</h2>
+    <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+      <div className="flex items-center gap-2">
+        <span className="h-px w-10 bg-gold" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Natural-language command center</p>
+      </div>
+      <h2 className="lx-display mb-3 mt-1 text-3xl font-light leading-none text-ink">Ask the Mumbai agent swarm</h2>
       <textarea
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="min-h-32 w-full rounded-md border border-ink/15 bg-[#fffaf0] p-4 text-sm font-medium text-ink outline-none ring-0 placeholder:text-ink/35 focus:border-coral"
+        className="min-h-32 w-full rounded-[3px] border border-ink/15 bg-ivory p-4 text-sm font-medium text-ink outline-none ring-0 placeholder:text-ink/35 focus:border-gold"
       />
       <button
         onClick={submit}
         disabled={loading}
-        className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-coral px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5 disabled:opacity-60"
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32] disabled:opacity-60"
       >
         <SendHorizontal size={16} />
         {loading ? "Routing..." : "Run agent"}
@@ -55,13 +58,13 @@ export function AgentConsole({ onProperties }: { onProperties: (items: Property[
           <button
             key={ex}
             onClick={() => setQuery(ex)}
-            className="rounded-md border border-ink/12 bg-white/62 px-3 py-1.5 text-left text-xs font-bold text-ink/58 hover:border-peacock hover:bg-white hover:text-ink"
+            className="rounded-[3px] border border-ink/12 bg-ivory px-3 py-1.5 text-left text-xs font-bold text-ink/55 hover:border-gold hover:bg-sand hover:text-ink"
           >
             {ex}
           </button>
         ))}
       </div>
-      {answer && <div className="mt-4 rounded-md border border-peacock/20 bg-[#eef8f6] p-4 text-sm font-semibold leading-6 text-peacock">{answer}</div>}
+      {answer && <div className="mt-4 rounded-[3px] border border-gold/20 bg-sand p-4 text-sm font-semibold leading-6 text-gold">{answer}</div>}
     </section>
   );
 }

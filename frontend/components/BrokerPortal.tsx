@@ -215,65 +215,66 @@ export function BrokerPortal({ view, id }: BrokerPortalProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f8fb] text-slate-950">
+    <main className="min-h-screen bg-ivory text-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-[1740px] gap-5 px-4 py-4 md:px-6 lg:px-8">
         <aside className="hidden w-[284px] shrink-0 lg:block">
-          <div className="sticky top-4 space-y-4 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
-            <div className="rounded-[18px] bg-slate-950 px-4 py-4 text-white">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">ASTRA Partner</p>
-              <h1 className="mt-3 text-2xl font-black leading-none">Broker Partner Portal</h1>
-              <p className="mt-2 text-sm leading-6 text-white/68">Verified inventory, tie-ups, buyers, PropertyPool, attribution, and commissions.</p>
+          <div className="sticky top-4 space-y-4 rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx">
+            <div className="rounded-[3px] bg-espresso px-4 py-4 text-ivory">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-goldsoft">ASTRA Partner</p>
+              <h1 className="lx-display font-light mt-3 text-2xl leading-none">Broker Partner Portal</h1>
+              <p className="mt-2 text-sm leading-6 text-ivory/68">Verified inventory, tie-ups, buyers, PropertyPool, attribution, and commissions.</p>
             </div>
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const selected = item.view === view || (view.includes("detail") && item.view === (view.startsWith("property") ? "properties" : view.startsWith("tieup") ? "tieups" : "buyers"));
                 return (
-                  <Link key={item.href} href={item.href} className={clsx("flex items-center gap-3 rounded-2xl px-3 py-3 transition", selected ? "bg-emerald-50 text-slate-950 ring-1 ring-emerald-200" : "text-slate-600 hover:bg-slate-50")}>
-                    <span className={clsx("grid h-9 w-9 place-items-center rounded-xl", selected ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600")}>
+                  <Link key={item.href} href={item.href} className={clsx("flex items-center gap-3 rounded-[3px] px-3 py-3 transition", selected ? "bg-ink text-ivory" : "text-ink/60 hover:bg-sand")}>
+                    <span className={clsx("grid h-9 w-9 place-items-center rounded-[3px]", selected ? "bg-gold text-ivory" : "border border-ink/15 bg-ivory text-ink/70")}>
                       <Icon size={17} />
                     </span>
-                    <span className="flex-1 text-sm font-black">{item.label}</span>
-                    <ChevronRight size={15} className="text-slate-400" />
+                    <span className="flex-1 text-sm font-semibold">{item.label}</span>
+                    <ChevronRight size={15} className="text-ink/30" />
                   </Link>
                 );
               })}
             </nav>
-            <div className="rounded-[18px] border border-amber-200 bg-amber-50 p-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-900">Trust score</p>
-              <p className="mt-2 text-3xl font-black text-amber-950">{data.broker.trust_score}/100</p>
-              <p className="text-sm font-semibold text-amber-900/70">{data.broker.verification_status.replace(/_/g, " ")}</p>
+            <div className="rounded-[3px] border border-ink/12 bg-sand p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">Trust score</p>
+              <p className="lx-display mt-2 text-3xl font-light text-ink">{data.broker.trust_score}/100</p>
+              <p className="text-sm font-semibold text-ink/55">{data.broker.verification_status.replace(/_/g, " ")}</p>
             </div>
           </div>
         </aside>
 
         <section className="min-w-0 flex-1 space-y-5 pb-8">
-          <header className="rounded-[26px] border border-slate-200 bg-white px-5 py-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+          <header className="rounded-[3px] border border-ink/12 bg-ivory px-5 py-5 shadow-lx">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">
-                  <Sparkles size={14} />
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
+                  <span className="h-px w-10 bg-gold" />
+                  <Sparkles size={14} className="text-gold" />
                   PropertyPool Network
                 </div>
-                <h2 className="mt-2 text-3xl font-black tracking-tight md:text-5xl">AI-powered brokerage office for independent Mumbai agents.</h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
+                <h2 className="lx-display mt-2 text-3xl font-light tracking-tight md:text-5xl">AI-powered brokerage office for independent Mumbai agents.</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/60">
                   Discover manager inventory, request tie-ups, protect attribution, bring buyers, organize collective visits, and track commissions from one command center.
                 </p>
               </div>
             <div className="flex flex-wrap gap-3">
-                <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:-translate-y-0.5">
+                <Link href="/" className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
                   <Home size={16} />
                   Home
                 </Link>
-                <Link href="/workspace" className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:-translate-y-0.5">
+                <Link href="/workspace" className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
                   <Home size={16} />
                   Buyer OS
                 </Link>
-                <Link href="/manager" className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 transition hover:-translate-y-0.5">
+                <Link href="/manager" className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
                   <BriefcaseBusiness size={16} />
                   Manager OS
                 </Link>
-                <button onClick={() => onRunAutomation(false)} className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5">
+                <button onClick={() => onRunAutomation(false)} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
                   <Wand2 size={16} />
                   {busy === "growth" ? "Running..." : "Run Broker Growth Automation"}
                 </button>
@@ -318,7 +319,7 @@ function DashboardView({ dashboard, properties, selected, setSelected, onRequest
             <div className="space-y-3">{dashboard.activity_feed.map((entry) => <FeedRow key={entry.id} entry={entry} />)}</div>
           </Panel>
           <Panel title="Focused opportunity" eyebrow="Map-selected property">
-            {selected ? <OpportunityCard property={selected} onRequestTieup={onRequestTieup} onCreatePropertyPool={onCreatePropertyPool} busy={busy} /> : <p className="text-sm text-slate-500">Select a property pin.</p>}
+            {selected ? <OpportunityCard property={selected} onRequestTieup={onRequestTieup} onCreatePropertyPool={onCreatePropertyPool} busy={busy} /> : <p className="text-sm text-ink/55">Select a property pin.</p>}
           </Panel>
         </div>
       </div>
@@ -339,10 +340,10 @@ function ProfileView({ dashboard, mode, onSave }: { dashboard: BrokerDashboard; 
     <div className="grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
       <Panel title={mode === "onboarding" ? "Broker onboarding" : "Broker profile"} eyebrow="Verification agent">
         <div className="space-y-4">
-          <div className="rounded-[20px] bg-slate-950 p-5 text-white">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">Profile completion</p>
-            <p className="mt-2 text-4xl font-black">{completion}%</p>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12"><div className="h-full rounded-full bg-emerald-400" style={{ width: `${completion}%` }} /></div>
+          <div className="rounded-[3px] bg-espresso p-5 text-ivory">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-goldsoft">Profile completion</p>
+            <p className="lx-display mt-2 text-4xl font-light">{completion}%</p>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-ivory/15"><div className="h-full rounded-full bg-gold" style={{ width: `${completion}%` }} /></div>
           </div>
           <InfoGrid items={[
             ["Name", profile.full_name],
@@ -352,7 +353,7 @@ function ProfileView({ dashboard, mode, onSave }: { dashboard: BrokerDashboard; 
             ["Buyer network", String(profile.buyer_network_size)],
             ["Monthly visits", String(profile.average_monthly_visits)],
           ]} />
-          <button onClick={onSave} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white">
+          <button onClick={onSave} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
             <BadgeCheck size={16} />
             Run Verification Agent
           </button>
@@ -374,11 +375,11 @@ function PropertiesView({ properties, query, setQuery, onOpen, onRequestTieup, b
     <div className="space-y-5">
       <Panel title="Property discovery" eyebrow="Natural-language inventory search">
         <div className="flex flex-col gap-3 lg:flex-row">
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by locality, commission, tie-up status, buyer fit, legal risk..." className="min-h-12 flex-1 rounded-2xl border border-slate-200 px-4 text-sm font-semibold outline-none focus:border-emerald-400" />
-          <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><Search size={16} />Search</button>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by locality, commission, tie-up status, buyer fit, legal risk..." className="min-h-12 flex-1 rounded-[3px] border border-ink/15 bg-ivory px-4 text-sm outline-none focus:border-gold" />
+          <button className="inline-flex items-center justify-center gap-2 rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]"><Search size={16} />Search</button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {naturalQueries.map((item) => <button key={item} onClick={() => setQuery(item)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-emerald-50">{item}</button>)}
+          {naturalQueries.map((item) => <button key={item} onClick={() => setQuery(item)} className="rounded-full border border-ink/15 bg-sand px-3 py-2 text-xs font-semibold text-ink/60 hover:bg-gold/10">{item}</button>)}
         </div>
       </Panel>
       <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
@@ -405,7 +406,7 @@ function PropertyDetailView({ property, onRequestTieup, onCreatePropertyPool, bu
         </div>
       </Panel>
       <Panel title="AI shareable pitch" eyebrow="Verified-claims only">
-        <p className="rounded-[20px] bg-slate-950 p-4 text-sm font-semibold leading-7 text-white">{property.shareable_pitch || `${property.title} in ${property.locality}. Request tie-up before sharing full details.`}</p>
+        <p className="rounded-[3px] bg-espresso p-4 text-sm font-semibold leading-7 text-ivory">{property.shareable_pitch || `${property.title} in ${property.locality}. Request tie-up before sharing full details.`}</p>
         <div className="mt-4 space-y-3">
           {(property.tour_route?.waypoints || []).map((item, index) => <RouteRow key={index} label={item.label} focus={item.focus} />)}
         </div>
@@ -420,19 +421,19 @@ function TieupsView({ tieups, properties, compact }: { tieups: BrokerTieup[]; pr
       <div className={clsx("grid gap-3", !compact && "xl:grid-cols-2")}>
         {tieups.length ? tieups.map((tieup) => {
           const property = properties.find((item) => item.id === tieup.listing_id);
-          return <div key={tieup.id} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4">
+          return <div key={tieup.id} className="rounded-[3px] border border-ink/12 bg-ivory p-4">
             <div className="flex items-start justify-between gap-3">
-              <div><p className="text-sm font-black text-slate-950">{tieup.property_title}</p><p className="mt-1 text-sm text-slate-500">{tieup.manager_name} · {property?.locality || "Mumbai"}</p></div>
+              <div><p className="text-sm font-semibold text-ink">{tieup.property_title}</p><p className="mt-1 text-sm text-ink/55">{tieup.manager_name} · {property?.locality || "Mumbai"}</p></div>
               <StatusBadge status={tieup.status} />
             </div>
-            <div className="mt-4 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
+            <div className="mt-4 grid gap-2 text-sm text-ink/60 md:grid-cols-2">
               <p>Commission: {tieup.approved_commission || tieup.requested_commission}%</p>
               <p>Validity: {tieup.approved_validity_days || tieup.requested_validity_days} days</p>
               <p>PropertyPool: {tieup.approved_propertypool_rights ? "Approved" : tieup.requested_propertypool_rights ? "Requested" : "No"}</p>
               <p>Channels: {tieup.marketing_channels.join(", ")}</p>
             </div>
           </div>;
-        }) : <p className="text-sm text-slate-500">No tie-up requests yet. Request access from property discovery.</p>}
+        }) : <p className="text-sm text-ink/55">No tie-up requests yet. Request access from property discovery.</p>}
       </div>
     </Panel>
   );
@@ -441,7 +442,7 @@ function TieupsView({ tieups, properties, compact }: { tieups: BrokerTieup[]; pr
 function PropertyPoolView({ events, onNew }: { events: PropertyPoolEvent[]; onNew: () => void }) {
   return (
     <div className="space-y-5">
-      <div className="flex justify-end"><button onClick={onNew} className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><Plus size={16} />New PropertyPool</button></div>
+      <div className="flex justify-end"><button onClick={onNew} className="inline-flex items-center gap-2 rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]"><Plus size={16} />New PropertyPool</button></div>
       <div className="grid gap-4 xl:grid-cols-2">
         {events.map((event) => <EventCard key={event.id} event={event} />)}
       </div>
@@ -454,17 +455,17 @@ function PropertyPoolNewView({ properties, selected, setSelected, onCreate, busy
     <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
       <Panel title="Create PropertyPool automatically" eyebrow="Collective site visit">
         <div className="space-y-3">
-          {properties.map((property) => <button key={property.id} onClick={() => setSelected(property)} className={clsx("w-full rounded-[18px] border p-4 text-left", selected?.id === property.id ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-slate-50")}>
-            <p className="font-black text-slate-950">{property.title}</p>
-            <p className="text-sm text-slate-500">{property.locality} · {property.propertypool_status}</p>
+          {properties.map((property) => <button key={property.id} onClick={() => setSelected(property)} className={clsx("w-full rounded-[3px] border p-4 text-left", selected?.id === property.id ? "border-gold/45 bg-gold/10" : "border-ink/12 bg-ivory")}>
+            <p className="font-semibold text-ink">{property.title}</p>
+            <p className="text-sm text-ink/55">{property.locality} · {property.propertypool_status}</p>
           </button>)}
         </div>
       </Panel>
       <Panel title="Auto-generated event plan" eyebrow="PropertyPool agent">
         {selected ? <div className="space-y-4">
           <InfoGrid items={[["Property", selected.title], ["Buyer segment", "qualified family and NRI buyers"], ["Max buyers", "8"], ["Meeting point", selected.address], ["Pre-qualification", "Budget and locality fit confirmed"], ["Reminder schedule", "24h, 2h, post-visit"]]} />
-          <button onClick={onCreate} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white"><CalendarClock size={16} />{busy ? "Creating..." : "Create PropertyPool"}</button>
-        </div> : <p className="text-sm text-slate-500">Select an approved property to generate event details.</p>}
+          <button onClick={onCreate} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><CalendarClock size={16} />{busy ? "Creating..." : "Create PropertyPool"}</button>
+        </div> : <p className="text-sm text-ink/55">Select an approved property to generate event details.</p>}
       </Panel>
     </div>
   );
@@ -475,13 +476,13 @@ function PropertyPoolDetailView({ event, buyers }: { event: PropertyPoolEvent; b
     <div className="grid gap-5 xl:grid-cols-[1fr_0.8fr]">
       <Panel title={event.event_title} eyebrow="Mobile site visit command">
         <InfoGrid items={[["Status", event.status], ["Time", new Date(event.scheduled_start).toLocaleString("en-IN")], ["Registered", String(event.registered_buyers)], ["Attended", String(event.attended_buyers)], ["Manager approval", event.manager_approval_status], ["Offer pipeline", String(event.offer_pipeline)]]} />
-        <div className="mt-4 rounded-[20px] bg-slate-950 p-4 text-white">
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">Broker tour script</p>
-          <p className="mt-2 text-sm font-semibold leading-7 text-white/78">{event.tour_script}</p>
+        <div className="mt-4 rounded-[3px] bg-espresso p-4 text-ivory">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-goldsoft">Broker tour script</p>
+          <p className="mt-2 text-sm font-semibold leading-7 text-ivory/78">{event.tour_script}</p>
         </div>
       </Panel>
       <Panel title="QR check-in and route" eyebrow="PropertyPool operations">
-        <div className="mb-4 grid h-36 w-36 place-items-center rounded-[24px] border border-slate-200 bg-slate-50"><QrCode size={84} className="text-slate-900" /></div>
+        <div className="mb-4 grid h-36 w-36 place-items-center rounded-[3px] border border-ink/12 bg-sand"><QrCode size={84} className="text-ink" /></div>
         <div className="space-y-3">{(event.route_json.waypoints || []).map((item, index) => <RouteRow key={index} label={item.label} focus={item.focus} />)}</div>
         <div className="mt-4 grid gap-2">{buyers.slice(0, 4).map((buyer) => <TaskRow key={buyer.id} title={buyer.full_name} agent={buyer.lead_temperature.replace(/_/g, " ")} priority="medium" />)}</div>
       </Panel>
@@ -498,7 +499,7 @@ function BuyersView({ buyers, draft, setDraft, onSubmit, busy }: { buyers: Broke
           <Input label="Phone" value={draft.phone} onChange={(value) => setDraft({ ...draft, phone: value })} />
           <Input label="Budget max" value={String(draft.budget_max)} onChange={(value) => setDraft({ ...draft, budget_max: Number(value) })} />
           <Input label="Preferred localities" value={draft.preferred_localities} onChange={(value) => setDraft({ ...draft, preferred_localities: value })} />
-          <button className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><Plus size={16} />{busy ? "Adding..." : "Add and qualify"}</button>
+          <button className="inline-flex items-center gap-2 rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]"><Plus size={16} />{busy ? "Adding..." : "Add and qualify"}</button>
         </form>
       </Panel>
       <div className="grid gap-4 lg:grid-cols-2">
@@ -509,7 +510,7 @@ function BuyersView({ buyers, draft, setDraft, onSubmit, busy }: { buyers: Broke
 }
 
 function LeadsView({ dashboard }: { dashboard: BrokerDashboard }) {
-  return <Panel title="Lead attribution protection" eyebrow="Commission dispute prevention"><div className="grid gap-3 xl:grid-cols-2">{dashboard.buyers.map((buyer) => <div key={buyer.id} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4"><p className="font-black text-slate-950">{buyer.full_name}</p><p className="mt-1 text-sm text-slate-500">{buyer.phone} · protected when attached to property</p><div className="mt-3 flex flex-wrap gap-2"><StatusBadge status={buyer.lead_temperature} /><StatusBadge status={buyer.follow_up_status} /></div></div>)}</div></Panel>;
+  return <Panel title="Lead attribution protection" eyebrow="Commission dispute prevention"><div className="grid gap-3 xl:grid-cols-2">{dashboard.buyers.map((buyer) => <div key={buyer.id} className="rounded-[3px] border border-ink/12 bg-ivory p-4"><p className="font-semibold text-ink">{buyer.full_name}</p><p className="mt-1 text-sm text-ink/55">{buyer.phone} · protected when attached to property</p><div className="mt-3 flex flex-wrap gap-2"><StatusBadge status={buyer.lead_temperature} /><StatusBadge status={buyer.follow_up_status} /></div></div>)}</div></Panel>;
 }
 
 function VisitsView({ events, buyers }: { events: PropertyPoolEvent[]; buyers: BrokerBuyer[] }) {
@@ -518,16 +519,16 @@ function VisitsView({ events, buyers }: { events: PropertyPoolEvent[]; buyers: B
 
 function CommissionsView({ dashboard }: { dashboard: BrokerDashboard }) {
   const total = dashboard.commissions.reduce((sum, item) => sum + item.expected_commission, 0);
-  return <Panel title="Commission pipeline" eyebrow="Attribution-backed payouts"><div className="mb-4 rounded-[20px] bg-slate-950 p-5 text-white"><p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">Expected commission</p><p className="mt-2 text-4xl font-black">{formatCr(total)}</p></div><div className="grid gap-3 xl:grid-cols-2">{dashboard.commissions.map((item) => <InfoGrid key={item.id} items={[["Deal status", item.deal_status], ["Property value", formatCr(item.property_value)], ["Commission", `${item.commission_percentage}%`], ["Expected", formatCr(item.expected_commission)], ["Payout", item.payout_status], ["Dispute", item.dispute_status]]} />)}</div></Panel>;
+  return <Panel title="Commission pipeline" eyebrow="Attribution-backed payouts"><div className="mb-4 rounded-[3px] bg-espresso p-5 text-ivory"><p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-goldsoft">Expected commission</p><p className="lx-display mt-2 text-4xl font-light">{formatCr(total)}</p></div><div className="grid gap-3 xl:grid-cols-2">{dashboard.commissions.map((item) => <InfoGrid key={item.id} items={[["Deal status", item.deal_status], ["Property value", formatCr(item.property_value)], ["Commission", `${item.commission_percentage}%`], ["Expected", formatCr(item.expected_commission)], ["Payout", item.payout_status], ["Dispute", item.dispute_status]]} />)}</div></Panel>;
 }
 
 function AutomationView({ dashboard, onRun, busy }: { dashboard: BrokerDashboard; onRun: (createPool?: boolean) => void; busy: string | null }) {
-  return <div className="grid gap-5 xl:grid-cols-[0.85fr_1.15fr]"><Panel title="Broker automation controls" eyebrow="Codex operations engine"><div className="space-y-3"><button onClick={() => onRun(false)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><RefreshCw size={16} />{busy === "growth" ? "Running..." : "Run Broker Growth Automation"}</button><button onClick={() => onRun(true)} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-black text-white"><CalendarClock size={16} />{busy === "propertypool-auto" ? "Planning..." : "Create PropertyPool Automatically"}</button></div></Panel><Panel title="Agent task queue" eyebrow="LangGraph broker swarm"><div className="grid gap-3">{dashboard.next_best_actions.map((task) => <TaskRow key={task.id} title={String(task.output_json?.title || task.task_type)} agent={task.agent_name} priority={task.priority} />)}</div></Panel></div>;
+  return <div className="grid gap-5 xl:grid-cols-[0.85fr_1.15fr]"><Panel title="Broker automation controls" eyebrow="Codex operations engine"><div className="space-y-3"><button onClick={() => onRun(false)} className="inline-flex w-full items-center justify-center gap-2 rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]"><RefreshCw size={16} />{busy === "growth" ? "Running..." : "Run Broker Growth Automation"}</button><button onClick={() => onRun(true)} className="inline-flex w-full items-center justify-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><CalendarClock size={16} />{busy === "propertypool-auto" ? "Planning..." : "Create PropertyPool Automatically"}</button></div></Panel><Panel title="Agent task queue" eyebrow="LangGraph broker swarm"><div className="grid gap-3">{dashboard.next_best_actions.map((task) => <TaskRow key={task.id} title={String(task.output_json?.title || task.task_type)} agent={task.agent_name} priority={task.priority} />)}</div></Panel></div>;
 }
 
 function MessagesView({ dashboard }: { dashboard: BrokerDashboard }) {
   const event = dashboard.propertypool_events[0];
-  return <Panel title="WhatsApp automation drafts" eyebrow="Approved claims and attribution-aware"><div className="grid gap-4 xl:grid-cols-2">{dashboard.buyers.map((buyer) => <div key={buyer.id} className="rounded-[20px] border border-slate-200 bg-slate-50 p-4"><div className="flex items-center justify-between"><p className="font-black text-slate-950">{buyer.full_name}</p><MessageCircle size={18} className="text-emerald-600" /></div><p className="mt-3 text-sm leading-7 text-slate-600">{event?.invite_message || `Hi ${buyer.full_name}, I found verified inventory matching your budget. Should I reserve a visit slot?`}</p><button className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"><Send size={14} />Draft WhatsApp</button></div>)}</div></Panel>;
+  return <Panel title="WhatsApp automation drafts" eyebrow="Approved claims and attribution-aware"><div className="grid gap-4 xl:grid-cols-2">{dashboard.buyers.map((buyer) => <div key={buyer.id} className="rounded-[3px] border border-ink/12 bg-ivory p-4"><div className="flex items-center justify-between"><p className="font-semibold text-ink">{buyer.full_name}</p><MessageCircle size={18} className="text-gold" /></div><p className="mt-3 text-sm leading-7 text-ink/60">{event?.invite_message || `Hi ${buyer.full_name}, I found verified inventory matching your budget. Should I reserve a visit slot?`}</p><button className="mt-3 inline-flex items-center gap-2 rounded-[3px] bg-gold px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><Send size={14} />Draft WhatsApp</button></div>)}</div></Panel>;
 }
 
 function AnalyticsView({ dashboard }: { dashboard: BrokerDashboard }) {
@@ -576,22 +577,22 @@ function BrokerMap({ properties, focused, onFocus }: { properties: BrokerPropert
     else if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
   }, [properties, focused, onFocus]);
 
-  return <Panel title="Broker opportunity map" eyebrow="Mumbai manager inventory"><div ref={containerRef} className="h-[620px] overflow-hidden rounded-[20px] border border-slate-200 bg-slate-100" /><div className="mt-4 grid gap-2 md:grid-cols-4"><Legend color="bg-emerald-500" label="Open tie-up" /><Legend color="bg-blue-500" label="Approved" /><Legend color="bg-amber-500" label="Pending" /><Legend color="bg-violet-500" label="High commission" /></div></Panel>;
+  return <Panel title="Broker opportunity map" eyebrow="Mumbai manager inventory"><div ref={containerRef} className="h-[620px] overflow-hidden rounded-[3px] border border-ink/12 bg-sand" /><div className="mt-4 grid gap-2 md:grid-cols-4"><Legend color="bg-emerald-500" label="Open tie-up" /><Legend color="bg-blue-500" label="Approved" /><Legend color="bg-amber-500" label="Pending" /><Legend color="bg-violet-500" label="High commission" /></div></Panel>;
 }
 
 function OpportunityCard({ property, onRequestTieup, onCreatePropertyPool, busy }: { property: BrokerProperty; onRequestTieup: (property: BrokerProperty) => void; onCreatePropertyPool: () => void; busy: string | null }) {
   const requesting = busy === `tieup-${property.id}`;
   const locked = isTieupActionLocked(property.tieup_status);
-  return <div className="rounded-[20px] border border-slate-200 bg-slate-50 p-4"><div className="flex items-start justify-between gap-4"><div><p className="text-xl font-black text-slate-950">{property.title}</p><p className="mt-1 text-sm text-slate-500">{property.locality} · {formatCr(property.price)} · {property.commission_range}</p></div><StatusBadge status={property.tieup_status} /></div><div className="mt-4 grid gap-2 md:grid-cols-3"><MiniMetric label="Buyer demand" value={`${Math.round(property.buyer_demand_score)}`} /><MiniMetric label="Legal risk" value={`${Math.round(property.legal_risk_score)}`} /><MiniMetric label="Market heat" value={`${Math.round(property.market_heat_score)}`} /></div><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => onRequestTieup(property)} disabled={locked || requesting} className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-3 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"><ShieldCheck size={14} />{tieupActionLabel(property.tieup_status, requesting)}</button><button className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700"><Send size={14} />Share pitch</button><button onClick={onCreatePropertyPool} className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800"><CalendarClock size={14} />Create PropertyPool</button></div></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4"><div className="flex items-start justify-between gap-4"><div><p className="lx-display text-xl font-light text-ink">{property.title}</p><p className="mt-1 text-sm text-ink/55">{property.locality} · {formatCr(property.price)} · {property.commission_range}</p></div><StatusBadge status={property.tieup_status} /></div><div className="mt-4 grid gap-2 md:grid-cols-3"><MiniMetric label="Buyer demand" value={`${Math.round(property.buyer_demand_score)}`} /><MiniMetric label="Legal risk" value={`${Math.round(property.legal_risk_score)}`} /><MiniMetric label="Market heat" value={`${Math.round(property.market_heat_score)}`} /></div><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => onRequestTieup(property)} disabled={locked || requesting} className="inline-flex items-center gap-2 rounded-[3px] bg-ink px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f] disabled:cursor-not-allowed disabled:bg-ink/25 disabled:text-ivory/60"><ShieldCheck size={14} />{tieupActionLabel(property.tieup_status, requesting)}</button><button className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand"><Send size={14} />Share pitch</button><button onClick={onCreatePropertyPool} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><CalendarClock size={14} />Create PropertyPool</button></div></div>;
 }
 
 function PropertyCard({ property, onOpen, onRequestTieup, busy }: { property: BrokerProperty; onOpen: () => void; onRequestTieup: () => void; busy: boolean }) {
   const locked = isTieupActionLocked(property.tieup_status);
-  return <div className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-[0_18px_56px_rgba(15,23,42,0.07)]"><button onClick={onOpen} className="w-full text-left"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">{property.locality}</p><h3 className="mt-1 text-xl font-black text-slate-950">{property.title}</h3><p className="mt-1 text-sm text-slate-500">{property.bedrooms || "-"} BHK · {property.carpet_area_sqft || "-"} sq ft · {formatCr(property.price)}</p></div><StatusBadge status={property.tieup_status} /></div></button><div className="mt-4 grid gap-2 md:grid-cols-2"><MiniMetric label="Commission" value={formatCr(property.commission_estimate)} /><MiniMetric label="Buyer match" value={`${Math.round(property.buyer_match_score)}/100`} /></div><p className="mt-3 text-sm font-semibold text-slate-500">{property.allowed_marketing_status}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={onRequestTieup} disabled={locked || busy} className="rounded-2xl bg-slate-950 px-3 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600">{tieupActionLabel(property.tieup_status, busy)}</button><button onClick={onOpen} className="rounded-2xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700">Open</button></div></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><button onClick={onOpen} className="w-full text-left"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{property.locality}</p><h3 className="lx-display mt-1 text-xl font-light text-ink">{property.title}</h3><p className="mt-1 text-sm text-ink/55">{property.bedrooms || "-"} BHK · {property.carpet_area_sqft || "-"} sq ft · {formatCr(property.price)}</p></div><StatusBadge status={property.tieup_status} /></div></button><div className="mt-4 grid gap-2 md:grid-cols-2"><MiniMetric label="Commission" value={formatCr(property.commission_estimate)} /><MiniMetric label="Buyer match" value={`${Math.round(property.buyer_match_score)}/100`} /></div><p className="mt-3 text-sm font-semibold text-ink/55">{property.allowed_marketing_status}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={onRequestTieup} disabled={locked || busy} className="rounded-[3px] bg-ink px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f] disabled:cursor-not-allowed disabled:bg-ink/25 disabled:text-ivory/60">{tieupActionLabel(property.tieup_status, busy)}</button><button onClick={onOpen} className="rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">Open</button></div></div>;
 }
 
 function EventCard({ event }: { event: PropertyPoolEvent }) {
-  return <Link href={`/broker/propertypool/${event.id}`} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_18px_56px_rgba(15,23,42,0.07)] transition hover:-translate-y-1"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">{event.event_type}</p><h3 className="mt-1 text-xl font-black text-slate-950">{event.event_title}</h3><p className="mt-1 text-sm text-slate-500">{new Date(event.scheduled_start).toLocaleString("en-IN")} · {event.meeting_point}</p></div><StatusBadge status={event.status} /></div><div className="mt-4 grid gap-2 md:grid-cols-3"><MiniMetric label="Registered" value={String(event.registered_buyers)} /><MiniMetric label="Max" value={String(event.max_buyers)} /><MiniMetric label="Offers" value={String(event.offer_pipeline)} /></div></Link>;
+  return <Link href={`/broker/propertypool/${event.id}`} className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx transition hover:-translate-y-1"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{event.event_type}</p><h3 className="lx-display mt-1 text-xl font-light text-ink">{event.event_title}</h3><p className="mt-1 text-sm text-ink/55">{new Date(event.scheduled_start).toLocaleString("en-IN")} · {event.meeting_point}</p></div><StatusBadge status={event.status} /></div><div className="mt-4 grid gap-2 md:grid-cols-3"><MiniMetric label="Registered" value={String(event.registered_buyers)} /><MiniMetric label="Max" value={String(event.max_buyers)} /><MiniMetric label="Offers" value={String(event.offer_pipeline)} /></div></Link>;
 }
 
 function BuyerCard({ buyer }: { buyer: BrokerBuyer }) {
@@ -606,20 +607,20 @@ function BuyerCard({ buyer }: { buyer: BrokerBuyer }) {
       setBusy(false);
     }
   }
-  return <Link href={`/broker/buyers/${buyer.id}`} className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_18px_56px_rgba(15,23,42,0.07)] transition hover:-translate-y-1"><div className="flex items-start justify-between gap-3"><div><p className="text-xl font-black text-slate-950">{buyer.full_name}</p><p className="mt-1 text-sm text-slate-500">{buyer.phone} · {buyer.communication_channel}</p></div><StatusBadge status={buyer.lead_temperature} /></div><div className="mt-4 grid gap-2 md:grid-cols-2"><MiniMetric label="Budget" value={formatCr(buyer.budget_max)} /><MiniMetric label="Qualification" value={`${buyer.qualification_score}/100`} /></div><p className="mt-3 text-sm text-slate-500">{buyer.preferred_localities.join(", ")} · {buyer.follow_up_status}</p><button onClick={callBuyer} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-3 py-2 text-xs font-black text-white"><MessageCircle size={14} />{busy ? "Calling..." : "Call buyer with ASTRA Voice Closer"}</button>{callResult ? <p className="mt-3 rounded-2xl bg-orange-50 p-3 text-xs font-black text-orange-900">{callResult.call_status}: {callResult.reason}</p> : null}</Link>;
+  return <Link href={`/broker/buyers/${buyer.id}`} className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx transition hover:-translate-y-1"><div className="flex items-start justify-between gap-3"><div><p className="lx-display text-xl font-light text-ink">{buyer.full_name}</p><p className="mt-1 text-sm text-ink/55">{buyer.phone} · {buyer.communication_channel}</p></div><StatusBadge status={buyer.lead_temperature} /></div><div className="mt-4 grid gap-2 md:grid-cols-2"><MiniMetric label="Budget" value={formatCr(buyer.budget_max)} /><MiniMetric label="Qualification" value={`${buyer.qualification_score}/100`} /></div><p className="mt-3 text-sm text-ink/55">{buyer.preferred_localities.join(", ")} · {buyer.follow_up_status}</p><button onClick={callBuyer} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[3px] bg-gold px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]"><MessageCircle size={14} />{busy ? "Calling..." : "Call buyer with ASTRA Voice Closer"}</button>{callResult ? <p className="mt-3 rounded-[3px] bg-sand p-3 text-xs font-semibold text-ink/70">{callResult.call_status}: {callResult.reason}</p> : null}</Link>;
 }
 
 function Panel({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
-  return <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)]"><div className="mb-4 flex items-start justify-between gap-4"><div><p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700">{eyebrow}</p><h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950">{title}</h3></div><Sparkles size={20} className="text-amber-500" /></div>{children}</section>;
+  return <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx"><div className="mb-4 flex items-start justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-gold">{eyebrow}</p><h3 className="lx-display mt-2 text-2xl font-light tracking-tight text-ink">{title}</h3></div><Sparkles size={20} className="text-gold" /></div>{children}</section>;
 }
 
 function MetricCard({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: string }) {
-  const color = tone === "emerald" ? "bg-emerald-50 text-emerald-800" : tone === "amber" ? "bg-amber-50 text-amber-900" : tone === "gold" ? "bg-yellow-50 text-yellow-900" : "bg-slate-50 text-slate-800";
-  return <div className={clsx("rounded-[20px] border border-slate-200 p-4", color)}><p className="text-[10px] font-black uppercase tracking-[0.18em] opacity-70">{label}</p><p className="mt-3 text-3xl font-black tracking-tight">{value}</p><p className="mt-2 text-sm font-semibold opacity-70">{detail}</p></div>;
+  const valueColor = tone === "emerald" || tone === "amber" || tone === "gold" ? "text-gold" : "text-ink";
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4"><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/45">{label}</p><p className={clsx("lx-display mt-3 text-3xl font-light", valueColor)}>{value}</p><p className="mt-2 text-sm text-ink/55">{detail}</p></div>;
 }
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-[16px] border border-slate-200 bg-white p-3"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">{label}</p><p className="mt-1 text-lg font-black text-slate-950">{value}</p></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-3"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/45">{label}</p><p className="lx-display mt-1 text-lg font-light text-ink">{value}</p></div>;
 }
 
 function InfoGrid({ items }: { items: Array<[string, string]> }) {
@@ -627,34 +628,34 @@ function InfoGrid({ items }: { items: Array<[string, string]> }) {
 }
 
 function FeedRow({ entry }: { entry: { actor_name: string; action: string; details: string; tone?: string } }) {
-  const tone = entry.tone === "emerald" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : entry.tone === "gold" ? "border-yellow-200 bg-yellow-50 text-yellow-900" : "border-slate-200 bg-slate-50 text-slate-700";
-  return <div className={clsx("rounded-[18px] border p-4", tone)}><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black">{entry.actor_name}</p><p className="mt-1 text-sm leading-6">{entry.details}</p></div><span className="text-[10px] font-black uppercase tracking-[0.16em] opacity-70">{entry.action.replace(/_/g, " ")}</span></div></div>;
+  const tone = entry.tone === "emerald" ? "border-gold/30 bg-gold/8 text-ink" : entry.tone === "gold" ? "border-gold/30 bg-sand text-ink" : "border-ink/12 bg-ivory text-ink/70";
+  return <div className={clsx("rounded-[3px] border p-4", tone)}><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold">{entry.actor_name}</p><p className="mt-1 text-sm leading-6">{entry.details}</p></div><span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-70">{entry.action.replace(/_/g, " ")}</span></div></div>;
 }
 
 function TaskRow({ title, agent, priority }: { title: string; agent: string; priority: string }) {
-  return <div className="rounded-[18px] border border-slate-200 bg-slate-50 p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-black text-slate-950">{title}</p><p className="mt-1 text-sm text-slate-500">{agent}</p></div><span className={clsx("rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.16em]", priority === "high" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600")}>{priority}</span></div></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{title}</p><p className="mt-1 text-sm text-ink/55">{agent}</p></div><span className={clsx("rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]", priority === "high" ? "bg-gold/12 text-[#8f6d32]" : "bg-ink/5 text-ink/55")}>{priority}</span></div></div>;
 }
 
 function RouteRow({ label, focus }: { label: string; focus: string }) {
-  return <div className="rounded-[16px] border border-slate-200 bg-slate-50 p-3"><p className="text-sm font-black text-slate-950">{label}</p><p className="mt-1 text-sm text-slate-500">{focus}</p></div>;
+  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-3"><p className="text-sm font-semibold text-ink">{label}</p><p className="mt-1 text-sm text-ink/55">{focus}</p></div>;
 }
 
 function TaskChip({ title, done }: { title: string; done: boolean }) {
-  return <div className={clsx("flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-black", done ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-900")}><CheckCircle2 size={16} />{title}</div>;
+  return <div className={clsx("flex items-center gap-2 rounded-[3px] border px-4 py-3 text-sm font-semibold", done ? "border-gold/40 bg-gold/10 text-[#8f6d32]" : "border-ink/15 bg-sand text-ink/70")}><CheckCircle2 size={16} />{title}</div>;
 }
 
 function StatusBadge({ status }: { status: string }) {
   const clean = status.replace(/_/g, " ");
-  const tone = status.includes("active") || status.includes("approved") || status.includes("hot") || status.includes("ready") || status.includes("scheduled") ? "bg-emerald-100 text-emerald-800" : status.includes("review") || status.includes("pending") || status.includes("warm") ? "bg-amber-100 text-amber-900" : "bg-slate-100 text-slate-700";
-  return <span className={clsx("rounded-full px-3 py-1 text-xs font-black capitalize", tone)}>{clean}</span>;
+  const tone = status.includes("active") || status.includes("approved") || status.includes("hot") || status.includes("ready") || status.includes("scheduled") ? "border-gold/45 bg-gold/10 text-[#8f6d32]" : status.includes("review") || status.includes("pending") || status.includes("warm") ? "border-ink/20 bg-ink/5 text-ink/60" : "border-ink/15 text-ink/55";
+  return <span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] capitalize", tone)}>{clean}</span>;
 }
 
 function Legend({ color, label }: { color: string; label: string }) {
-  return <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-600"><span className={clsx("h-3 w-3 rounded-full", color)} />{label}</div>;
+  return <div className="flex items-center gap-2 rounded-[3px] border border-ink/12 bg-ivory px-3 py-2 text-xs font-semibold text-ink/60"><span className={clsx("h-3 w-3 rounded-full", color)} />{label}</div>;
 }
 
 function Input({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return <label className="block"><span className="mb-1 block text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 w-full rounded-2xl border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-emerald-400" /></label>;
+  return <label className="block"><span className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-ink/50">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 w-full rounded-[3px] border border-ink/15 bg-ivory px-3 text-sm outline-none focus:border-gold" /></label>;
 }
 
 function emptyDashboard(): BrokerDashboard {

@@ -12,20 +12,23 @@ export function TourGuidePanel({ focused }: { focused: Property | null }) {
   }
 
   return (
-    <section className="glass rounded-lg p-5 shadow-soft">
-      <p className="section-kicker">Tour guide assistant</p>
-      <h2 className="font-display text-3xl font-black leading-none text-ink">AI viewing route</h2>
-      <button onClick={run} className="mt-4 flex items-center gap-2 rounded-md bg-peacock px-4 py-3 text-sm font-black text-white shadow-crisp transition hover:-translate-y-0.5">
+    <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+      <div className="flex items-center gap-2">
+        <span className="h-px w-10 bg-gold" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Tour guide assistant</p>
+      </div>
+      <h2 className="lx-display mt-1 text-3xl font-light leading-none text-ink">AI viewing route</h2>
+      <button onClick={run} className="mt-4 flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32]">
         <Route size={16} />
         Generate guided tour
       </button>
       {tour && (
         <div className="mt-4 space-y-3">
-          <p className="text-sm font-medium leading-6 text-ink/62">{tour.narration}</p>
+          <p className="text-sm font-medium leading-6 text-ink/65">{tour.narration}</p>
           {tour.waypoints.map((w, i) => (
-            <div key={w.label} className="rounded-md border border-ink/12 bg-white/62 p-3">
-              <p className="font-black text-ink">{i + 1}. {w.label}</p>
-              <p className="text-sm font-semibold text-ink/52">{w.focus}</p>
+            <div key={w.label} className="rounded-[3px] border border-ink/12 bg-ivory p-3">
+              <p className="font-semibold text-ink">{i + 1}. {w.label}</p>
+              <p className="text-sm font-semibold text-ink/55">{w.focus}</p>
             </div>
           ))}
         </div>

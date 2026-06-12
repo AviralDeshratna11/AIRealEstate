@@ -7,6 +7,7 @@ import { dashboardForRole, type AuthRole } from "@/lib/auth/roles";
 import { RoleSwitcher } from "@/components/auth/RoleSwitcher";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { apiFetch } from "@/lib/api/client";
+import { syncBrowserAuthFromBackend } from "@/lib/auth/session";
 
 const fieldsByRole: Record<AuthRole, string[]> = {
   buyer: ["phone", "budget range", "preferred localities", "property type", "BHK", "purchase purpose", "buying timeline", "loan requirement", "EMI comfort", "family size"],
@@ -56,6 +57,7 @@ export function OnboardingStepper() {
       setBrowserAuthCookies(role);
       try {
         await apiFetch("/api/auth/profile", { method: "POST", body: JSON.stringify({ role, full_name: fullName, phone: metadata.phone, metadata }) });
+        await syncBrowserAuthFromBackend(role);
       } catch (profileError) {
         console.warn("ASTRA backend profile sync failed; continuing with Supabase session.", profileError);
       }
