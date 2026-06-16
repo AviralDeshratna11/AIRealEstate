@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import assistant, agents, bookings, broker, crm, documents, finance, manager, market, negotiation, properties, tour, vapi, voice, whatsapp
+from app.api.routes import assistant, agents, bookings, broker, crm, documents, finance, manager, market, negotiation, properties, radar, tour, vapi, voice, whatsapp
 from app.config import get_settings
 from app.db.session import close_pool
 from app.routers import auth
@@ -35,6 +35,7 @@ app.include_router(manager.router)
 app.include_router(broker.router)
 app.include_router(crm.router)
 app.include_router(market.router)
+app.include_router(radar.router)
 app.include_router(tour.router)
 app.include_router(negotiation.router)
 app.include_router(documents.router)
@@ -45,7 +46,7 @@ app.include_router(whatsapp.router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "environment": settings.environment, "market": "Mumbai", "agents": 10}
+    return {"status": "ok", "environment": settings.environment, "market": "Mumbai", "agents": 18}
 
 
 @app.on_event("shutdown")

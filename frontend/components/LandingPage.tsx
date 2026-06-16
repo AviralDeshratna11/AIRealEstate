@@ -14,6 +14,7 @@ import {
   IndianRupee,
   Map as MapIcon,
   MessageCircle,
+  Radar,
   TrendingUp,
 } from "lucide-react";
 import { DEMO_MARKET_INSIGHTS, DEMO_PROPERTIES } from "@/lib/demo";
@@ -23,6 +24,7 @@ type Property = (typeof DEMO_PROPERTIES)[number];
 
 const navLinks = [
   { label: "Workspace", href: "/workspace" },
+  { label: "Radar", href: "/radar" },
   { label: "Sales OS", href: "/crm" },
   { label: "Market", href: "/workspace/?tab=market" },
   { label: "Brokers", href: "/broker" },
@@ -39,6 +41,7 @@ const workflows = [
   { title: "Search", href: "/workspace/?tab=search", icon: Building2, copy: "Natural-language buyer intent becomes a ranked Mumbai shortlist." },
   { title: "Market", href: "/workspace/?tab=market", icon: TrendingUp, copy: "Inventory, liquidity, and redevelopment signals shape the position." },
   { title: "Map", href: "/workspace/?tab=map", icon: MapIcon, copy: "Locality pins keep every mandate anchored to its true context." },
+  { title: "Redevelopment Radar", href: "/radar", icon: Radar, copy: "Evidence-backed Future Scores reveal where Mumbai is going next — infra, redevelopment, zoning." },
   { title: "Finance", href: "/workspace/?tab=finance", icon: IndianRupee, copy: "EMI, down payment, and construction estimates stay legible." },
   { title: "Tours", href: "/workspace/?tab=tour", icon: CalendarClock, copy: "AI viewing routes turn shortlist energy into scheduled site visits." },
   { title: "Channels", href: "/workspace/?tab=channels", icon: MessageCircle, copy: "WhatsApp, call triage, slot lookup, and booking handoff in one lane." },

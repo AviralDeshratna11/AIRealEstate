@@ -427,3 +427,102 @@ body {
     transition: none;
   }
 }
+
+/* ----------------------------------------------------------------------- */
+/* Mumbai Redevelopment Radar                                              */
+/* Editorial light look (canonical) + radar signal accents layered on top. */
+/* ----------------------------------------------------------------------- */
+:root {
+  --radar-growth: #0f9d6b;        /* green  - confirmed growth */
+  --radar-connectivity: #2563eb;  /* blue   - connectivity uplift */
+  --radar-redevelopment: #7c3aed; /* purple - redevelopment momentum */
+  --radar-premium: #a8813c;       /* gold   - premiumization */
+  --radar-speculative: #ea7317;   /* orange - speculative */
+  --radar-risk: #d6532c;          /* red    - execution / disruption risk */
+  --radar-insufficient: #8a8170;  /* gray   - insufficient data */
+}
+
+.radar-card {
+  background:
+    linear-gradient(180deg, rgba(255, 252, 244, 0.96), rgba(247, 243, 234, 0.92)),
+    repeating-linear-gradient(135deg, transparent 0 14px, rgba(25, 23, 19, 0.02) 14px 15px);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: 0 18px 42px rgba(25, 23, 19, 0.1);
+}
+
+/* Frosted glass panel that still reads on top of the live map. */
+.radar-glass {
+  background: linear-gradient(180deg, rgba(255, 252, 244, 0.94), rgba(244, 238, 222, 0.9));
+  border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 18px 42px rgba(25, 23, 19, 0.14);
+}
+
+.radar-kicker {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Score gauge ring */
+.radar-gauge {
+  --val: 0;
+  --tone: var(--radar-growth);
+  background: conic-gradient(var(--tone) calc(var(--val) * 1%), rgba(25, 23, 19, 0.08) 0);
+  border-radius: 999px;
+}
+
+/* Signal dot used on the map + chips */
+.radar-signal-dot {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: #fffaf0;
+  border: 2px solid #fffaf0;
+  box-shadow: 4px 4px 0 rgba(25, 23, 19, 0.22);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.radar-leaflet { background: var(--sand); }
+
+/* A thin animated scan line for the dashboard header */
+.radar-scan {
+  position: relative;
+  overflow: hidden;
+}
+.radar-scan::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -40%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(168, 129, 60, 0.16), transparent);
+  animation: radar-sweep 5.5s linear infinite;
+}
+@keyframes radar-sweep {
+  to { transform: translateX(350%); }
+}
+
+/* Horizontal score bar */
+.radar-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(25, 23, 19, 0.08);
+  overflow: hidden;
+}
+.radar-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar-scan::after { animation: none; }
+}

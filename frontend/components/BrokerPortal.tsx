@@ -274,6 +274,10 @@ export function BrokerPortal({ view, id }: BrokerPortalProps) {
                   <BriefcaseBusiness size={16} />
                   Manager OS
                 </Link>
+                <Link href="/radar" className="inline-flex items-center gap-2 rounded-[3px] border border-gold/40 bg-gold/10 px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-gold hover:text-ivory">
+                  <BriefcaseBusiness size={16} />
+                  Broker Radar
+                </Link>
                 <button onClick={() => onRunAutomation(false)} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
                   <Wand2 size={16} />
                   {busy === "growth" ? "Running..." : "Run Broker Growth Automation"}

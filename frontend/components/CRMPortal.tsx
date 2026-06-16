@@ -149,6 +149,7 @@ export function CRMPortal({ view, id }: { view: CRMView; id?: string | null }) {
             </div>
             <nav className="mt-3 space-y-1">
               <Link href="/" className="flex items-center gap-3 rounded-[3px] px-3 py-2.5 text-sm font-semibold text-ink/60 hover:bg-sand"><span className="grid h-7 w-7 place-items-center rounded-[3px] border border-ink/15 bg-ivory text-ink/70"><Home size={16} /></span> Home</Link>
+              <Link href="/radar" className="flex items-center gap-3 rounded-[3px] border border-gold/40 bg-gold/10 px-3 py-2.5 text-sm font-semibold text-ink/80 transition-colors hover:bg-gold hover:text-ivory"><span className="grid h-7 w-7 place-items-center rounded-[3px] border border-gold/40 bg-ivory text-gold"><ChevronRight size={16} /></span> Redevelopment Radar</Link>
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const selected = item.view === view || (view === "opportunity-detail" && item.view === "opportunities");

@@ -326,6 +326,12 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
                 );
               })}
             </nav>
+            <Link href="/radar" className="flex items-center gap-3 rounded-[3px] border border-gold/40 bg-gold/10 px-4 py-3 text-ink transition-colors hover:bg-gold hover:text-ivory">
+              <span className="grid h-9 w-9 place-items-center rounded-[3px] border border-gold/40 bg-ivory text-gold">
+                <ChevronRight size={17} />
+              </span>
+              <span className="flex-1 text-sm font-semibold">Redevelopment Radar</span>
+            </Link>
             <div className="rounded-[3px] border border-ink/12 bg-sand p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ink/45">Live status</p>
               <p className="mt-2 text-sm font-semibold text-ink/70">{currentDashboard.listings.length} listings tracked</p>

@@ -109,6 +109,10 @@ export function WorkspaceShell() {
                   Home
                 </Link>
                 <div className="flex flex-wrap items-center justify-end gap-2">
+                  <Link href="/radar" className="inline-flex items-center gap-2 rounded-[3px] border border-gold/40 bg-gold/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-gold hover:text-ivory">
+                    <RadioTower size={13} />
+                    Future growth radar
+                  </Link>
                   <Link href="/manager" className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
                     <Building2 size={13} />
                     Manager portal

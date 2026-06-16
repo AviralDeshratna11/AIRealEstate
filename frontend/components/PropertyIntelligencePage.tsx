@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import type { PropertyIntelligenceDetail } from "@/lib/api";
 import { askPropertyAI, formatCr, formatInr, getPropertyIntelligence, runPropertyAction, triggerElevenLabsInterestCall, type VoiceCallResult } from "@/lib/api";
+import { FutureRadarCard } from "@/components/radar/FutureRadarCard";
 
 type Role = PropertyIntelligenceDetail["role"];
 
@@ -45,6 +46,7 @@ const tabs = [
   ["legal", "Legal and Documents"],
   ["environment", "Sunlight, Ventilation and Noise"],
   ["map", "Map and Location"],
+  ["future-radar", "Future Radar"],
   ["market", "Market Intelligence"],
   ["tour", "Tour Guide"],
   ["similar", "Similar Properties"],
@@ -301,6 +303,10 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
                 {data.map.nearby.map((poi, index) => <Fact key={index} label={String(poi.type || "POI")} value={String(poi.name || poi.distance || "Mock fallback")} />)}
               </div>
             </Section>
+
+            <section id="future-radar" className="scroll-mt-24">
+              <FutureRadarCard propertyId={data.id} localityName={listing.locality} role={role} />
+            </section>
 
             <Section id="market" icon={Search} title="Market Intelligence" eyebrow="Mumbai-first signals">
               <MetricGrid data={data.market_intelligence} />
