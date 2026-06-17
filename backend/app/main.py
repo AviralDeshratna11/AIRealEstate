@@ -49,6 +49,30 @@ async def health():
     return {"status": "ok", "environment": settings.environment, "market": "Mumbai", "agents": 18}
 
 
+@app.on_event("startup")
+async def radar_live_ingest_startup():
+    """Kick off a one-time live Radar ingest (Wikipedia + Google News) in the background.
+
+    Non-blocking: runs in a daemon thread so startup is not delayed, and any
+    network failure is swallowed (the seeded data keeps the feature working).
+    Disable with RADAR_LIVE_INGEST=0.
+    """
+    import os
+    import threading
+
+    if os.getenv("RADAR_LIVE_INGEST", "1") == "0":
+        return
+
+    def _run():
+        try:
+            from app.services import radar_data
+            radar_data.run_ingest_all()
+        except Exception:  # pragma: no cover - best-effort background refresh
+            pass
+
+    threading.Thread(target=_run, name="radar-live-ingest", daemon=True).start()
+
+
 @app.on_event("shutdown")
 async def shutdown_event():
     await close_pool()

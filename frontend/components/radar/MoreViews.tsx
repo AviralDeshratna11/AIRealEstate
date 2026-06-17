@@ -286,7 +286,7 @@ export function AdminView() {
             <Database size={16} className="text-gold" />
             <h3 className="lx-display text-xl font-light text-ink">Source ingestion</h3>
           </div>
-          <p className="text-[13px] text-ink/60">Pull the latest official project records (MMRDA, BMC, MHADA, CIDCO, MRVC, RERA), re-verify sources and re-score affected localities.</p>
+          <p className="text-[13px] text-ink/60">Live ingest fetches current project data from Wikipedia (status, cost, dates, last-revised) and fresh locality signals from Google News, then merges them alongside the seeded official records. Tertiary-source items are marked <span className="font-semibold text-emerald-700">Live</span> and never auto-verified.</p>
           <button type="button" onClick={runIngest} disabled={busy} className="mt-3 inline-flex items-center gap-1.5 rounded-[3px] bg-ink px-4 py-2 text-[13px] font-semibold text-ivory hover:bg-ink/85 disabled:opacity-60">
             {busy ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />} {busy ? "Ingesting…" : "Run ingestion"}
           </button>

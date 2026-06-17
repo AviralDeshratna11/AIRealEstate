@@ -1236,24 +1236,39 @@ DEFAULT_SOURCES = [
 def run_ingest(source: IngestSourceRequest | dict[str, Any]) -> IngestionJob:
     if isinstance(source, dict):
         source = IngestSourceRequest(**source)
-    found = 3
-    job = IngestionJob(
-        id=_uid("job"), source_name=source.source_name, source_url=source.source_url,
-        job_type=source.job_type, status="completed", records_found=found,
-        records_created=found, records_updated=0, started_at=_now(), completed_at=_now(),
-    )
-    INGESTION_JOBS.append(job)
-    _audit("ingest.source", "ingestion", job.id,
-           f"Mock ingest from {source.source_name} ({source.source_type.value}); {found} records.")
-    return job
+    # Real single-source ingest (fetch + optional LLM extraction); fall back to a mock record.
+    try:
+        from app.services import radar_ingest
+        return radar_ingest.ingest_single(source)
+    except Exception as exc:  # network/dependency failure -> graceful mock
+        job = IngestionJob(
+            id=_uid("job"), source_name=source.source_name, source_url=source.source_url,
+            job_type=source.job_type, status="completed", records_found=0,
+            records_created=0, records_updated=0, error_message=f"live ingest unavailable: {exc}",
+            started_at=_now(), completed_at=_now(),
+        )
+        INGESTION_JOBS.append(job)
+        _audit("ingest.source", "ingestion", job.id, f"Fallback (mock) ingest from {source.source_name}.")
+        return job
 
 
 def run_ingest_all() -> list[IngestionJob]:
+    """Run the real live ingest (Wikipedia + Google News). Falls back to mock jobs offline."""
+    try:
+        from app.services import radar_ingest
+        jobs = radar_ingest.ingest_live()
+        if jobs:
+            return jobs
+    except Exception as exc:  # pragma: no cover - network/offline fallback
+        _audit("ingest.run_all.error", "ingestion", None, f"Live ingest failed, using mock: {exc}")
     jobs = []
     for name, url, jtype in DEFAULT_SOURCES:
-        jobs.append(run_ingest(IngestSourceRequest(source_name=name, source_url=url,
-                                                   source_type=SourceType.official, job_type=jtype)))
-    _audit("ingest.run_all", "ingestion", None, f"Ran {len(jobs)} mock ingestion jobs.")
+        jobs.append(IngestionJob(
+            id=_uid("job"), source_name=name, source_url=url, job_type=jtype, status="completed",
+            records_found=0, records_created=0, records_updated=0, started_at=_now(), completed_at=_now(),
+        ))
+    INGESTION_JOBS.extend(jobs)
+    _audit("ingest.run_all", "ingestion", None, f"Ran {len(jobs)} fallback ingestion jobs (offline).")
     return jobs
 
 

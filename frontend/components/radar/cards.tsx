@@ -82,6 +82,11 @@ export function ProjectCard({ project, compact }: { project: RadarProject; compa
       <h3 className="lx-display mt-2 text-xl font-light leading-tight text-ink">{project.name}</h3>
       {!compact ? <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-ink/65">{project.description || project.impact_summary}</p> : null}
       <div className="mt-3 flex flex-wrap items-center gap-2">
+        {project.id.startsWith("live-") ? (
+          <span className="inline-flex items-center gap-1 rounded-[3px] border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> Live
+          </span>
+        ) : null}
         <SourceReliabilityBadge sourceType={project.source_type} reliability={project.reliability_score} />
         {project.stale ? (
           <span className="inline-flex items-center gap-1 rounded-[3px] border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-red-700">

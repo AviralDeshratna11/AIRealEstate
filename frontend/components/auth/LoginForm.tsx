@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
@@ -10,11 +10,22 @@ import { getAuthCallbackUrl, isLocalPublicAppUrl } from "@/lib/auth/redirects";
 import { dashboardForRole } from "@/lib/auth/roles";
 import { syncBrowserAuthFromBackend } from "@/lib/auth/session";
 
-export function LoginForm({ next = "/auth/onboarding", initialError }: { next?: string; initialError?: string }) {
+export function LoginForm({ next: nextProp = "/auth/onboarding", initialError }: { next?: string; initialError?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [next, setNext] = useState(nextProp);
   const [message, setMessage] = useState<string | null>(initialError ? decodeURIComponent(initialError) : null);
+
+  // Read `next`/`error` from the URL on the client so this page can be statically
+  // exported (no server-side `searchParams`). Runtime behavior is unchanged.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const n = params.get("next");
+    if (n) setNext(n);
+    const e = params.get("error");
+    if (e) setMessage(decodeURIComponent(e));
+  }, []);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
