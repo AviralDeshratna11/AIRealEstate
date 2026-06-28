@@ -109,6 +109,17 @@ class PropertyIntelligenceService:
 
     async def detail(self, property_id: str, role: str = "public") -> dict[str, Any]:
         listing = await self._listing(property_id)
+        # Pull the source property for the full listing-spec parameters (the manager
+        # listing model does not carry all of them).
+        spec: dict[str, Any] = {}
+        try:
+            from app.services.property_repository import PropertyRepository
+
+            prop = await PropertyRepository().get_property(str(property_id).replace("seller-", ""))
+            if prop is not None:
+                spec = prop.model_dump(mode="json")
+        except Exception:
+            spec = {}
         media = await self.media(property_id)
         documents = await self.documents(property_id, role)
         price = _float(listing.get("asking_price"))
@@ -147,6 +158,46 @@ class PropertyIntelligenceService:
             "manager": ["Edit Listing", "Run AI Review", "Publish/Unpublish", "Generate Listing Copy", "View Leads", "View Broker Requests"],
             "admin": ["Run AI Review", "View Audit", "Regenerate Summary", "Inspect Agent Routing", "Review Data Quality"],
         }
+        def _spec(*keys: str, default: Any = None) -> Any:
+            for source in (spec, listing):
+                for key in keys:
+                    value = source.get(key)
+                    if value not in (None, "", [], {}):
+                        return value
+            return default
+
+        def _yn(value: Any) -> str:
+            return "Available" if value is True else ("Not available" if value is False else "Needs confirmation")
+
+        facts = [
+            {"label": "Bedrooms", "value": f"{_spec('bedrooms') or '-'} Bed"},
+            {"label": "Bathrooms", "value": f"{_spec('bathrooms') or '-'} Bath"},
+            {"label": "Carpet area", "value": f"{carpet} sq ft usable"},
+            {"label": "RERA carpet", "value": f"{_spec('rera_carpet_area_sqft')} sq ft"} if _spec("rera_carpet_area_sqft") else None,
+            {"label": "Built-up", "value": f"{_spec('builtup_area_sqft', 'built_up_area_sqft') or carpet} sq ft"},
+            {"label": "Property type", "value": str(_spec("property_type", default="apartment")).replace("_", " ").title()},
+            {"label": "Builder", "value": _spec("builder")} if _spec("builder") else None,
+            {"label": "Pincode", "value": str(_spec("pincode"))} if _spec("pincode") else None,
+            {"label": "Year / Possession", "value": str(_spec("year_built"))} if _spec("year_built") else None,
+            {"label": "Floor", "value": f"{listing.get('floor_number') or '3rd'} of {listing.get('total_floors') or 22}"},
+            {"label": "Parking", "value": ", ".join(_spec("parking", "parking_types", default=[])).title()} if _spec("parking", "parking_types") else {"label": "Parking", "value": f"{listing.get('parking_count') or 0} covered"},
+            {"label": "Furnishing", "value": str(_spec("furnishing", "furnishing_status", default="Needs confirmation")).replace("_", " ").title()},
+            {"label": "Kitchen", "value": str(_spec("kitchen_type")).replace("_", " ").title()} if _spec("kitchen_type") else None,
+            {"label": "Possession (RERA)", "value": _spec("rera_possession")} if _spec("rera_possession") else None,
+            {"label": "Possession (Builder)", "value": _spec("builder_possession")} if _spec("builder_possession") else {"label": "Possession", "value": _spec("possession", "possession_status", default="Needs confirmation")},
+            {"label": "Listing type", "value": str(_spec("listing_type")).replace("_", " ").title()} if _spec("listing_type") else None,
+            {"label": "Condition", "value": str(_spec("current_condition")).replace("_", " ").title()} if _spec("current_condition") else None,
+            {"label": "Shown by", "value": str(_spec("who_shows_property")).replace("_", " ").title()} if _spec("who_shows_property") else None,
+            {"label": "Price status", "value": _spec("price_status")} if _spec("price_status") else None,
+            {"label": "Maintenance", "value": f"INR {int(_spec('maintenance_cost')):,}/mo"} if _spec("maintenance_cost") else None,
+            {"label": "Occupancy cert.", "value": _yn(spec.get("occupancy_certificate"))} if "occupancy_certificate" in spec else None,
+            {"label": "Allotment letter", "value": _yn(spec.get("allotment_letter"))} if "allotment_letter" in spec else None,
+            {"label": "Sale deed", "value": _yn(spec.get("sale_deed"))} if "sale_deed" in spec else None,
+        ]
+        for key, value in (spec.get("nearby") or listing.get("nearby") or {}).items():
+            facts.append({"label": f"Nearby - {key.replace('_', ' ').title()}", "value": str(value)})
+        facts = [fact for fact in facts if fact]
+
         return {
             "id": listing["id"],
             "slug": listing.get("slug") or listing["id"],
@@ -157,16 +208,9 @@ class PropertyIntelligenceService:
             "documents": documents,
             "badges": badges,
             "actions": role_actions.get(role, role_actions["public"]),
-            "facts": [
-                {"label": "Bedrooms", "value": f"{listing.get('bedrooms') or '-'} Bed"},
-                {"label": "Bathrooms", "value": f"{listing.get('bathrooms') or '-'} Bath"},
-                {"label": "Carpet area", "value": f"{carpet} sq ft usable"},
-                {"label": "Built-up", "value": f"{listing.get('builtup_area_sqft') or carpet} sq ft"},
-                {"label": "Floor", "value": f"{listing.get('floor_number') or '3rd'} of {listing.get('total_floors') or 13}"},
-                {"label": "Parking", "value": f"{listing.get('parking_count') or 0} covered"},
-                {"label": "Furnishing", "value": listing.get("furnishing_status") or "Needs manager confirmation"},
-                {"label": "Possession", "value": listing.get("possession_status") or "Needs manager confirmation"},
-            ],
+            "facts": facts,
+            "highlights": spec.get("highlights") or listing.get("highlights") or [],
+            "google_map_link": spec.get("google_map_link") or listing.get("google_map_link"),
             "amenities": self._amenities(listing),
             "area": room_breakdown,
             "vastu": {"available": False, "message": "Vastu information not provided."},

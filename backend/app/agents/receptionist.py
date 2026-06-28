@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from app.services.calcom import CalComService
+from app.services.scheduler import scheduler_service
 
 
 class ReceptionistAgent:
     def __init__(self) -> None:
-        self.calcom = CalComService()
+        self.scheduler = scheduler_service
 
     async def handle(self, message: str) -> dict:
         q = message.lower()
-        slots = await self.calcom.get_slots(days=7)
+        slots = await self.scheduler.get_slots(days=7)
         if any(word in q for word in ["book", "schedule", "viewing", "visit", "tour"]):
             first_slot = slots[0] if slots else None
             return {

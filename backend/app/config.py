@@ -47,6 +47,17 @@ class Settings(BaseSettings):
     calcom_event_type_slug: str = "property-viewing"
     calcom_timezone: str = "Asia/Kolkata"
 
+    # Scheduler provider: "calcom" (default) or "google" (direct Google Calendar API).
+    scheduler_provider: str = "calcom"
+    google_calendar_id: str | None = None
+    # Service-account credentials as a raw JSON string (preferred for Railway env) or a file path.
+    google_service_account_json: str | None = None
+    google_service_account_file: str | None = None
+    # Business-hours window used to generate candidate visit slots (local to calcom_timezone).
+    scheduler_start_hour: int = 10
+    scheduler_end_hour: int = 19
+    scheduler_slot_minutes: int = 60
+
     vapi_webhook_secret: str | None = None
 
     elevenlabs_api_key: str | None = None

@@ -65,6 +65,29 @@ export type Property = {
   walkability_score?: number;
   commute_score?: number;
   risk_flags?: string[];
+  // Listing-spec parameters
+  pincode?: string;
+  year_built?: number;
+  listing_type?: string;
+  listing_status?: string;
+  current_condition?: string;
+  who_shows_property?: string;
+  furnishing?: string;
+  kitchen_type?: string;
+  parking?: string[];
+  maintenance_cost?: number;
+  price_status?: string;
+  google_map_link?: string;
+  floor_plan_url?: string;
+  brochure_url?: string;
+  highlights?: string[];
+  nearby?: Record<string, string>;
+  rera_possession?: string;
+  builder_possession?: string;
+  rera_carpet_area_sqft?: number;
+  occupancy_certificate?: boolean;
+  allotment_letter?: boolean;
+  sale_deed?: boolean;
 };
 
 export type MarketInsights = {
@@ -1411,6 +1434,8 @@ export type PropertyIntelligenceDetail = {
   badges: Array<{ label: string; status: "positive" | "warning" | "missing"; detail: string }>;
   actions: string[];
   facts: Array<{ label: string; value: string }>;
+  highlights?: string[];
+  google_map_link?: string | null;
   amenities: Record<string, string[]>;
   area: {
     carpet_area_sqft?: number;

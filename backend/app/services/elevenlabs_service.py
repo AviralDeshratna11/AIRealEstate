@@ -14,7 +14,7 @@ from app.agents.voice_calling_graph import build_voice_calling_graph
 from app.config import get_settings
 from app.crm_models import CRMActivityCreate
 from app.services.call_context_builder import call_context_builder
-from app.services.calcom import calcom_service
+from app.services.scheduler import scheduler_service
 from app.services.crm_erp import crm_erp_service
 from app.services.mumbai_market import monthly_emi
 from app.voice_models import (
@@ -395,10 +395,10 @@ class ElevenLabsCallingService:
         return {"loan_amount": loan, "monthly_emi": emi, "total_estimated_upfront_cost": down, "affordability_note": "Indicative only. Final EMI depends on lender approval."}
 
     async def tool_get_visit_slots(self, request: VoiceToolRequest) -> dict[str, Any]:
-        return {"available_slots": await calcom_service.get_slots(days=5), "event_type": "property-viewing", "booking_rules": ["Confirm buyer phone", "Send WhatsApp confirmation", "Do not overbook manager"]}
+        return {"available_slots": await scheduler_service.get_slots(days=5), "event_type": "property-viewing", "booking_rules": ["Confirm buyer phone", "Send WhatsApp confirmation", "Do not overbook manager"]}
 
     async def tool_book_site_visit(self, request: VoiceToolRequest) -> dict[str, Any]:
-        booking = await calcom_service.create_booking(request.attendee_name or "Demo Buyer", "buyer@example.com", request.slot or _utc_now(), request.property_id or "Selected property")
+        booking = await scheduler_service.create_booking(request.attendee_name or "Demo Buyer", "buyer@example.com", request.slot or _utc_now(), request.property_id or "Selected property")
         return {"booking_confirmation": True, "cal_booking_id": booking.get("id"), "visit_details": booking}
 
     async def tool_send_whatsapp_summary(self, request: VoiceToolRequest) -> dict[str, Any]:

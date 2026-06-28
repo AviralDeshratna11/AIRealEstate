@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.services.calcom import calcom_service
+from app.services.scheduler import scheduler_service
 from app.services.mumbai_market import monthly_emi
 from app.services.property_repository import PropertyRepository
 
@@ -35,7 +35,7 @@ class CallContextBuilder:
             prop = props[0] if props else None
         property_context = self._property_context(prop, property_id)
         finance_context = await self._finance_context(prop)
-        slots = await calcom_service.get_slots(days=5)
+        slots = await scheduler_service.get_slots(days=5)
         buyer_context = {
             "buyer_id": buyer_id,
             "lead_id": lead_id,

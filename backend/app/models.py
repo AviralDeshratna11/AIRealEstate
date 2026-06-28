@@ -51,6 +51,31 @@ class Property(BaseModel):
     rera_id: str | None = None
     score: float | None = None
 
+    # Listing parameters (from the listing-spec blueprint).
+    pincode: str | None = None
+    year_built: int | None = None
+    listing_type: str | None = None  # agent_listed / for_sale_by_owner / new_construction / coming_soon
+    listing_status: str | None = None  # new / price_reduced / coming_soon / resale
+    current_condition: str | None = None  # vacant / sample_flat / occupied
+    who_shows_property: str | None = None  # builder_sales / developer_sales / agent / channel_partner / agency / owner
+    furnishing: str | None = None  # unfurnished / semi_furnished / furnished
+    kitchen_type: str | None = None  # modular / open_shelves / covered
+    parking: list[str] = Field(default_factory=list)  # ["car", "bike"]
+    maintenance_cost: float | None = None  # monthly maintenance (INR)
+    price_status: str | None = None  # e.g. "All-in (lower floors)"
+    google_map_link: str | None = None
+    floor_plan_url: str | None = None
+    brochure_url: str | None = None
+    highlights: list[str] = Field(default_factory=list)  # bullet points
+    nearby: dict[str, str] = Field(default_factory=dict)  # {hospital, school, metro, road, q_commerce, ...}
+    rera_possession: str | None = None
+    builder_possession: str | None = None
+    rera_carpet_area_sqft: float | None = None
+    # Legal / document availability
+    occupancy_certificate: bool | None = None
+    allotment_letter: bool | None = None
+    sale_deed: bool | None = None
+
     # Mumbai intelligence fields derived from the user's attached references.
     inventory_months: int | None = None
     cost_bucket: str | None = None

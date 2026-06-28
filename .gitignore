@@ -6,6 +6,7 @@ frontend/.env.*.local
 !.env.example
 !frontend/.env.local.example
 .codex/
+.vercel
 .venv
 node_modules
 .next

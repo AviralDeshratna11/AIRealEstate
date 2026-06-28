@@ -2,6 +2,7 @@ import { DEMO_PROPERTIES } from "@/lib/demo";
 import { MANAGER_DEMO_LISTING_IDS } from "@/lib/manager-demo";
 
 const BACKEND_SAMPLE_IDS = [
+  "lnt-elixir-reserve-barbet",
   "mumbai-powai-1",
   "mumbai-bandra-1",
   "mumbai-borivali-1",

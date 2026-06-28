@@ -191,6 +191,20 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
               <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {data.facts.map((fact) => <Fact key={fact.label} label={fact.label} value={fact.value} />)}
               </div>
+              {data.highlights && data.highlights.length > 0 ? (
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {data.highlights.map((point) => (
+                    <li key={point} className="flex items-start gap-2 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 text-sm font-semibold text-slate-700">
+                      <Star size={15} className="mt-0.5 shrink-0 text-emerald-600" />{point}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {data.google_map_link ? (
+                <a href={data.google_map_link} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-950 hover:text-white">
+                  <MapPin size={14} /> View on Google Maps
+                </a>
+              ) : null}
             </div>
             <div className="rounded-[24px] bg-slate-950 p-5 text-white">
               <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Asking price</p>
