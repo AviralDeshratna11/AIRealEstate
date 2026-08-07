@@ -43,6 +43,7 @@ import {
   publishManagerListing,
   runManagerAutomation,
   runManagerListingAgents,
+  uploadManagerMedia,
 } from "@/lib/api";
 import { DEMO_MANAGER_LISTINGS } from "@/lib/manager-demo";
 
@@ -620,7 +621,7 @@ function ListingDetailView({ listing, tab, setTab, onPublish, onRunAutomation, o
 
       {tab === "overview" && <OverviewTab listing={listing} />}
       {tab === "documents" && <DocumentsTab listing={listing} />}
-      {tab === "media" && <MediaTab listing={listing} />}
+      {tab === "media" && <MediaTab listing={listing} onRefetch={onRefetch} />}
       {tab === "pricing" && <PricingTab listing={listing} />}
       {tab === "leads" && <ListingLeadsTab listing={listing} />}
       {tab === "site-visits" && <VisitsTab listing={listing} />}
@@ -666,8 +667,36 @@ function DocumentsTab({ listing }: { listing: ManagerListing }) {
   return <TwoColumnSection left={<Panel title="Documents" eyebrow="Extraction status"><div className="space-y-3">{(listing.documents || []).map((doc, index) => <DocumentCard key={index} doc={doc} />)}</div></Panel>} right={<Panel title="Missing items" eyebrow="Manager approval"><div className="space-y-3">{(listing.missing_fields || ["Title report", "Encumbrance certificate"]).map((item) => <TaskChip key={item} title={item} tone="amber" />)}</div></Panel>} />;
 }
 
-function MediaTab({ listing }: { listing: ManagerListing }) {
-  return <TwoColumnSection left={<Panel title="Media" eyebrow="Uploads and room classification"><div className="space-y-3">{(listing.media || []).map((media, index) => <MediaCard key={index} media={media} />)}</div></Panel>} right={<Panel title="Media actions" eyebrow="Open workflow"><div className="space-y-3"><Dropzone label="Upload images / floor plans" icon={ImageIcon} /><Dropzone label="Upload walkthrough video" icon={Upload} /><TaskChip title="Select hero image" tone="emerald" /><TaskChip title="Generate captions and alt text" tone="slate" /></div></Panel>} />;
+function MediaTab({ listing, onRefetch }: { listing: ManagerListing; onRefetch: () => Promise<void> }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFiles(files: File[], media_type: "image" | "video") {
+    if (!files.length) return;
+    setUploading(true);
+    setError(null);
+    try {
+      await uploadManagerMedia(listing.id, files, media_type);
+      await onRefetch();
+    } catch {
+      setError("Upload failed. Check the file type/size and try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <TwoColumnSection
+      left={<Panel title="Media" eyebrow="Uploads and room classification"><div className="space-y-3">{(listing.media || []).map((media, index) => <MediaCard key={index} media={media} />)}{!(listing.media || []).length && <p className="text-sm text-ink/50">No photos yet. Upload some on the right.</p>}</div></Panel>}
+      right={<Panel title="Media actions" eyebrow="Open workflow"><div className="space-y-3">
+        <Dropzone label={uploading ? "Uploading..." : "Upload images / floor plans"} icon={ImageIcon} disabled={uploading} onFiles={(files) => handleFiles(files, "image")} />
+        <Dropzone label={uploading ? "Uploading..." : "Upload walkthrough video"} icon={Upload} disabled={uploading} onFiles={(files) => handleFiles(files, "video")} />
+        {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
+        <TaskChip title="Select hero image" tone="emerald" />
+        <TaskChip title="Generate captions and alt text" tone="slate" />
+      </div></Panel>}
+    />
+  );
 }
 
 function PricingTab({ listing }: { listing: ManagerListing }) {
@@ -834,8 +863,24 @@ function TaskChip({ title, tone }: { title: string; tone: string }) {
   return <div className={clsx("rounded-[3px] border px-4 py-3 text-sm font-semibold", classes)}>{title}</div>;
 }
 
-function Dropzone({ label, icon: Icon }: { label: string; icon: typeof Upload }) {
-  return <label className="flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand"><Icon size={16} />{label}<input type="file" multiple className="sr-only" /></label>;
+function Dropzone({ label, icon: Icon, onFiles, disabled }: { label: string; icon: typeof Upload; onFiles?: (files: File[]) => void; disabled?: boolean }) {
+  return (
+    <label className={clsx("flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand", disabled && "pointer-events-none opacity-60")}>
+      <Icon size={16} />
+      {label}
+      <input
+        type="file"
+        multiple
+        disabled={disabled}
+        className="sr-only"
+        onChange={(event) => {
+          const files = Array.from(event.target.files || []);
+          if (files.length) onFiles?.(files);
+          event.target.value = "";
+        }}
+      />
+    </label>
+  );
 }
 
 function DocumentCard({ doc }: { doc: Record<string, unknown> }) {

@@ -98,7 +98,9 @@ class WhatsAppListingService:
         if not urls:
             return out
         auth = (settings.twilio_account_sid, settings.twilio_auth_token) if settings.twilio_account_sid else None
-        async with httpx.AsyncClient(timeout=15) as client:
+        # Twilio media URLs 307-redirect to a signed CDN link; httpx doesn't follow
+        # redirects by default and raise_for_status() treats an unfollowed one as an error.
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
             for url in urls[:3]:
                 try:
                     response = await client.get(url, auth=auth)
