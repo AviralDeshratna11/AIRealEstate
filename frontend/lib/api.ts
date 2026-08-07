@@ -1139,6 +1139,20 @@ export async function uploadManagerMedia(listingId: string, files: File[], media
   }
 }
 
+export type BulkUploadResult = {
+  total_rows: number;
+  created: Array<{ row: number; listing_id: string; title: string }>;
+  skipped: Array<{ row: number; reason: string }>;
+};
+
+export async function bulkUploadListings(file: File): Promise<BulkUploadResult> {
+  const form = new FormData();
+  form.append("file", file);
+  // No demo/offline fallback here on purpose - a fake "success" response for a real
+  // bulk-upload action would be actively misleading, unlike read-only demo fallbacks.
+  return await apiFetch<BulkUploadResult>("/api/manager/listings/bulk-upload", { method: "POST", body: form });
+}
+
 export async function getManagerLeads(): Promise<ManagerLead[]> {
   try {
     return await apiFetch<ManagerLead[]>("/api/manager/leads");

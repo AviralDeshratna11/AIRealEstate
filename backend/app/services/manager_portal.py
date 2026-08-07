@@ -1227,6 +1227,68 @@ class ManagerPortalService:
         self._listings[listing_id]["updated_at"] = _utc_now()
         await self._save_listing(listing_id)
 
+    async def bulk_upload_csv(self, content: bytes) -> dict[str, Any]:
+        import csv
+        import io
+
+        from app.services.whatsapp_listing import locality_coords, whatsapp_listing_service
+
+        text = content.decode("utf-8-sig", errors="ignore")
+        rows = list(csv.DictReader(io.StringIO(text)))
+        max_rows = 200
+        if len(rows) > max_rows:
+            raise HTTPException(status_code=400, detail=f"CSV has {len(rows)} rows; max {max_rows} per upload. Split into smaller files.")
+
+        semaphore = asyncio.Semaphore(8)
+        created: list[dict[str, Any]] = []
+        skipped: list[dict[str, Any]] = []
+
+        async def process(index: int, row: dict[str, Any]) -> None:
+            row_text = "\n".join(f"{k}: {v}" for k, v in row.items() if v and str(v).strip())
+            if not row_text.strip():
+                skipped.append({"row": index, "reason": "empty row"})
+                return
+            async with semaphore:
+                extraction = await whatsapp_listing_service.extract(row_text)
+            if not extraction or not extraction.is_listing:
+                skipped.append({"row": index, "reason": "not recognized as a listing"})
+                return
+            if not extraction.locality or not (extraction.title or extraction.asking_price):
+                skipped.append({"row": index, "reason": "missing locality/title/price"})
+                return
+            lat, lng = locality_coords(extraction.locality)
+            title = extraction.title or f"{extraction.bedrooms or ''} BHK in {extraction.locality}".strip()
+            notes_parts = [p for p in [extraction.builder and f"Builder: {extraction.builder}", extraction.notes] if p]
+            try:
+                listing = await self.create_listing(
+                    ManagerCreateListingRequest(
+                        publish_immediately=False,
+                        title=title,
+                        property_type=extraction.property_type,
+                        transaction_type=extraction.transaction_type,
+                        locality=extraction.locality,
+                        address=f"{extraction.locality}, Mumbai",
+                        latitude=lat,
+                        longitude=lng,
+                        carpet_area_sqft=extraction.carpet_area_sqft,
+                        bedrooms=extraction.bedrooms,
+                        bathrooms=extraction.bathrooms,
+                        furnishing_status=extraction.furnishing_status,
+                        possession_status=extraction.possession_status,
+                        asking_price=extraction.asking_price,
+                        owner_name=extraction.owner_name,
+                        owner_phone=extraction.owner_phone,
+                        notes=" | ".join(notes_parts) or None,
+                    )
+                )
+                created.append({"row": index, "listing_id": listing.id, "title": title})
+            except Exception as exc:
+                skipped.append({"row": index, "reason": f"failed to create: {exc}"})
+
+        await asyncio.gather(*(process(i, row) for i, row in enumerate(rows, start=2)))
+        return {"total_rows": len(rows), "created": created, "skipped": skipped}
+        await self._save_listing(listing_id)
+
     async def leads(self) -> list[ListingLead]:
         await self.ensure_ready()
         results: list[ListingLead] = []

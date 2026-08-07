@@ -10,12 +10,12 @@ from app.config import get_settings
 from app.services.openai_client import get_openai_client
 
 LISTING_SYSTEM_PROMPT = """
-You read incoming WhatsApp messages for ASTRA Estate, a Mumbai real estate platform.
-Decide whether the sender (a broker, builder, or property owner) is submitting a NEW property
-for listing/sale on the platform, as opposed to a buyer asking to find a property, a general
-question, or anything unrelated.
+You read incoming property submissions for ASTRA Estate, a Mumbai real estate platform - either
+a WhatsApp message or a row from a bulk CSV listing upload. Decide whether this describes a NEW
+property for listing/sale on the platform, as opposed to a buyer asking to find a property, a
+general question, junk/header row, or anything unrelated.
 
-If it IS a listing submission, extract only facts stated or clearly implied in the message/image.
+If it IS a listing submission, extract only facts stated or clearly implied in the text/image.
 Never invent a price, area, or address that isn't present. Use null for anything not stated.
 Prices are in INR; "cr"/"crore" = 1,00,00,000, "lakh"/"L" = 1,00,000.
 locality must be a Mumbai Metropolitan Region place name (e.g. Powai, Andheri, Thane, Borivali).
@@ -75,7 +75,7 @@ class WhatsAppListingService:
 
         settings = get_settings()
         raw_images = raw_images or []
-        content: list[dict[str, Any]] = [{"type": "text", "text": f"Incoming WhatsApp message:\n{text[:4000]}"}]
+        content: list[dict[str, Any]] = [{"type": "text", "text": f"Source text:\n{text[:4000]}"}]
         for raw in raw_images:
             content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(raw).decode('utf-8')}"}})
 

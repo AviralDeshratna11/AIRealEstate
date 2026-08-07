@@ -24,6 +24,7 @@ import {
   Wand2,
 } from "lucide-react";
 import type {
+  BulkUploadResult,
   ManagerAutomationRule,
   ManagerDashboard,
   ManagerLead,
@@ -31,6 +32,7 @@ import type {
   ManagerTask,
 } from "@/lib/api";
 import {
+  bulkUploadListings,
   createManagerListing,
   formatCr,
   getManagerAuditLog,
@@ -141,6 +143,9 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
   const [busy, setBusy] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [bulkResult, setBulkResult] = useState<BulkUploadResult | null>(null);
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const [draft, setDraft] = useState<ListingDraft>({
     title: "",
@@ -270,6 +275,21 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
     }
   }
 
+  async function onBulkUpload(file: File) {
+    setBulkBusy(true);
+    setBulkError(null);
+    setBulkResult(null);
+    try {
+      const result = await bulkUploadListings(file);
+      setBulkResult(result);
+      getManagerListings().then(setListings).catch(console.error);
+    } catch (error) {
+      setBulkError(error instanceof Error ? error.message : "Bulk upload failed");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
   async function onRunAutomation() {
     const id = listingId ?? activeListing?.id;
     if (!id) return;
@@ -371,7 +391,7 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
 
           {view === "dashboard" && <DashboardView dashboard={currentDashboard} listings={currentDashboard.listings} mapPins={currentDashboard.map_pins} onFocus={(id) => router.push(`/manager/listings/${id}`)} />}
           {view === "listings" && <ListingsView listings={filteredListings} search={search} setSearch={setSearch} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
-          {view === "new" && <NewListingView draft={draft} setDraft={setDraft} onSubmit={onCreateListing} busy={busy === "create"} error={formError} />}
+          {view === "new" && <NewListingView draft={draft} setDraft={setDraft} onSubmit={onCreateListing} busy={busy === "create"} error={formError} onBulkUpload={onBulkUpload} bulkBusy={bulkBusy} bulkResult={bulkResult} bulkError={bulkError} />}
           {view === "detail" && activeListing && <ListingDetailView listing={activeListing} tab={detailTab} setTab={setDetailTab} onPublish={onPublish} onRunAutomation={onRunAutomation} onRunAgents={onRunListingAgents} onRefetch={async () => setListing(await getManagerListing(activeListing.id))} />}
           {view === "detail" && !activeListing && <DetailPlaceholder listingId={listingId || ""} error={detailError} />}
           {view === "leads" && <LeadsView leads={leads.length ? leads : (currentDashboard.listings.flatMap((item) => item.leads || []) as ManagerLead[])} onOpen={(id) => router.push(`/manager/listings/${id}`)} />}
@@ -476,7 +496,27 @@ function ListingsView({ listings, search, setSearch, onOpen }: { listings: Manag
   );
 }
 
-function NewListingView({ draft, setDraft, onSubmit, busy, error }: { draft: ListingDraft; setDraft: React.Dispatch<React.SetStateAction<ListingDraft>>; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; busy: boolean; error?: string | null }) {
+function NewListingView({
+  draft,
+  setDraft,
+  onSubmit,
+  busy,
+  error,
+  onBulkUpload,
+  bulkBusy,
+  bulkResult,
+  bulkError,
+}: {
+  draft: ListingDraft;
+  setDraft: React.Dispatch<React.SetStateAction<ListingDraft>>;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  busy: boolean;
+  error?: string | null;
+  onBulkUpload: (file: File) => void;
+  bulkBusy: boolean;
+  bulkResult: BulkUploadResult | null;
+  bulkError: string | null;
+}) {
   function update(field: string, value: string | number) {
     setDraft({ ...draft, [field]: value });
   }
@@ -511,8 +551,45 @@ function NewListingView({ draft, setDraft, onSubmit, busy, error }: { draft: Lis
   ];
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <Panel title="Create a new listing" eyebrow="Guided seller intake">
+    <div className="space-y-5">
+      <Panel title="Bulk import from CSV" eyebrow="AI-read — any column layout works">
+        <p className="text-sm text-ink/55">Upload a CSV of properties (any columns — title, locality, BHK, price, etc. in any order). Each row is read by AI and saved as a draft listing for review before publishing. Max 200 rows per file.</p>
+        <div className="mt-4">
+          <label className={clsx("flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand", bulkBusy && "pointer-events-none opacity-60")}>
+            <Upload size={16} />
+            {bulkBusy ? "Reading and importing rows..." : "Upload listings CSV"}
+            <input
+              type="file"
+              accept=".csv"
+              disabled={bulkBusy}
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) onBulkUpload(file);
+                event.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+        {bulkError && <p className="mt-3 text-xs font-semibold text-red-600">{bulkError}</p>}
+        {bulkResult && (
+          <div className="mt-4 rounded-[3px] bg-espresso p-4 text-ivory">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">
+              {bulkResult.created.length} of {bulkResult.total_rows} rows imported as drafts
+            </p>
+            {bulkResult.skipped.length > 0 && (
+              <ul className="mt-2 space-y-1 text-sm text-ivory/70">
+                {bulkResult.skipped.map((item) => (
+                  <li key={item.row}>Row {item.row}: {item.reason}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </Panel>
+
+      <form onSubmit={onSubmit} className="space-y-5">
+      <Panel title="Or create a single listing" eyebrow="Guided seller intake">
         <div className="grid gap-4 lg:grid-cols-2">
           {textFields.map(([field, label]) => (
             <label key={field} className="space-y-2">
@@ -559,7 +636,8 @@ function NewListingView({ draft, setDraft, onSubmit, busy, error }: { draft: Lis
           Create listing
         </button>
       </div>
-    </form>
+      </form>
+    </div>
   );
 }
 

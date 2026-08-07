@@ -60,6 +60,14 @@ async def upload_media(listing_id: str, files: list[UploadFile] = File(...), med
     return await manager_portal_service.upload_media(listing_id, files, media_type)
 
 
+@router.post("/listings/bulk-upload")
+async def bulk_upload_listings(file: UploadFile = File(...)):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Upload a .csv file")
+    content = await file.read()
+    return await manager_portal_service.bulk_upload_csv(content)
+
+
 @router.get("/leads")
 async def get_leads():
     leads = await manager_portal_service.leads()
