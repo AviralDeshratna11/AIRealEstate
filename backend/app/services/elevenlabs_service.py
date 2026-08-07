@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -13,6 +14,7 @@ from fastapi import HTTPException, Request
 from app.agents.voice_calling_graph import build_voice_calling_graph
 from app.config import get_settings
 from app.crm_models import CRMActivityCreate
+from app.db.session import get_pool
 from app.services.call_context_builder import call_context_builder
 from app.services.scheduler import scheduler_service
 from app.services.crm_erp import crm_erp_service
@@ -39,6 +41,19 @@ def _utc_now() -> str:
 
 def _id(prefix: str) -> str:
     return f"{prefix}-{uuid4().hex[:10]}"
+
+
+def _dt(value: Any) -> datetime | None:
+    """asyncpg needs real datetime objects for timestamptz params - a SQL-side ::timestamptz
+    cast doesn't help, it still rejects a str client-side before the query is even sent."""
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value
+    try:
+        return datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
 
 
 def _norm_phone(phone: str | None) -> str:
@@ -106,7 +121,7 @@ class ElevenLabsCallingService:
         if blocked and not request.force_call:
             return VoiceTriggerResult(call_status="blocked", reason=blocked, mode=self.config().mode)
         crm_task_id = await self._create_crm_call_task(request, to_number)
-        record = self._create_record(request, to_number, state, crm_task_id)
+        record = await self._create_record(request, to_number, state, crm_task_id)
         if self.config().mode == "live":
             return await self._start_live_call(record, state, crm_task_id)
         return await self._complete_mock_call(record["id"], state, crm_task_id)
@@ -193,6 +208,129 @@ class ElevenLabsCallingService:
             self._consents[key] = VoiceCallConsent(id=_id("voice-consent"), buyer_id=buyer_id, phone=phone, consent_status="confirmed", consent_source="request", consent_timestamp=_utc_now(), created_at=_utc_now()).model_dump(mode="json")
         return self._consents[key]
 
+    # -- Best-effort DB persistence. In-memory dicts stay the source of truth for the
+    # process lifetime (every read path uses them); these calls just keep history from
+    # being lost on restart. Every write is wrapped so a missing/unreachable DB never
+    # breaks the calling flow.
+
+    async def _persist_record(self, record: dict[str, Any]) -> None:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if not pool:
+            return
+        try:
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    """
+                    insert into voice_call_records (
+                        id, provider, mode, buyer_id, lead_id, property_id, broker_id, manager_id,
+                        crm_opportunity_id, trigger_source, trigger_reason, call_goal, to_number,
+                        provider_call_id, provider_conversation_id, status, started_at, ended_at,
+                        duration_seconds, transcript, summary_json, outcome, intent_score, next_action,
+                        error_message, created_at
+                    ) values (
+                        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
+                        $17::timestamptz,$18::timestamptz,$19,$20,$21::jsonb,$22,$23,$24,$25,$26::timestamptz
+                    )
+                    on conflict (id) do update set
+                        provider_call_id = excluded.provider_call_id,
+                        provider_conversation_id = excluded.provider_conversation_id,
+                        status = excluded.status,
+                        started_at = excluded.started_at,
+                        ended_at = excluded.ended_at,
+                        duration_seconds = excluded.duration_seconds,
+                        transcript = excluded.transcript,
+                        summary_json = excluded.summary_json,
+                        outcome = excluded.outcome,
+                        intent_score = excluded.intent_score,
+                        next_action = excluded.next_action,
+                        error_message = excluded.error_message,
+                        updated_at = now()
+                    """,
+                    record.get("id"), record.get("provider", "elevenlabs"), record.get("mode"),
+                    record.get("buyer_id"), record.get("lead_id"), record.get("property_id"),
+                    record.get("broker_id"), record.get("manager_id"), record.get("crm_opportunity_id"),
+                    record.get("trigger_source"), record.get("trigger_reason"), record.get("call_goal"),
+                    record.get("to_number"), record.get("provider_call_id"), record.get("provider_conversation_id"),
+                    record.get("status"), _dt(record.get("started_at")), _dt(record.get("ended_at")),
+                    int(record.get("duration_seconds") or 0), record.get("transcript"),
+                    json.dumps(record.get("summary_json") or {}), record.get("outcome"),
+                    record.get("intent_score"), record.get("next_action"), record.get("error_message"),
+                    _dt(record.get("created_at")),
+                )
+        except Exception:
+            pass
+
+    async def _persist_consent(self, consent: dict[str, Any]) -> None:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if not pool:
+            return
+        try:
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    """
+                    insert into voice_call_consent (
+                        id, buyer_id, phone, consent_status, consent_source, consent_timestamp,
+                        opt_out, opt_out_reason, last_called_at, calls_last_7_days, created_at
+                    ) values ($1,$2,$3,$4,$5,$6::timestamptz,$7,$8,$9::timestamptz,$10,$11::timestamptz)
+                    on conflict (phone) do update set
+                        buyer_id = coalesce(excluded.buyer_id, voice_call_consent.buyer_id),
+                        consent_status = excluded.consent_status,
+                        opt_out = excluded.opt_out,
+                        opt_out_reason = excluded.opt_out_reason,
+                        last_called_at = excluded.last_called_at,
+                        calls_last_7_days = excluded.calls_last_7_days,
+                        updated_at = now()
+                    """,
+                    consent.get("id"), consent.get("buyer_id"), consent.get("phone"),
+                    consent.get("consent_status"), consent.get("consent_source"), _dt(consent.get("consent_timestamp")),
+                    bool(consent.get("opt_out") or False), consent.get("opt_out_reason"),
+                    _dt(consent.get("last_called_at")), int(consent.get("calls_last_7_days") or 0),
+                    _dt(consent.get("created_at")),
+                )
+        except Exception:
+            pass
+
+    async def _persist_event(self, event: dict[str, Any]) -> None:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if not pool:
+            return
+        try:
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    "insert into voice_call_events (id, call_id, event_type, payload_json, created_at) "
+                    "values ($1,$2,$3,$4::jsonb,$5::timestamptz) on conflict (id) do nothing",
+                    event.get("id"), event.get("call_id"), event.get("event_type"),
+                    json.dumps(event.get("payload_json") or {}), _dt(event.get("created_at")),
+                )
+        except Exception:
+            pass
+
+    async def _persist_tool_call(self, call_id: str | None, tool_name: str, input_json: dict[str, Any], output_json: dict[str, Any], status: str = "success", error_message: str | None = None) -> None:
+        try:
+            pool = await get_pool()
+        except Exception:
+            pool = None
+        if not pool:
+            return
+        try:
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    "insert into voice_agent_tool_calls (id, call_id, tool_name, input_json, output_json, status, error_message) "
+                    "values ($1,$2,$3,$4::jsonb,$5::jsonb,$6,$7)",
+                    _id("voice-tool-call"), call_id, tool_name, json.dumps(input_json), json.dumps(output_json), status, error_message,
+                )
+        except Exception:
+            pass
+
     async def _create_crm_call_task(self, request: VoiceInterestCallRequest, to_number: str) -> str | None:
         try:
             activity = await crm_erp_service.create_activity(
@@ -211,7 +349,7 @@ class ElevenLabsCallingService:
         except Exception:
             return None
 
-    def _create_record(self, request: VoiceInterestCallRequest, to_number: str, state: dict[str, Any], crm_task_id: str | None) -> dict[str, Any]:
+    async def _create_record(self, request: VoiceInterestCallRequest, to_number: str, state: dict[str, Any], crm_task_id: str | None) -> dict[str, Any]:
         record = VoiceCallRecord(
             id=_id("voice-call"),
             mode=self.config().mode,
@@ -232,11 +370,15 @@ class ElevenLabsCallingService:
             summary_json={"call_context": state, "crm_task_id": crm_task_id, "agent_prompt": ELEVENLABS_AGENT_PROMPT},
         ).model_dump(mode="json")
         self._records[record["id"]] = record
-        self._events.append({"id": _id("voice-event"), "call_id": record["id"], "event_type": "call_created", "payload_json": {"source": request.interest_source}, "created_at": _utc_now()})
+        event = {"id": _id("voice-event"), "call_id": record["id"], "event_type": "call_created", "payload_json": {"source": request.interest_source}, "created_at": _utc_now()}
+        self._events.append(event)
         consent = self._consent_for(to_number, request.buyer_id)
         consent["last_called_at"] = _utc_now()
         consent["calls_last_7_days"] = int(consent.get("calls_last_7_days") or 0) + 1
         consent["updated_at"] = _utc_now()
+        await self._persist_record(record)
+        await self._persist_event(event)
+        await self._persist_consent(consent)
         return record
 
     def _elevenlabs_payload(self, record: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
@@ -266,6 +408,7 @@ class ElevenLabsCallingService:
         if not self.settings.elevenlabs_api_key or not self.settings.elevenlabs_agent_id or not self.settings.elevenlabs_agent_phone_number_id:
             record["status"] = "failed"
             record["error_message"] = "ElevenLabs live mode missing API key, agent id, or phone number id"
+            await self._persist_record(record)
             return VoiceTriggerResult(call_status="failed", call_id=record["id"], reason=record["error_message"], crm_task_id=crm_task_id, mode="live")
         payload = self._elevenlabs_payload(record, state)
         async with httpx.AsyncClient(timeout=30) as client:
@@ -277,15 +420,18 @@ class ElevenLabsCallingService:
                     record["status"] = "failed"
                     record["error_message"] = body.get("message") or "ElevenLabs outbound call was not started"
                     record["summary_json"]["provider_response"] = body
+                    await self._persist_record(record)
                     return VoiceTriggerResult(call_status="failed", call_id=record["id"], reason=record["error_message"], crm_task_id=crm_task_id, mode="live", payload_preview=payload)
                 record["provider_call_id"] = body.get("call_id") or body.get("callSid") or body.get("id")
                 record["provider_conversation_id"] = body.get("conversation_id")
                 record["status"] = "calling"
                 record["summary_json"]["provider_response"] = body
+                await self._persist_record(record)
                 return VoiceTriggerResult(call_status="calling", call_id=record["id"], reason="ElevenLabs outbound call started", crm_task_id=crm_task_id, scheduled_or_started="started", mode="live", payload_preview=payload)
             except httpx.HTTPError as exc:
                 record["status"] = "failed"
                 record["error_message"] = str(exc)
+                await self._persist_record(record)
                 return VoiceTriggerResult(call_status="failed", call_id=record["id"], reason=str(exc), crm_task_id=crm_task_id, mode="live", payload_preview=payload)
 
     async def _complete_mock_call(self, call_id: str, state: dict[str, Any], crm_task_id: str | None) -> VoiceTriggerResult:
@@ -315,7 +461,10 @@ class ElevenLabsCallingService:
                 "updated_at": _utc_now(),
             }
         )
-        self._events.append({"id": _id("voice-event"), "call_id": call_id, "event_type": "mock_call_completed", "payload_json": record["summary_json"], "created_at": _utc_now()})
+        event = {"id": _id("voice-event"), "call_id": call_id, "event_type": "mock_call_completed", "payload_json": record["summary_json"], "created_at": _utc_now()}
+        self._events.append(event)
+        await self._persist_record(record)
+        await self._persist_event(event)
         return VoiceTriggerResult(call_status="mock_completed", call_id=call_id, reason="Mock call completed without spending ElevenLabs credits", crm_task_id=crm_task_id, scheduled_or_started="mock_started", mode="mock", payload_preview=record["summary_json"].get("call_context", {}))
 
     async def webhook(self, request: Request) -> dict[str, Any]:
@@ -328,7 +477,9 @@ class ElevenLabsCallingService:
         event_type = str(payload.get("type") or payload.get("event") or payload.get("status") or "event")
         call_id = str(payload.get("call_id") or payload.get("metadata", {}).get("call_id") or payload.get("conversation_id") or _id("provider-event"))
         local = self._find_record(call_id)
-        self._events.append({"id": _id("voice-event"), "call_id": local.get("id") if local else call_id, "event_type": event_type, "payload_json": payload, "created_at": _utc_now()})
+        event = {"id": _id("voice-event"), "call_id": local.get("id") if local else call_id, "event_type": event_type, "payload_json": payload, "created_at": _utc_now()}
+        self._events.append(event)
+        await self._persist_event(event)
         if local:
             if "transcript" in payload:
                 local["transcript"] = payload["transcript"]
@@ -337,6 +488,7 @@ class ElevenLabsCallingService:
                 local["ended_at"] = _utc_now()
                 local["summary_json"] = {**local.get("summary_json", {}), "provider_event": payload}
                 local["outcome"] = payload.get("outcome") or local.get("outcome") or "completed"
+            await self._persist_record(local)
         return {"ok": True, "event_type": event_type, "call_id": local.get("id") if local else call_id}
 
     def _valid_webhook_signature(self, body: bytes, signature: str) -> bool:
@@ -384,7 +536,9 @@ class ElevenLabsCallingService:
 
     async def tool_get_property_details(self, request: VoiceToolRequest) -> dict[str, Any]:
         context = await call_context_builder.build(buyer_id=request.buyer_id, lead_id=request.lead_id, buyer_name=None, buyer_phone=None, property_id=request.property_id or "seller-demo-powai-1")
-        return {"property_summary": context["property_context"], "verified_details": context["property_context"], "missing_details": context["safety_context"]["missing_documents"], "allowed_claims": ["price", "locality", "BHK", "area", "RERA if present", "availability if present"]}
+        result = {"property_summary": context["property_context"], "verified_details": context["property_context"], "missing_details": context["safety_context"]["missing_documents"], "allowed_claims": ["price", "locality", "BHK", "area", "RERA if present", "availability if present"]}
+        await self._persist_tool_call(request.call_id, "get_property_details", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_calculate_emi(self, request: VoiceToolRequest) -> dict[str, Any]:
         context = await call_context_builder.build(buyer_id=request.buyer_id, lead_id=request.lead_id, buyer_name=None, buyer_phone=None, property_id=request.property_id or "seller-demo-powai-1")
@@ -392,24 +546,36 @@ class ElevenLabsCallingService:
         down = float(request.down_payment or price * 0.2)
         loan = max(0, price - down)
         emi = monthly_emi(loan, request.interest_rate, request.tenure_years)
-        return {"loan_amount": loan, "monthly_emi": emi, "total_estimated_upfront_cost": down, "affordability_note": "Indicative only. Final EMI depends on lender approval."}
+        result = {"loan_amount": loan, "monthly_emi": emi, "total_estimated_upfront_cost": down, "affordability_note": "Indicative only. Final EMI depends on lender approval."}
+        await self._persist_tool_call(request.call_id, "calculate_emi", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_get_visit_slots(self, request: VoiceToolRequest) -> dict[str, Any]:
-        return {"available_slots": await scheduler_service.get_slots(days=5), "event_type": "property-viewing", "booking_rules": ["Confirm buyer phone", "Send WhatsApp confirmation", "Do not overbook manager"]}
+        result = {"available_slots": await scheduler_service.get_slots(days=5), "event_type": "property-viewing", "booking_rules": ["Confirm buyer phone", "Send WhatsApp confirmation", "Do not overbook manager"]}
+        await self._persist_tool_call(request.call_id, "get_visit_slots", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_book_site_visit(self, request: VoiceToolRequest) -> dict[str, Any]:
         booking = await scheduler_service.create_booking(request.attendee_name or "Demo Buyer", "buyer@example.com", request.slot or _utc_now(), request.property_id or "Selected property")
-        return {"booking_confirmation": True, "cal_booking_id": booking.get("id"), "visit_details": booking}
+        result = {"booking_confirmation": True, "cal_booking_id": booking.get("id"), "visit_details": booking}
+        await self._persist_tool_call(request.call_id, "book_site_visit", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_send_whatsapp_summary(self, request: VoiceToolRequest) -> dict[str, Any]:
-        return {"message_status": "mock_prepared", "message_preview": f"Here is the {request.summary_type} for property {request.property_id}. Reply YES to schedule a visit."}
+        result = {"message_status": "mock_prepared", "message_preview": f"Here is the {request.summary_type} for property {request.property_id}. Reply YES to schedule a visit."}
+        await self._persist_tool_call(request.call_id, "send_whatsapp_summary", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_escalate_human(self, request: VoiceToolRequest) -> dict[str, Any]:
         activity = await crm_erp_service.create_activity(CRMActivityCreate(lead_id=request.lead_id, property_id=request.property_id, activity_type="Internal task", title=f"Human escalation: {request.reason or 'buyer requested human'}", priority="high", created_by_agent=True))
-        return {"escalation_id": activity.id, "assigned_user": "sales-manager-demo", "next_step": "Manager should call buyer within 30 minutes"}
+        result = {"escalation_id": activity.id, "assigned_user": "sales-manager-demo", "next_step": "Manager should call buyer within 30 minutes"}
+        await self._persist_tool_call(request.call_id, "escalate_human", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_update_crm_lead(self, request: VoiceToolRequest) -> dict[str, Any]:
-        return {"crm_update_status": "recorded", "intent_score": request.intent_score, "next_action": request.next_action}
+        result = {"crm_update_status": "recorded", "intent_score": request.intent_score, "next_action": request.next_action}
+        await self._persist_tool_call(request.call_id, "update_crm_lead", request.model_dump(mode="json"), result)
+        return result
 
     async def tool_opt_out(self, request: VoiceToolRequest) -> dict[str, Any]:
         phone = _norm_phone(request.buyer_phone)
@@ -417,7 +583,10 @@ class ElevenLabsCallingService:
         consent["opt_out"] = True
         consent["opt_out_reason"] = request.reason or "buyer requested opt-out"
         consent["updated_at"] = _utc_now()
-        return {"opt_out_status": "opted_out", "phone": phone}
+        await self._persist_consent(consent)
+        result = {"opt_out_status": "opted_out", "phone": phone}
+        await self._persist_tool_call(request.call_id, "opt_out", request.model_dump(mode="json"), result)
+        return result
 
 
 elevenlabs_calling_service = ElevenLabsCallingService()

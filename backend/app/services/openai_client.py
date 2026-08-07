@@ -16,4 +16,6 @@ def get_openai_client() -> Any | None:
     settings = get_settings()
     if not settings.openai_api_key or AsyncOpenAI is None:
         return None
+    if settings.openai_base_url:
+        return AsyncOpenAI(api_key=settings.openai_api_key, base_url=settings.openai_base_url)
     return AsyncOpenAI(api_key=settings.openai_api_key)

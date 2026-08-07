@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     backend_cors_origins: str | None = None
 
     openai_api_key: str | None = None
+    # When set, points the OpenAI SDK at an OpenAI-compatible gateway (e.g. https://openrouter.ai/api/v1)
+    # instead of api.openai.com. Model ids must match that gateway's naming (e.g. "openai/gpt-4.1-mini").
+    openai_base_url: str | None = None
     openai_model: str = "gpt-4.1-mini"
     openai_vision_model: str = "gpt-4.1-mini"
     openai_embedding_model: str = "text-embedding-3-small"
@@ -30,6 +33,9 @@ class Settings(BaseSettings):
 
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-2.5-flash"
+    # OpenRouter has no embeddings endpoint, so Gemini is the default embedding provider
+    # whenever GEMINI_API_KEY is set (used regardless of openai_base_url).
+    gemini_embedding_model: str = "gemini-embedding-001"
 
     whatsapp_provider: str = "mock"
     whatsapp_access_token: str | None = None

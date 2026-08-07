@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import { AIAssistant } from "@/components/AIAssistant";
+import { VoiceAgentWidget } from "@/components/VoiceAgentWidget";
 import { UserMenu } from "@/components/auth/UserMenu";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         {children}
         <AIAssistant />
+        <VoiceAgentWidget />
       </body>
     </html>
   );
