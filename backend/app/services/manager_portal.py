@@ -13,6 +13,7 @@ from fastapi import HTTPException
 
 from app.agents.manager_graph import build_manager_graph
 from app.db.session import get_pool
+from app.services.storage import storage_service
 from app.manager_models import (
     AutomationRule,
     ComparableListing,
@@ -1186,28 +1187,45 @@ class ManagerPortalService:
             raise HTTPException(status_code=404, detail="Listing not found")
         created: list[ListingMedia] = []
         rooms = ["living_room", "kitchen", "bedroom", "bathroom", "building_exterior", "view", "amenities"]
+        existing_media = self._media.get(listing_id, [])
         for index, file in enumerate(files):
             room = rooms[index % len(rooms)]
+            content = await file.read()
+            uploaded_url = await storage_service.upload(content, file.filename or "photo.jpg", folder=f"listings/{listing_id}")
+            file_url = uploaded_url or f"/uploads/{file.filename}"
+            is_hero = index == 0 and not existing_media
             item = ListingMedia(
                 id=f"media-{uuid4().hex[:10]}",
                 listing_id=listing_id,
                 media_type=media_type,
                 room_type=room,
-                file_url=f"/uploads/{file.filename}",
-                thumbnail_url=f"/uploads/{file.filename}",
+                file_url=file_url,
+                thumbnail_url=file_url,
                 caption=f"{room.replace('_', ' ').title()} for {self._listings[listing_id]['title']}",
                 alt_text=f"{room.replace('_', ' ')} image for {self._listings[listing_id]['title']}",
-                is_hero=index == 0,
+                is_hero=is_hero,
                 quality_score=86 if index == 0 else 74,
                 created_at=_utc_now(),
             )
             self._media.setdefault(listing_id, []).append(item.model_dump(mode="json"))
-            self._add_audit(listing_id, "agent", "Media Intelligence Agent", "media_uploaded", {"summary": f"Uploaded {file.filename}", "room": room})
+            self._add_audit(listing_id, "agent", "Media Intelligence Agent", "media_uploaded", {"summary": f"Uploaded {file.filename}", "room": room, "stored": bool(uploaded_url)})
             created.append(item)
+            if is_hero and uploaded_url:
+                self._listings[listing_id]["hero_image_url"] = uploaded_url
+                self._listings[listing_id]["updated_at"] = _utc_now()
         if any(file.filename.lower().endswith((".mp4", ".mov", ".mkv")) for file in files):
             self._add_task(listing_id, "Codex Ops Agent", "3dgs_pipeline", "Trigger 3DGS / walkthrough ingestion task", priority="high")
         self._add_task(listing_id, "Media Intelligence Agent", "quality_review", "Approve hero image and missing visuals", priority="medium")
+        await self._save_listing(listing_id)
         return {"listing_id": listing_id, "media": [item.model_dump(mode="json") for item in created], "audit_log": [ListingAuditLog(**item).model_dump(mode="json") for item in self._audit.get(listing_id, [])][-4:]}
+
+    async def set_hero_image(self, listing_id: str, url: str) -> None:
+        await self.ensure_ready()
+        if listing_id not in self._listings:
+            return
+        self._listings[listing_id]["hero_image_url"] = url
+        self._listings[listing_id]["updated_at"] = _utc_now()
+        await self._save_listing(listing_id)
 
     async def leads(self) -> list[ListingLead]:
         await self.ensure_ready()

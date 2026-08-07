@@ -68,15 +68,16 @@ def locality_coords(locality: str | None) -> tuple[float, float]:
 
 
 class WhatsAppListingService:
-    async def extract(self, text: str, image_urls: list[str] | None = None) -> WhatsAppListingExtraction | None:
+    async def extract(self, text: str, raw_images: list[bytes] | None = None) -> WhatsAppListingExtraction | None:
         client = get_openai_client()
         if not client:
             return None
 
         settings = get_settings()
+        raw_images = raw_images or []
         content: list[dict[str, Any]] = [{"type": "text", "text": f"Incoming WhatsApp message:\n{text[:4000]}"}]
-        for img_b64 in await self._fetch_images(image_urls or []):
-            content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}})
+        for raw in raw_images:
+            content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(raw).decode('utf-8')}"}})
 
         try:
             completion = await client.beta.chat.completions.parse(
@@ -91,9 +92,9 @@ class WhatsAppListingService:
         except Exception:
             return None
 
-    async def _fetch_images(self, urls: list[str]) -> list[str]:
+    async def fetch_raw_images(self, urls: list[str]) -> list[bytes]:
         settings = get_settings()
-        out: list[str] = []
+        out: list[bytes] = []
         if not urls:
             return out
         auth = (settings.twilio_account_sid, settings.twilio_auth_token) if settings.twilio_account_sid else None
@@ -102,7 +103,7 @@ class WhatsAppListingService:
                 try:
                     response = await client.get(url, auth=auth)
                     response.raise_for_status()
-                    out.append(base64.b64encode(response.content).decode("utf-8"))
+                    out.append(response.content)
                 except Exception:
                     continue
         return out

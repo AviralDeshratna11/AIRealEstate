@@ -14,6 +14,7 @@ from app.manager_models import ManagerCreateListingRequest
 from app.models import LeadChannel, LeadQualificationRequest, LeadQualificationResponse
 from app.models import WhatsAppSendRequest, WhatsAppSendResponse
 from app.services.manager_portal import manager_portal_service
+from app.services.storage import storage_service
 from app.services.whatsapp_listing import locality_coords, whatsapp_listing_service
 
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
@@ -69,7 +70,8 @@ async def _maybe_handle_listing_submission(text: str, media_urls: list[str], pho
     """Detects and drafts a listing from an inbound WhatsApp message. Returns a reply string
     if this message was handled as a listing submission, or None to fall through to the
     normal buyer-qualification flow."""
-    extraction = await whatsapp_listing_service.extract(text, media_urls)
+    raw_images = await whatsapp_listing_service.fetch_raw_images(media_urls)
+    extraction = await whatsapp_listing_service.extract(text, raw_images)
     if not extraction or not extraction.is_listing:
         return None
 
@@ -104,6 +106,11 @@ async def _maybe_handle_listing_submission(text: str, media_urls: list[str], pho
             notes=" | ".join(notes_parts) or None,
         )
     )
+
+    if raw_images:
+        photo_url = await storage_service.upload(raw_images[0], "listing.jpg", folder=f"listings/{listing.id}")
+        if photo_url:
+            await manager_portal_service.set_hero_image(listing.id, photo_url)
 
     price_label = f"INR {extraction.asking_price / 1_00_00_000:.2f} Cr" if extraction.asking_price else "price not captured"
     return (
