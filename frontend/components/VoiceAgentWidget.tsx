@@ -4,6 +4,7 @@ import type { DetailedHTMLProps, HTMLAttributes } from "react";
 import Script from "next/script";
 
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- required to augment JSX.IntrinsicElements
   namespace JSX {
     interface IntrinsicElements {
       "elevenlabs-convai": DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
