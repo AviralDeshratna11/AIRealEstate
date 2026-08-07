@@ -10,8 +10,11 @@ from fastapi.responses import JSONResponse, Response
 
 from app.agents.support_agents import WhatsAppAssistantAgent
 from app.config import get_settings
+from app.manager_models import ManagerCreateListingRequest
 from app.models import LeadChannel, LeadQualificationRequest, LeadQualificationResponse
 from app.models import WhatsAppSendRequest, WhatsAppSendResponse
+from app.services.manager_portal import manager_portal_service
+from app.services.whatsapp_listing import locality_coords, whatsapp_listing_service
 
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 agent = WhatsAppAssistantAgent()
@@ -62,6 +65,54 @@ async def qualify_lead(request: LeadQualificationRequest):
     return await agent.qualify(request)
 
 
+async def _maybe_handle_listing_submission(text: str, media_urls: list[str], phone: str | None) -> str | None:
+    """Detects and drafts a listing from an inbound WhatsApp message. Returns a reply string
+    if this message was handled as a listing submission, or None to fall through to the
+    normal buyer-qualification flow."""
+    extraction = await whatsapp_listing_service.extract(text, media_urls)
+    if not extraction or not extraction.is_listing:
+        return None
+
+    if not extraction.locality or not (extraction.title or extraction.asking_price):
+        return (
+            "Thanks for reaching out to list a property! I couldn't quite catch all the details. "
+            "Could you share the locality, BHK, area (sq ft), and asking price in one message?"
+        )
+
+    lat, lng = locality_coords(extraction.locality)
+    title = extraction.title or f"{extraction.bedrooms or ''} BHK in {extraction.locality}".strip()
+    notes_parts = [p for p in [extraction.builder and f"Builder: {extraction.builder}", extraction.notes] if p]
+
+    listing = await manager_portal_service.create_listing(
+        ManagerCreateListingRequest(
+            publish_immediately=False,
+            title=title,
+            property_type=extraction.property_type,
+            transaction_type=extraction.transaction_type,
+            locality=extraction.locality,
+            address=f"{extraction.locality}, Mumbai",
+            latitude=lat,
+            longitude=lng,
+            carpet_area_sqft=extraction.carpet_area_sqft,
+            bedrooms=extraction.bedrooms,
+            bathrooms=extraction.bathrooms,
+            furnishing_status=extraction.furnishing_status,
+            possession_status=extraction.possession_status,
+            asking_price=extraction.asking_price,
+            owner_name=extraction.owner_name,
+            owner_phone=extraction.owner_phone or phone,
+            notes=" | ".join(notes_parts) or None,
+        )
+    )
+
+    price_label = f"INR {extraction.asking_price / 1_00_00_000:.2f} Cr" if extraction.asking_price else "price not captured"
+    return (
+        f"Got it! I've drafted a listing: {title} ({price_label}). "
+        "It's saved as a draft and our team will review and publish it shortly. "
+        f"Reference: {listing.id}"
+    )
+
+
 @router.post("/webhook")
 async def whatsapp_webhook(request: Request):
     """Meta/Twilio-compatible webhook shim.
@@ -78,6 +129,17 @@ async def whatsapp_webhook(request: Request):
         or "I need help finding a Mumbai property"
     )
     phone = payload.get("From") or payload.get("phone")
+
+    num_media = int(payload.get("NumMedia") or 0)
+    media_urls = [payload[f"MediaUrl{i}"] for i in range(num_media) if payload.get(f"MediaUrl{i}")]
+
+    listing_reply = await _maybe_handle_listing_submission(str(text), media_urls, phone)
+    if listing_reply:
+        settings = get_settings()
+        if settings.whatsapp_provider.lower() == "twilio":
+            return Response(content=_build_twiml(listing_reply), media_type="application/xml")
+        return JSONResponse({"reply": listing_reply, "provider": settings.whatsapp_provider})
+
     try:
         result = await agent.qualify(LeadQualificationRequest(channel=LeadChannel.whatsapp, phone=phone, message=str(text)))
         reply_text = result.suggested_reply

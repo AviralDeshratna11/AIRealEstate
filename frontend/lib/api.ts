@@ -694,7 +694,7 @@ function demoBrokerDashboard(): BrokerDashboard {
 
 export async function getProperties(): Promise<Property[]> {
   try {
-    const res = await fetch(`${API_URL}/api/properties`, { cache: "no-store" });
+    const res = await fetch(`${API_URL}/api/properties?limit=100`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to load properties");
     return res.json();
   } catch (error) {
