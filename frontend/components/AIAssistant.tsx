@@ -61,10 +61,10 @@ export function AIAssistant() {
       </button>
 
       {open && (
-        <section className="fixed bottom-5 right-5 z-[1200] flex h-[560px] w-[calc(100vw-2rem)] max-w-[420px] flex-col overflow-hidden rounded-lg border border-ink/15 bg-[#fffaf0] shadow-soft">
+        <section className="fixed bottom-5 right-5 z-[1200] flex h-[560px] w-[calc(100vw-2rem)] max-w-[420px] flex-col overflow-hidden rounded-lg border border-ink/15 bg-[#f9fafb] shadow-soft">
           <header className="flex items-center justify-between border-b border-ink/15 px-4 py-3">
             <div className="flex items-center gap-3">
-              <div className="grid h-9 w-9 place-items-center rounded-md bg-ink text-[#fffaf0]">
+              <div className="grid h-9 w-9 place-items-center rounded-md bg-ink text-[#f9fafb]">
                 <Bot size={18} />
               </div>
               <div>
@@ -77,14 +77,14 @@ export function AIAssistant() {
             </button>
           </header>
 
-          <div className="flex-1 space-y-3 overflow-auto bg-[linear-gradient(90deg,rgba(25,23,19,0.04)_1px,transparent_1px),linear-gradient(180deg,rgba(25,23,19,0.04)_1px,transparent_1px)] bg-[length:24px_24px] p-4">
+          <div className="flex-1 space-y-3 overflow-auto bg-[linear-gradient(90deg,rgba(17,24,39,0.04)_1px,transparent_1px),linear-gradient(180deg,rgba(17,24,39,0.04)_1px,transparent_1px)] bg-[length:24px_24px] p-4">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
                 className={clsx(
                   "max-w-[88%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm leading-6",
                   message.role === "user"
-                    ? "ml-auto bg-ink text-[#fffaf0]"
+                    ? "ml-auto bg-ink text-[#f9fafb]"
                     : "bg-white/82 text-ink/70 ring-1 ring-ink/12"
                 )}
               >

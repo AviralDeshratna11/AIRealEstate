@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, Bath, BedDouble, Heart, MapPin, Ruler } from "lucide-react";
 import { Property, formatCr } from "@/lib/api";
 
 // Listing card: deliberately lean. It carries only what a buyer needs to
@@ -22,9 +23,10 @@ export function PropertyCard({
   onFocus: (property: Property) => void;
 }) {
   const detailHref = `/properties/${property.id}`;
+  const [saved, setSaved] = useState(false);
 
   return (
-    <article className="group overflow-hidden rounded-[3px] border border-ink/12 bg-ivory shadow-lx transition hover:-translate-y-1 hover:border-gold">
+    <article className="group relative overflow-hidden rounded-xl border border-ink/12 bg-ivory shadow-lx transition hover:-translate-y-1 hover:shadow-soft">
       <Link href={detailHref} className="block w-full text-left">
         <div className="relative h-52 overflow-hidden bg-espresso">
           {property.image_url && (
@@ -36,26 +38,41 @@ export function PropertyCard({
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-espresso/82 via-espresso/12 to-transparent" />
-          <span className="absolute left-3 top-3 rounded-full border border-ivory/30 bg-espresso/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-ivory backdrop-blur">
+          <div className="absolute inset-0 bg-gradient-to-b from-espresso/45 via-transparent to-transparent" />
+          <span className="absolute left-3 top-3 rounded-full border border-ivory/30 bg-espresso/45 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-ivory backdrop-blur">
             {property.status}
           </span>
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-ivory">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-goldsoft">{property.locality}</p>
-              <p className="lx-display mt-1 text-2xl font-light leading-none">{formatCr(property.price)}</p>
-            </div>
-            <p className="text-xs font-semibold text-ivory/75">{property.bedrooms} BHK · {property.area_sqft} sq ft</p>
-          </div>
         </div>
       </Link>
+      <button
+        onClick={() => setSaved((value) => !value)}
+        aria-label={saved ? "Remove from saved" : "Save listing"}
+        className={clsx(
+          "absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border backdrop-blur transition-colors",
+          saved ? "border-gold bg-gold text-ivory" : "border-ivory/40 bg-espresso/45 text-ivory hover:bg-espresso/65"
+        )}
+      >
+        <Heart size={16} className={clsx(saved && "fill-current")} />
+      </button>
 
       <div className="space-y-4 p-5">
         <Link href={detailHref} className="block">
-          <h3 className="lx-display text-xl font-light leading-snug text-ink transition-colors group-hover:text-gold">
+          <p className="text-2xl font-bold leading-none text-ink">{formatCr(property.price)}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-ink/70">
+            <span className="flex items-center gap-1.5">
+              <BedDouble size={15} /> {property.bedrooms} bed
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Bath size={15} /> {property.bathrooms} bath
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Ruler size={15} /> {property.area_sqft} sqft
+            </span>
+          </div>
+          <h3 className="mt-3 text-base font-semibold leading-snug text-ink transition-colors group-hover:text-gold">
             {property.title}
           </h3>
-          <p className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-ink/55">
+          <p className="mt-1.5 flex items-center gap-1.5 text-[13px] font-medium text-ink/55">
             <MapPin size={13} /> {property.locality}, Mumbai
           </p>
         </Link>
@@ -70,23 +87,23 @@ export function PropertyCard({
         <div className="flex items-center gap-2">
           <Link
             href={detailHref}
-            className="group/btn inline-flex flex-1 items-center justify-center gap-2 rounded-[3px] bg-ink px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory transition-colors hover:bg-[#2b251f]"
+            className="group/btn inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory transition-colors hover:bg-[#1d4ed8]"
           >
             View details
             <ArrowUpRight size={14} className="transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
           </Link>
           <button
             onClick={() => onFocus(property)}
-            className="rounded-[3px] border border-ink/15 bg-ivory px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-sand"
+            className="rounded-xl border border-ink/15 bg-ivory px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-sand"
           >
             Map
           </button>
           <button
             onClick={() => onCompare(property)}
             className={clsx(
-              "rounded-[3px] border px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors",
+              "rounded-xl border px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors",
               selected
-                ? "border-gold bg-gold text-ivory"
+                ? "border-ink bg-ink text-ivory"
                 : "border-ink/15 bg-ivory text-ink hover:bg-sand"
             )}
           >

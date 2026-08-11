@@ -61,7 +61,7 @@ export function LandingPage() {
   const heroProperty = DEMO_PROPERTIES[3]; // Worli — the house signature
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] font-sans text-ink antialiased selection:bg-ink selection:text-[#f7f3ea]">
+    <main className="min-h-screen bg-[#ffffff] font-sans text-ink antialiased selection:bg-ink selection:text-[#ffffff]">
       <SiteHeader />
       <Hero property={heroProperty} />
       <Residences active={active} activeId={activeId} setActiveId={setActiveId} />
@@ -77,15 +77,15 @@ export function LandingPage() {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/10 bg-[#f7f3ea]/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-[#ffffff]/85 backdrop-blur-md">
       <div className="mx-auto flex h-20 w-full max-w-[1240px] items-center justify-between px-5 sm:px-8">
         <Link href="/" className="group flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-[3px] border border-ink/25 lx-display text-lg text-ink transition-colors group-hover:border-[#a8813c]">
+          <span className="grid h-10 w-10 place-items-center rounded-xl border border-ink/25 lx-display text-lg text-ink transition-colors group-hover:border-[#2563eb]">
             A
           </span>
           <span className="leading-none">
             <span className="lx-display text-[19px] tracking-tight text-ink">
-              Astra <span className="italic text-[#a8813c]">Estate</span>
+              Astra <span className="italic text-[#2563eb]">Estate</span>
             </span>
             <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.32em] text-ink/45">
               Mumbai deal desk
@@ -107,7 +107,7 @@ function SiteHeader() {
 
         <Link
           href="/workspace"
-          className="group inline-flex items-center gap-2 rounded-[3px] bg-ink px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f7f3ea] transition-colors hover:bg-[#2b251f]"
+          className="group inline-flex items-center gap-2 rounded-xl bg-ink px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ffffff] transition-colors hover:bg-[#1f2937]"
         >
           Enter workspace
           <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -126,8 +126,8 @@ function Hero({ property }: { property: Property }) {
       <div className="mx-auto grid w-full max-w-[1240px] items-center gap-14 px-5 py-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
         <div>
           <div className="lx-rise flex items-center gap-3" style={{ animationDelay: "60ms" }}>
-            <span className="h-px w-10 bg-[#a8813c]" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#a8813c]">
+            <span className="h-px w-10 bg-[#2563eb]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#2563eb]">
               Multi-agent estate desk
             </span>
           </div>
@@ -136,7 +136,7 @@ function Hero({ property }: { property: Property }) {
             className="lx-rise lx-display mt-7 text-[clamp(2.8rem,6vw,5.2rem)] font-light leading-[0.98] tracking-[-0.01em] text-ink"
             style={{ animationDelay: "140ms" }}
           >
-            A <span className="italic text-[#a8813c]">quieter</span> way to move Mumbai property.
+            A <span className="italic text-[#2563eb]">quieter</span> way to move Mumbai property.
           </h1>
 
           <p
@@ -151,7 +151,7 @@ function Hero({ property }: { property: Property }) {
           <div className="lx-rise mt-9 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "320ms" }}>
             <Link
               href="/workspace"
-              className="group inline-flex items-center justify-center gap-2 rounded-[3px] bg-ink px-7 py-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#f7f3ea] transition-colors hover:bg-[#2b251f]"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-7 py-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#ffffff] transition-colors hover:bg-[#1f2937]"
             >
               Launch the desk
               <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -183,8 +183,8 @@ function Hero({ property }: { property: Property }) {
         </div>
 
         <div className="lx-rise relative" style={{ animationDelay: "260ms" }}>
-          <div className="pointer-events-none absolute -inset-3 hidden rounded-[3px] border border-[#a8813c]/40 md:block" />
-          <figure className="relative aspect-[4/5] overflow-hidden rounded-[3px] shadow-[0_50px_90px_-30px_rgba(25,23,19,0.45)]">
+          <div className="pointer-events-none absolute -inset-3 hidden rounded-xl border border-[#2563eb]/40 md:block" />
+          <figure className="relative aspect-[4/5] overflow-hidden rounded-xl shadow-[0_50px_90px_-30px_rgba(17,24,39,0.45)]">
             <Image
               src={property.image_url || DEMO_PROPERTIES[0].image_url || ""}
               alt={property.title}
@@ -193,23 +193,23 @@ function Hero({ property }: { property: Property }) {
               sizes="(max-width: 1024px) 100vw, 560px"
               className="lx-ken object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#14110d]/82 via-[#14110d]/12 to-transparent" />
-            <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 text-[#f7f3ea]">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/82 via-[#0f172a]/12 to-transparent" />
+            <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 text-[#ffffff]">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#c8a35a]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#60a5fa]">
                   Signature residence
                 </p>
                 <p className="lx-display mt-2 text-2xl leading-tight">{property.locality}</p>
-                <p className="mt-1 text-sm text-[#f7f3ea]/70">
+                <p className="mt-1 text-sm text-[#ffffff]/70">
                   {property.bedrooms} BHK · {property.micro_market}
                 </p>
               </div>
-              <p className="lx-display whitespace-nowrap text-2xl text-[#f7f3ea]">
+              <p className="lx-display whitespace-nowrap text-2xl text-[#ffffff]">
                 {formatCr(property.price)}
               </p>
             </figcaption>
-            <span className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-[#f7f3ea]/30 bg-[#14110d]/35 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#f7f3ea] backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#c8a35a]" /> Live mandate
+            <span className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-[#ffffff]/30 bg-[#0f172a]/35 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#ffffff] backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#60a5fa]" /> Live mandate
             </span>
           </figure>
         </div>
@@ -247,7 +247,7 @@ function Residences({
 
         <div className="mt-14 grid gap-14 lg:grid-cols-2 lg:items-start">
           <Reveal className="relative">
-            <figure className="relative aspect-[5/6] overflow-hidden rounded-[3px] shadow-[0_40px_80px_-30px_rgba(25,23,19,0.4)]">
+            <figure className="relative aspect-[5/6] overflow-hidden rounded-xl shadow-[0_40px_80px_-30px_rgba(17,24,39,0.4)]">
               <Image
                 key={active.id}
                 src={active.image_url || ""}
@@ -256,18 +256,18 @@ function Residences({
                 sizes="(max-width: 1024px) 100vw, 560px"
                 className="object-cover transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#14110d]/55 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/55 to-transparent" />
               <figcaption className="absolute bottom-0 left-0 p-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#c8a35a]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#60a5fa]">
                   {active.locality} · {active.status}
                 </p>
-                <p className="lx-display mt-2 max-w-sm text-2xl leading-tight text-[#f7f3ea]">
+                <p className="lx-display mt-2 max-w-sm text-2xl leading-tight text-[#ffffff]">
                   {active.title}
                 </p>
               </figcaption>
             </figure>
 
-            <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-[3px] border border-ink/12 bg-ink/12 sm:grid-cols-4">
+            <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-ink/12 bg-ink/12 sm:grid-cols-4">
               {DEMO_PROPERTIES.map((property, index) => {
                 const isActive = property.id === activeId;
                 return (
@@ -276,7 +276,7 @@ function Residences({
                     type="button"
                     onClick={() => setActiveId(property.id)}
                     className={`relative px-4 py-4 text-left transition-colors ${
-                      isActive ? "bg-ink text-[#f7f3ea]" : "bg-[#f7f3ea] text-ink/70 hover:bg-[#efe7d7]"
+                      isActive ? "bg-ink text-[#ffffff]" : "bg-[#ffffff] text-ink/70 hover:bg-[#f3f4f6]"
                     }`}
                   >
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] opacity-60">
@@ -295,7 +295,7 @@ function Residences({
           </Reveal>
 
           <Reveal delay={120}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#a8813c]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#2563eb]">
               {active.builder} · RERA {active.rera_id}
             </p>
             <h3 className="lx-display mt-3 text-3xl font-light leading-tight text-ink sm:text-4xl">
@@ -328,7 +328,7 @@ function Residences({
             <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
               <Link
                 href={`/properties/${active.id}/`}
-                className="group inline-flex items-center gap-2 rounded-[3px] bg-ink px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#f7f3ea] transition-colors hover:bg-[#2b251f]"
+                className="group inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#ffffff] transition-colors hover:bg-[#1f2937]"
               >
                 View intelligence
                 <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -369,13 +369,13 @@ function Desk() {
                 <Link
                   key={workflow.title}
                   href={workflow.href}
-                  className="group relative flex flex-col gap-5 border-t border-ink/12 px-2 py-9 transition-colors hover:bg-[#efe7d7]/60 sm:px-7 sm:odd:border-r sm:odd:border-ink/12"
+                  className="group relative flex flex-col gap-5 border-t border-ink/12 px-2 py-9 transition-colors hover:bg-[#f3f4f6]/60 sm:px-7 sm:odd:border-r sm:odd:border-ink/12"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="grid h-11 w-11 place-items-center rounded-[3px] border border-ink/15 text-ink/70 transition-colors group-hover:border-[#a8813c] group-hover:text-[#a8813c]">
+                    <span className="grid h-11 w-11 place-items-center rounded-xl border border-ink/15 text-ink/70 transition-colors group-hover:border-[#2563eb] group-hover:text-[#2563eb]">
                       <Icon size={18} strokeWidth={1.6} />
                     </span>
-                    <span className="lx-display text-2xl font-light text-ink/25 transition-colors group-hover:text-[#a8813c]">
+                    <span className="lx-display text-2xl font-light text-ink/25 transition-colors group-hover:text-[#2563eb]">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                   </div>
@@ -414,7 +414,7 @@ function MarketIntelligence() {
   ];
 
   return (
-    <section className="border-t border-ink/10 bg-[#efe7d7]/45">
+    <section className="border-t border-ink/10 bg-[#f3f4f6]/45">
       <div className="mx-auto grid w-full max-w-[1240px] gap-14 px-5 py-24 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
         <Reveal>
           <SectionHeading
@@ -465,7 +465,7 @@ function MarketBars({ markets, max }: { markets: [string, number][]; max: number
   }, []);
 
   return (
-    <div ref={ref} className="rounded-[3px] border border-ink/12 bg-[#f7f3ea] p-8 shadow-[0_30px_70px_-40px_rgba(25,23,19,0.4)]">
+    <div ref={ref} className="rounded-xl border border-ink/12 bg-[#ffffff] p-8 shadow-[0_30px_70px_-40px_rgba(17,24,39,0.4)]">
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ink/45">
         Top micro-markets · development agreements
       </p>
@@ -478,7 +478,7 @@ function MarketBars({ markets, max }: { markets: [string, number][]; max: number
             </div>
             <div className="h-[3px] w-full overflow-hidden rounded-full bg-ink/10">
               <div
-                className="h-full rounded-full bg-[#a8813c] transition-[width] duration-[1100ms] ease-out"
+                className="h-full rounded-full bg-[#2563eb] transition-[width] duration-[1100ms] ease-out"
                 style={{
                   width: visible ? `${Math.max(14, (value / max) * 100)}%` : "0%",
                   transitionDelay: `${index * 120}ms`,
@@ -496,7 +496,7 @@ function MarketBars({ markets, max }: { markets: [string, number][]; max: number
 
 function ClosingInvitation() {
   return (
-    <section className="relative overflow-hidden bg-[#14110d] text-[#f7f3ea]">
+    <section className="relative overflow-hidden bg-[#0f172a] text-[#ffffff]">
       <div className="lx-grain opacity-[0.06]" />
       <div
         className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-60 blur-3xl"
@@ -505,13 +505,13 @@ function ClosingInvitation() {
       <div className="relative mx-auto flex w-full max-w-[1240px] flex-col items-start gap-12 px-5 py-28 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
           <Reveal>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#c8a35a]">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#60a5fa]">
               Open the desk
             </span>
             <h2 className="lx-display mt-6 text-[clamp(2.4rem,5vw,4.2rem)] font-light leading-[1.02]">
-              Ready to move your next <span className="italic text-[#c8a35a]">Mumbai</span> mandate?
+              Ready to move your next <span className="italic text-[#60a5fa]">Mumbai</span> mandate?
             </h2>
-            <p className="mt-6 max-w-xl text-[16px] leading-8 text-[#f7f3ea]/65">
+            <p className="mt-6 max-w-xl text-[16px] leading-8 text-[#ffffff]/65">
               Step into a command floor where search, finance, tours, documents and
               negotiation already speak to one another.
             </p>
@@ -520,14 +520,14 @@ function ClosingInvitation() {
         <Reveal delay={120} className="flex flex-col gap-4 sm:flex-row">
           <Link
             href="/workspace"
-            className="group inline-flex items-center justify-center gap-2 rounded-[3px] bg-[#f7f3ea] px-8 py-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink transition-transform hover:-translate-y-0.5"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-[#ffffff] px-8 py-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink transition-transform hover:-translate-y-0.5"
           >
             Enter workspace
             <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
           <Link
             href="/broker"
-            className="inline-flex items-center justify-center gap-2 rounded-[3px] border border-[#f7f3ea]/25 px-8 py-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#f7f3ea] transition-colors hover:bg-[#f7f3ea]/10"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#ffffff]/25 px-8 py-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#ffffff] transition-colors hover:bg-[#ffffff]/10"
           >
             Broker portal
           </Link>
@@ -541,20 +541,20 @@ function ClosingInvitation() {
 
 function SiteFooter() {
   return (
-    <footer className="bg-[#14110d] text-[#f7f3ea]/60">
-      <div className="mx-auto flex w-full max-w-[1240px] flex-col items-start justify-between gap-6 border-t border-[#f7f3ea]/10 px-5 py-10 sm:px-8 md:flex-row md:items-center">
+    <footer className="bg-[#0f172a] text-[#ffffff]/60">
+      <div className="mx-auto flex w-full max-w-[1240px] flex-col items-start justify-between gap-6 border-t border-[#ffffff]/10 px-5 py-10 sm:px-8 md:flex-row md:items-center">
         <div className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-[3px] border border-[#f7f3ea]/25 lx-display text-base text-[#f7f3ea]">
+          <span className="grid h-9 w-9 place-items-center rounded-xl border border-[#ffffff]/25 lx-display text-base text-[#ffffff]">
             A
           </span>
-          <span className="lx-display text-base text-[#f7f3ea]">
-            Astra <span className="italic text-[#c8a35a]">Estate</span>
+          <span className="lx-display text-base text-[#ffffff]">
+            Astra <span className="italic text-[#60a5fa]">Estate</span>
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-          <Link href="/workspace" className="lx-link transition-colors hover:text-[#f7f3ea]">Workspace</Link>
-          <Link href="/broker" className="lx-link transition-colors hover:text-[#f7f3ea]">Brokers</Link>
-          <Link href="/manager" className="lx-link transition-colors hover:text-[#f7f3ea]">Managers</Link>
+          <Link href="/workspace" className="lx-link transition-colors hover:text-[#ffffff]">Workspace</Link>
+          <Link href="/broker" className="lx-link transition-colors hover:text-[#ffffff]">Brokers</Link>
+          <Link href="/manager" className="lx-link transition-colors hover:text-[#ffffff]">Managers</Link>
         </div>
         <p className="text-[11px] uppercase tracking-[0.18em]">Mumbai · multi-agent estate desk</p>
       </div>
@@ -568,8 +568,8 @@ function SectionHeading({ kicker, title, note }: { kicker: string; title: string
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3">
-        <span className="h-px w-10 bg-[#a8813c]" />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#a8813c]">{kicker}</span>
+        <span className="h-px w-10 bg-[#2563eb]" />
+        <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#2563eb]">{kicker}</span>
       </div>
       <h2 className="lx-display mt-5 text-[clamp(2rem,4vw,3.2rem)] font-light leading-[1.04] text-ink">
         {title}

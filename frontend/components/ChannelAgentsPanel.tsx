@@ -92,7 +92,7 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
 
   return (
     <section className="grid gap-5 xl:grid-cols-3">
-      <div className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+      <div className="rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx">
         <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
           <MessageCircle size={16} />
           WhatsApp assistant
@@ -105,25 +105,25 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
           value={whatsAppTo}
           onChange={(event) => setWhatsAppTo(event.target.value)}
           placeholder="+918209979629"
-          className="mt-4 w-full rounded-[3px] border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
+          className="mt-4 w-full rounded-xl border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
         />
         <textarea
           value={leadMessage}
           onChange={(event) => setLeadMessage(event.target.value)}
-          className="mt-3 min-h-32 w-full rounded-[3px] border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
+          className="mt-3 min-h-32 w-full rounded-xl border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
         />
-        <button onClick={runWhatsApp} disabled={whatsAppSending} className="mt-3 w-full rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32] disabled:opacity-50">
+        <button onClick={runWhatsApp} disabled={whatsAppSending} className="mt-3 w-full rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#1d4ed8] disabled:opacity-50">
           Send WhatsApp reply
         </button>
         {whatsapp && (
-          <div className="mt-4 rounded-[3px] border border-gold/45 bg-gold/10 p-4 text-sm font-semibold leading-6 text-[#8f6d32]">
+          <div className="mt-4 rounded-xl border border-gold/45 bg-gold/10 p-4 text-sm font-semibold leading-6 text-[#1d4ed8]">
             <p className="font-semibold">Assistant response</p>
             <p className="mt-2">Lead score {whatsapp.lead_score}/100 - {whatsapp.intent}</p>
             <p className="mt-2">{whatsapp.suggested_reply}</p>
           </div>
         )}
         {whatsappSend && (
-          <div className={`mt-4 rounded-[3px] border p-4 text-sm font-semibold leading-6 ${whatsappSend.sent ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
+          <div className={`mt-4 rounded-xl border p-4 text-sm font-semibold leading-6 ${whatsappSend.sent ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
             <p className="font-semibold">Delivery status</p>
             <p className="mt-2">{whatsappSend.sent ? "Sent" : "Not sent"} | {whatsappSend.status || "unknown"}</p>
             <p className="mt-2">To: {whatsappSend.to}</p>
@@ -135,7 +135,7 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         )}
       </div>
 
-      <div className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+      <div className="rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx">
         <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
           <PhoneCall size={16} />
           Call agent
@@ -147,15 +147,15 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         <input
           value={callPhone}
           onChange={(event) => setCallPhone(event.target.value)}
-          className="mt-4 w-full rounded-[3px] border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
+          className="mt-4 w-full rounded-xl border border-ink/15 bg-ivory p-3 text-sm font-medium text-ink outline-none focus:border-gold"
           placeholder="+91 buyer phone"
         />
         <label className="mt-3 flex items-start gap-2 text-sm font-bold text-ink/65"><input type="checkbox" checked={callConsent} onChange={(event) => setCallConsent(event.target.checked)} className="mt-1" />Buyer consent confirmed for ASTRA AI call.</label>
-        <button onClick={runCall} disabled={callBusy || !focused} className="mt-3 w-full rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#2b251f] disabled:opacity-50">
+        <button onClick={runCall} disabled={callBusy || !focused} className="mt-3 w-full rounded-xl bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#1f2937] disabled:opacity-50">
           {callBusy ? "Starting call..." : "Trigger ElevenLabs call"}
         </button>
         {callResult && (
-          <div className={`mt-4 rounded-[3px] border p-4 text-sm font-medium leading-6 ${
+          <div className={`mt-4 rounded-xl border p-4 text-sm font-medium leading-6 ${
             callResult.call_status === "calling" || callResult.call_status === "completed"
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
               : callResult.call_status === "failed" || callResult.call_status === "blocked"
@@ -169,7 +169,7 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
         )}
       </div>
 
-      <div className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+      <div className="rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx">
         <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
           <CalendarCheck size={16} />
           Booking page
@@ -183,7 +183,7 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
             <button
               key={slot.time}
               onClick={() => setSelectedSlot(slot.time)}
-              className={`rounded-[3px] border px-3 py-2 text-left text-sm font-bold ${
+              className={`rounded-xl border px-3 py-2 text-left text-sm font-bold ${
                 selectedSlot === slot.time ? "border-ink bg-ink text-ivory" : "border-ink/15 bg-ivory text-ink/65"
               }`}
             >
@@ -191,11 +191,11 @@ export function ChannelAgentsPanel({ focused }: { focused: Property | null }) {
             </button>
           ))}
         </div>
-        <button onClick={bookSlot} disabled={!selectedSlot} className="mt-3 w-full rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32] disabled:opacity-50">
+        <button onClick={bookSlot} disabled={!selectedSlot} className="mt-3 w-full rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#1d4ed8] disabled:opacity-50">
           Book viewing
         </button>
         {booking && (
-          <div className="mt-4 rounded-[3px] border border-gold/45 bg-gold/10 p-4 text-sm font-semibold leading-6 text-[#8f6d32]">
+          <div className="mt-4 rounded-xl border border-gold/45 bg-gold/10 p-4 text-sm font-semibold leading-6 text-[#1d4ed8]">
             <p className="font-semibold">Booking confirmed</p>
             <p>{booking.booking?.title}</p>
           </div>

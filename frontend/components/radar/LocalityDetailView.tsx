@@ -72,10 +72,10 @@ export function LocalityDetailView({ slug }: { slug: string }) {
         </div>
         <div className="flex flex-col items-end gap-2">
           <WatchlistButton entityType="locality" entityId={locality.slug} entityName={locality.name} />
-          <Link href={`/radar/reports/${locality.slug}`} className="inline-flex items-center gap-1 rounded-[3px] border border-ink/20 px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-ink/5">
+          <Link href={`/radar/reports/${locality.slug}`} className="inline-flex items-center gap-1 rounded-xl border border-ink/20 px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-ink/5">
             <FileText size={13} /> Report
           </Link>
-          <Link href={`/radar/compare?with=${locality.slug}`} className="inline-flex items-center gap-1 rounded-[3px] border border-ink/20 px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-ink/5">
+          <Link href={`/radar/compare?with=${locality.slug}`} className="inline-flex items-center gap-1 rounded-xl border border-ink/20 px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-ink/5">
             Compare <ArrowUpRight size={13} />
           </Link>
         </div>
@@ -150,7 +150,7 @@ export function LocalityDetailView({ slug }: { slug: string }) {
           <h2 className="lx-display text-2xl font-light text-ink">Suggested actions</h2>
           <div className="flex gap-1.5">
             {(["buyer", "broker", "manager", "crm"] as const).map((r) => (
-              <button key={r} type="button" onClick={() => setRole(r)} className={clsx("rounded-[3px] px-2.5 py-1 text-[12px] font-semibold capitalize", role === r ? "bg-ink text-ivory" : "border border-ink/15 text-ink/60 hover:bg-ink/5")}>{r}</button>
+              <button key={r} type="button" onClick={() => setRole(r)} className={clsx("rounded-xl px-2.5 py-1 text-[12px] font-semibold capitalize", role === r ? "bg-ink text-ivory" : "border border-ink/15 text-ink/60 hover:bg-ink/5")}>{r}</button>
             ))}
           </div>
         </div>
@@ -185,7 +185,7 @@ function AnalyzePanel({ slug, role, setRole }: { slug: string; role: string; set
       <div className="flex flex-wrap gap-2">
         <div className="flex gap-1.5">
           {(["buyer", "broker", "manager", "crm"] as const).map((r) => (
-            <button key={r} type="button" onClick={() => setRole(r)} className={clsx("rounded-[3px] px-2.5 py-1 text-[12px] font-semibold capitalize", role === r ? "bg-ink text-ivory" : "border border-ink/15 text-ink/60 hover:bg-ink/5")}>{r}</button>
+            <button key={r} type="button" onClick={() => setRole(r)} className={clsx("rounded-xl px-2.5 py-1 text-[12px] font-semibold capitalize", role === r ? "bg-ink text-ivory" : "border border-ink/15 text-ink/60 hover:bg-ink/5")}>{r}</button>
           ))}
         </div>
       </div>
@@ -195,14 +195,14 @@ function AnalyzePanel({ slug, role, setRole }: { slug: string; role: string; set
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") run(); }}
           placeholder="e.g. Is this good for a 5-year investment? What government plans affect it?"
-          className="flex-1 rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-[14px] text-ink outline-none focus:border-gold"
+          className="flex-1 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[14px] text-ink outline-none focus:border-gold"
         />
-        <button type="button" onClick={run} disabled={busy} className="inline-flex items-center gap-1.5 rounded-[3px] bg-ink px-4 py-2 text-[13px] font-semibold text-ivory hover:bg-ink/85 disabled:opacity-60">
+        <button type="button" onClick={run} disabled={busy} className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-[13px] font-semibold text-ivory hover:bg-ink/85 disabled:opacity-60">
           <Send size={14} /> {busy ? "…" : "Ask"}
         </button>
       </div>
       {result ? (
-        <div className="mt-3 rounded-[3px] border border-ink/10 bg-ink/[0.02] p-4">
+        <div className="mt-3 rounded-xl border border-ink/10 bg-ink/[0.02] p-4">
           <p className="text-[14px] leading-relaxed text-ink/80">{result.answer}</p>
           <p className="mt-2 text-[13px] font-medium text-ink/70"><span className="font-bold">Recommendation:</span> {result.recommendation}</p>
           <div className="mt-2"><ConfidenceBadge value={result.confidence_score} /></div>

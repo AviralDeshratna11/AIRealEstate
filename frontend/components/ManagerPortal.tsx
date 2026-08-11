@@ -326,8 +326,8 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
     <main className="min-h-screen bg-ivory text-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-[1720px] gap-5 px-4 py-4 md:px-6 lg:px-8">
         <aside className="hidden w-[280px] shrink-0 lg:block">
-          <div className="sticky top-4 space-y-4 rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx">
-            <div className="rounded-[3px] bg-espresso px-4 py-4 text-ivory">
+          <div className="sticky top-4 space-y-4 rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx">
+            <div className="rounded-xl bg-espresso px-4 py-4 text-ivory">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Patel Panel</p>
               <h1 className="lx-display mt-3 text-2xl font-light leading-none">Manager Selling Portal</h1>
               <p className="mt-2 text-sm leading-6 text-ivory/70">Seller command center for Mumbai listings, documents, media, pricing, and lead automation.</p>
@@ -337,8 +337,8 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
                 const Icon = item.icon;
                 const selected = view === item.mode;
                 return (
-                  <Link key={item.href} href={item.href} className={clsx("flex items-center gap-3 rounded-[3px] px-4 py-3 transition-colors", selected ? "bg-ink text-ivory" : "text-ink/60 hover:bg-sand") }>
-                    <span className={clsx("grid h-9 w-9 place-items-center rounded-[3px]", selected ? "bg-gold text-ivory" : "border border-ink/15 bg-ivory text-ink/70") }>
+                  <Link key={item.href} href={item.href} className={clsx("flex items-center gap-3 rounded-xl px-4 py-3 transition-colors", selected ? "bg-ink text-ivory" : "text-ink/60 hover:bg-sand") }>
+                    <span className={clsx("grid h-9 w-9 place-items-center rounded-xl", selected ? "bg-gold text-ivory" : "border border-ink/15 bg-ivory text-ink/70") }>
                       <Icon size={17} />
                     </span>
                     <span className="flex-1 text-sm font-semibold">{item.label}</span>
@@ -347,13 +347,13 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
                 );
               })}
             </nav>
-            <Link href="/radar" className="flex items-center gap-3 rounded-[3px] border border-gold/40 bg-gold/10 px-4 py-3 text-ink transition-colors hover:bg-gold hover:text-ivory">
-              <span className="grid h-9 w-9 place-items-center rounded-[3px] border border-gold/40 bg-ivory text-gold">
+            <Link href="/radar" className="flex items-center gap-3 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-ink transition-colors hover:bg-gold hover:text-ivory">
+              <span className="grid h-9 w-9 place-items-center rounded-xl border border-gold/40 bg-ivory text-gold">
                 <ChevronRight size={17} />
               </span>
               <span className="flex-1 text-sm font-semibold">Redevelopment Radar</span>
             </Link>
-            <div className="rounded-[3px] border border-ink/12 bg-sand p-4">
+            <div className="rounded-xl border border-ink/12 bg-sand p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ink/45">Live status</p>
               <p className="mt-2 text-sm font-semibold text-ink/70">{currentDashboard.listings.length} listings tracked</p>
               <p className="text-sm font-semibold text-ink/55">{currentDashboard.urgent_tasks.length} urgent actions</p>
@@ -362,7 +362,7 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-5 pb-6">
-          <header className="rounded-[3px] border border-ink/12 bg-ivory px-5 py-5 shadow-lx">
+          <header className="rounded-xl border border-ink/12 bg-ivory px-5 py-5 shadow-lx">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
@@ -373,15 +373,15 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
                 <p className="max-w-3xl text-sm leading-7 text-ink/55">This portal handles listing intake, document extraction, media intelligence, pricing, copy generation, publishing, lead qualification, site visits, negotiation, and Codex-backed automation.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <button onClick={onRunListingAgents} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
+                <button onClick={onRunListingAgents} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
                   <Wand2 size={16} />
                   Run AI Review
                 </button>
-                <button onClick={onRunAutomation} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
+                <button onClick={onRunAutomation} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
                   <TimerReset size={16} />
                   Run Full Listing Automation
                 </button>
-                <button onClick={onPublish} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
+                <button onClick={onPublish} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
                   <BadgeCheck size={16} />
                   Publish Listing
                 </button>
@@ -438,7 +438,7 @@ function DashboardView({ dashboard, listings, mapPins, onFocus }: { dashboard: M
       <Panel title="Pipeline board" eyebrow="Kanban-style workflow">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5 2xl:grid-cols-10">
           {dashboard.pipeline_columns.map((column) => (
-            <div key={column.id} className="rounded-[3px] border border-ink/12 bg-sand p-3">
+            <div key={column.id} className="rounded-xl border border-ink/12 bg-sand p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/45">{column.label}</p>
                 <span className="rounded-full bg-ivory px-2 py-1 text-[11px] font-semibold text-ink/60">{column.count}</span>
@@ -462,7 +462,7 @@ function DashboardView({ dashboard, listings, mapPins, onFocus }: { dashboard: M
               <p className="mt-1 text-sm text-ink/55">{active.locality} · {active.status} · {active.lead_count} leads · {active.market_heat_score} market heat</p>
               <p className="mt-2 text-sm text-ink/50">{active.address}</p>
             </div>
-            <div className="rounded-[3px] bg-espresso p-4 text-ivory">
+            <div className="rounded-xl bg-espresso p-4 text-ivory">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Quick actions</p>
               <div className="mt-3 space-y-2 text-sm font-semibold text-ivory/80">
                 <p>Legal risk score: {active.legal_risk_score}</p>
@@ -482,8 +482,8 @@ function ListingsView({ listings, search, setSearch, onOpen }: { listings: Manag
     <div className="space-y-4">
       <Panel title="Listings pipeline" eyebrow="Seller command center">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title, locality, status, address" className="w-full rounded-[3px] border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold placeholder:text-ink/40 md:max-w-lg" />
-          <Link href="/manager/listings/new" className="inline-flex items-center gap-2 rounded-[3px] bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]">
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title, locality, status, address" className="w-full rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold placeholder:text-ink/40 md:max-w-lg" />
+          <Link href="/manager/listings/new" className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1f2937]">
             <Plus size={16} />
             New listing
           </Link>
@@ -555,7 +555,7 @@ function NewListingView({
       <Panel title="Bulk import from CSV" eyebrow="AI-read — any column layout works">
         <p className="text-sm text-ink/55">Upload a CSV of properties (any columns — title, locality, BHK, price, etc. in any order). Each row is read by AI and saved as a draft listing for review before publishing. Max 200 rows per file.</p>
         <div className="mt-4">
-          <label className={clsx("flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand", bulkBusy && "pointer-events-none opacity-60")}>
+          <label className={clsx("flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand", bulkBusy && "pointer-events-none opacity-60")}>
             <Upload size={16} />
             {bulkBusy ? "Reading and importing rows..." : "Upload listings CSV"}
             <input
@@ -573,7 +573,7 @@ function NewListingView({
         </div>
         {bulkError && <p className="mt-3 text-xs font-semibold text-red-600">{bulkError}</p>}
         {bulkResult && (
-          <div className="mt-4 rounded-[3px] bg-espresso p-4 text-ivory">
+          <div className="mt-4 rounded-xl bg-espresso p-4 text-ivory">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">
               {bulkResult.created.length} of {bulkResult.total_rows} rows imported as drafts
             </p>
@@ -594,27 +594,27 @@ function NewListingView({
           {textFields.map(([field, label]) => (
             <label key={field} className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</span>
-              <input value={draft[field] || ""} onChange={(e) => update(field, e.target.value)} required={field === "title" || field === "locality" || field === "address"} className="w-full rounded-[3px] border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
+              <input value={draft[field] || ""} onChange={(e) => update(field, e.target.value)} required={field === "title" || field === "locality" || field === "address"} className="w-full rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
             </label>
           ))}
           {numberFields.map(([field, label]) => (
             <label key={field} className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</span>
-              <input type="number" value={draft[field] || ""} onChange={(e) => update(field, e.target.value)} className="w-full rounded-[3px] border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
+              <input type="number" value={draft[field] || ""} onChange={(e) => update(field, e.target.value)} className="w-full rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
             </label>
           ))}
           {optionFields.map(([field, label]) => (
             <label key={field} className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</span>
-              <input value={draft[field] || ""} onChange={(e) => update(field, e.target.value)} className="w-full rounded-[3px] border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
+              <input value={draft[field] || ""} onChange={(e) => update(field, e.target.value)} className="w-full rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
             </label>
           ))}
           <label className="space-y-2 lg:col-span-2">
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">Seller notes</span>
-            <textarea value={draft.notes || ""} onChange={(e) => update("notes", e.target.value)} rows={4} className="w-full rounded-[3px] border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
+            <textarea value={draft.notes || ""} onChange={(e) => update("notes", e.target.value)} rows={4} className="w-full rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold" />
           </label>
         </div>
-        <div className="mt-4 flex items-center justify-between gap-3 rounded-[3px] bg-espresso px-4 py-4 text-ivory">
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-espresso px-4 py-4 text-ivory">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Map preview</p>
             <p className="mt-1 text-sm text-ivory/70">Place the location pin and continue to documents, media, pricing, and publishing.</p>
@@ -626,12 +626,12 @@ function NewListingView({
         </div>
       </Panel>
       {error ? (
-        <div className="rounded-[3px] border border-coral/40 bg-coral/10 px-4 py-3 text-sm font-semibold text-coral">
+        <div className="rounded-xl border border-coral/40 bg-coral/10 px-4 py-3 text-sm font-semibold text-coral">
           {error}
         </div>
       ) : null}
       <div className="flex justify-end">
-        <button disabled={busy} className="inline-flex items-center gap-2 rounded-[3px] bg-gold px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32] disabled:bg-ink/25 disabled:text-ivory/60">
+        <button disabled={busy} className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8] disabled:bg-ink/25 disabled:text-ivory/60">
           <Plus size={16} />
           Create listing
         </button>
@@ -644,7 +644,7 @@ function NewListingView({
 function DetailPlaceholder({ listingId, error }: { listingId: string; error?: string | null }) {
   return (
     <Panel title={error ? "Listing not found" : "Loading listing"} eyebrow="Database listing">
-      <div className={clsx("rounded-[3px] border px-4 py-4 text-sm font-semibold", error ? "border-coral/40 bg-coral/10 text-coral" : "border-ink/12 bg-sand text-ink/55")}>
+      <div className={clsx("rounded-xl border px-4 py-4 text-sm font-semibold", error ? "border-coral/40 bg-coral/10 text-coral" : "border-ink/12 bg-sand text-ink/55")}>
         {error ? `Could not load ${listingId}: ${error}` : `Fetching ${listingId} from the backend database.`}
       </div>
     </Panel>
@@ -658,7 +658,7 @@ function ListingDetailView({ listing, tab, setTab, onPublish, onRunAutomation, o
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/45">
-              <span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] capitalize", listing.status === "published" ? "border-gold/45 bg-gold/10 text-[#8f6d32]" : "border-ink/20 bg-ink/5 text-ink/60")}>{listing.status}</span>
+              <span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] capitalize", listing.status === "published" ? "border-gold/45 bg-gold/10 text-[#1d4ed8]" : "border-ink/20 bg-ink/5 text-ink/60")}>{listing.status}</span>
               <span>{listing.locality}</span>
               <span>{listing.lead_count} leads</span>
               <span>{listing.readiness_score} readiness</span>
@@ -667,19 +667,19 @@ function ListingDetailView({ listing, tab, setTab, onPublish, onRunAutomation, o
             <p className="max-w-3xl text-sm leading-7 text-ink/55">{listing.description_long}</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[420px]">
-            <button onClick={onRunAgents} className="inline-flex items-center justify-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
+            <button onClick={onRunAgents} className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
               <RefreshCw size={16} />
               Run AI Review
             </button>
-            <button onClick={onRunAutomation} className="inline-flex items-center justify-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
+            <button onClick={onRunAutomation} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
               <TimerReset size={16} />
               Run Full Automation
             </button>
-            <button onClick={onPublish} className="inline-flex items-center justify-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#8f6d32]">
+            <button onClick={onPublish} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
               <BadgeCheck size={16} />
               Publish
             </button>
-            <button onClick={onRefetch} className="inline-flex items-center justify-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
+            <button onClick={onRefetch} className="inline-flex items-center justify-center gap-2 rounded-xl border border-ink/15 bg-ivory px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
               <ArrowRight size={16} />
               Refresh
             </button>
@@ -687,10 +687,10 @@ function ListingDetailView({ listing, tab, setTab, onPublish, onRunAutomation, o
         </div>
       </Panel>
 
-      <div className="rounded-[3px] border border-ink/12 bg-ivory p-2 shadow-lx">
+      <div className="rounded-xl border border-ink/12 bg-ivory p-2 shadow-lx">
         <div className="flex flex-wrap gap-2">
           {detailTabs.map((item) => (
-            <button key={item} onClick={() => setTab(item)} className={clsx("rounded-[3px] px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors", tab === item ? "bg-ink text-ivory" : "text-ink/55 hover:bg-sand")}>
+            <button key={item} onClick={() => setTab(item)} className={clsx("rounded-xl px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors", tab === item ? "bg-ink text-ivory" : "text-ink/55 hover:bg-sand")}>
               {item.replace("-", " ")}
             </button>
           ))}
@@ -721,17 +721,17 @@ function OverviewTab({ listing }: { listing: ManagerListing }) {
           <StatPair label="Legal risk" value={`${listing.legal_risk_score}`} />
           <StatPair label="Market heat" value={`${listing.market_heat_score}`} />
         </div>
-        <div className="mt-5 rounded-[3px] bg-espresso p-4 text-ivory">
+        <div className="mt-5 rounded-xl bg-espresso p-4 text-ivory">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Buyer preview</p>
           <p className="lx-display mt-2 text-lg font-light">{listing.seo_title || listing.title}</p>
           <p className="mt-2 text-sm leading-6 text-ivory/72">{listing.description_short}</p>
         </div>
       </Panel>
       <Panel title="Map pin" eyebrow="Location proof">
-        <div className="rounded-[3px] border border-ink/12 bg-sand p-4">
+        <div className="rounded-xl border border-ink/12 bg-sand p-4">
           <p className="lx-display text-base font-light text-ink">{listing.locality}</p>
           <p className="mt-1 text-sm text-ink/55">{listing.address}</p>
-          <div className="mt-4 rounded-[3px] bg-espresso px-4 py-4 text-ivory">
+          <div className="mt-4 rounded-xl bg-espresso px-4 py-4 text-ivory">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Coordinates</p>
             <p className="mt-2 text-sm font-semibold">{listing.latitude}, {listing.longitude}</p>
           </div>
@@ -786,7 +786,7 @@ function PricingTab({ listing }: { listing: ManagerListing }) {
     ["Fast-sale price", pricing.fast_sale_price],
     ["Price per sq ft", pricing.price_per_sqft],
     ["Confidence", pricing.confidence_score],
-  ].map(([label, value]) => <StatPair key={String(label)} label={String(label)} value={typeof value === "number" ? (String(label).includes("price") || String(label).includes("Recommended") ? formatCr(value as number) : String(value)) : String(value || "-")} />)}</div><div className="mt-4 rounded-[3px] bg-espresso p-4 text-ivory"><p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Explanation</p><p className="mt-2 text-sm leading-6 text-ivory/72">{String(pricing.explanation || "No pricing explanation yet.")}</p></div></Panel>} right={<Panel title="Pricing chart" eyebrow="Negotiation band"><div className="space-y-3"><Progress label="Recommended" value={70} tone="emerald" /><Progress label="Fast sale" value={56} tone="amber" /><Progress label="Optimistic" value={88} tone="slate" /><TaskChip title={`Buyer affordability: ${pricing.buyer_affordability_segment || "pending"}`} tone="emerald" /></div></Panel>} />;
+  ].map(([label, value]) => <StatPair key={String(label)} label={String(label)} value={typeof value === "number" ? (String(label).includes("price") || String(label).includes("Recommended") ? formatCr(value as number) : String(value)) : String(value || "-")} />)}</div><div className="mt-4 rounded-xl bg-espresso p-4 text-ivory"><p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Explanation</p><p className="mt-2 text-sm leading-6 text-ivory/72">{String(pricing.explanation || "No pricing explanation yet.")}</p></div></Panel>} right={<Panel title="Pricing chart" eyebrow="Negotiation band"><div className="space-y-3"><Progress label="Recommended" value={70} tone="emerald" /><Progress label="Fast sale" value={56} tone="amber" /><Progress label="Optimistic" value={88} tone="slate" /><TaskChip title={`Buyer affordability: ${pricing.buyer_affordability_segment || "pending"}`} tone="emerald" /></div></Panel>} />;
 }
 
 function ListingLeadsTab({ listing }: { listing: ManagerListing }) {
@@ -802,7 +802,7 @@ function NegotiationTab({ listing }: { listing: ManagerListing }) {
 }
 
 function MarketIntelTab({ listing }: { listing: ManagerListing }) {
-  return <TwoColumnSection left={<Panel title="Mumbai market intelligence" eyebrow="Locality context"><div className="space-y-3">{["Redevelopment potential", "Inventory pressure", "EMI sensitivity", "Builder credibility", "RERA risk"].map((label) => <Progress key={label} label={label} value={label === "Redevelopment potential" ? (listing.redevelopment_score || 55) : label === "Inventory pressure" ? 72 : 64} tone="emerald" />)}</div></Panel>} right={<Panel title="Comparable listings" eyebrow="Database comparable set"><div className="space-y-3">{(listing.market_comparables || []).slice(0, 5).map((item, index) => <div key={index} className="rounded-[3px] border border-ink/12 bg-sand p-4 text-sm"><p className="lx-display font-light text-ink">{String(item.locality || listing.locality)}</p><p className="text-ink/55">₹{Number(item.price || 0).toLocaleString("en-IN")} · {String(item.property_type || listing.property_type)} · {String(item.source || "database")}</p></div>)}</div></Panel>} />;
+  return <TwoColumnSection left={<Panel title="Mumbai market intelligence" eyebrow="Locality context"><div className="space-y-3">{["Redevelopment potential", "Inventory pressure", "EMI sensitivity", "Builder credibility", "RERA risk"].map((label) => <Progress key={label} label={label} value={label === "Redevelopment potential" ? (listing.redevelopment_score || 55) : label === "Inventory pressure" ? 72 : 64} tone="emerald" />)}</div></Panel>} right={<Panel title="Comparable listings" eyebrow="Database comparable set"><div className="space-y-3">{(listing.market_comparables || []).slice(0, 5).map((item, index) => <div key={index} className="rounded-xl border border-ink/12 bg-sand p-4 text-sm"><p className="lx-display font-light text-ink">{String(item.locality || listing.locality)}</p><p className="text-ink/55">₹{Number(item.price || 0).toLocaleString("en-IN")} · {String(item.property_type || listing.property_type)} · {String(item.source || "database")}</p></div>)}</div></Panel>} />;
 }
 
 function AutomationTab({ listing }: { listing: ManagerListing }) {
@@ -817,12 +817,12 @@ function AuditTab({ listing }: { listing: ManagerListing }) {
 }
 
 function LeadsView({ leads, onOpen }: { leads: ManagerLead[]; onOpen: (id: string) => void }) {
-  return <div className="grid gap-4 xl:grid-cols-2">{leads.map((lead) => <div key={lead.id} className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{lead.source}</p><h3 className="lx-display mt-1 text-xl font-light text-ink">{lead.name}</h3><p className="mt-1 text-sm text-ink/55">{lead.buyer_profile || "buyer"} · {lead.status}</p></div><span className="rounded-full border border-gold/45 bg-gold/10 px-3 py-1 text-xs font-semibold text-[#8f6d32]">{lead.qualification_score}/100</span></div><div className="mt-4 grid gap-2 text-sm text-ink/55"><p>Budget: {formatCr(lead.budget_min)} - {formatCr(lead.budget_max)}</p><p>Preferred visit: {lead.preferred_visit_time || "Any time"}</p><p>Last summary: {lead.last_agent_summary || "No summary yet"}</p></div><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => onOpen(lead.listing_id)} className="rounded-[3px] bg-ink px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]">Open listing</button><button className="rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">WhatsApp</button><button className="rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">Schedule</button></div></div>)}</div>;
+  return <div className="grid gap-4 xl:grid-cols-2">{leads.map((lead) => <div key={lead.id} className="rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{lead.source}</p><h3 className="lx-display mt-1 text-xl font-light text-ink">{lead.name}</h3><p className="mt-1 text-sm text-ink/55">{lead.buyer_profile || "buyer"} · {lead.status}</p></div><span className="rounded-full border border-gold/45 bg-gold/10 px-3 py-1 text-xs font-semibold text-[#1d4ed8]">{lead.qualification_score}/100</span></div><div className="mt-4 grid gap-2 text-sm text-ink/55"><p>Budget: {formatCr(lead.budget_min)} - {formatCr(lead.budget_max)}</p><p>Preferred visit: {lead.preferred_visit_time || "Any time"}</p><p>Last summary: {lead.last_agent_summary || "No summary yet"}</p></div><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => onOpen(lead.listing_id)} className="rounded-xl bg-ink px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1f2937]">Open listing</button><button className="rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">WhatsApp</button><button className="rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">Schedule</button></div></div>)}</div>;
 }
 
 function MarketView({ market, listings, onOpen }: { market: ManagerMarketResponse | null; listings: ManagerListing[]; onOpen: (id: string) => void }) {
   const buckets = market?.insights?.inventory_by_price_bucket || [];
-  return <div className="space-y-4"><Panel title="Mumbai market intelligence" eyebrow="Seller-side intelligence"><div className="grid gap-3 md:grid-cols-3">{buckets.map((bucket) => <div key={bucket.cost_range} className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/45">{bucket.cost_range}</p><p className="lx-display mt-2 text-3xl font-light text-ink">{bucket.months_inventory} mo</p><p className="text-sm text-ink/55">{bucket.unsold_units} unsold · {bucket.annual_sales_units} annual sales</p></div>)}</div></Panel><Panel title="Comparable listings" eyebrow="Database comps"><div className="grid gap-3 xl:grid-cols-2">{listings.map((listing) => <button key={listing.id} onClick={() => onOpen(listing.id)} className="rounded-[3px] border border-ink/12 bg-ivory p-4 text-left shadow-lx transition hover:-translate-y-0.5"><div className="flex items-center justify-between gap-3"><div><p className="lx-display font-light text-ink">{listing.title}</p><p className="text-sm text-ink/55">{listing.locality} · {listing.status}</p></div><span className="text-sm font-semibold text-gold">{formatCr(listing.asking_price)}</span></div></button>)}</div></Panel></div>;
+  return <div className="space-y-4"><Panel title="Mumbai market intelligence" eyebrow="Seller-side intelligence"><div className="grid gap-3 md:grid-cols-3">{buckets.map((bucket) => <div key={bucket.cost_range} className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/45">{bucket.cost_range}</p><p className="lx-display mt-2 text-3xl font-light text-ink">{bucket.months_inventory} mo</p><p className="text-sm text-ink/55">{bucket.unsold_units} unsold · {bucket.annual_sales_units} annual sales</p></div>)}</div></Panel><Panel title="Comparable listings" eyebrow="Database comps"><div className="grid gap-3 xl:grid-cols-2">{listings.map((listing) => <button key={listing.id} onClick={() => onOpen(listing.id)} className="rounded-xl border border-ink/12 bg-ivory p-4 text-left shadow-lx transition hover:-translate-y-0.5"><div className="flex items-center justify-between gap-3"><div><p className="lx-display font-light text-ink">{listing.title}</p><p className="text-sm text-ink/55">{listing.locality} · {listing.status}</p></div><span className="text-sm font-semibold text-gold">{formatCr(listing.asking_price)}</span></div></button>)}</div></Panel></div>;
 }
 
 function TasksView({ tasks, audit }: { tasks: ManagerTask[]; audit: ManagerAuditEntry[] }) {
@@ -885,7 +885,7 @@ function ManagerMap({ pins, focused, onFocus }: { pins: ManagerDashboard["map_pi
 
   return (
     <Panel title="Mumbai map" eyebrow="Color-coded seller listings">
-      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-[3px] border border-ink/12 bg-sand" />
+      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-xl border border-ink/12 bg-sand" />
       {preview ? (
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <InfoChip label="Price" value={formatCr(preview.price)} />
@@ -899,7 +899,7 @@ function ManagerMap({ pins, focused, onFocus }: { pins: ManagerDashboard["map_pi
 }
 
 function Panel({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
-  return <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx"><div className="mb-4 flex items-start justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-gold">{eyebrow}</p><h3 className="lx-display mt-2 text-2xl font-light tracking-tight text-ink">{title}</h3></div><Shield size={22} className="text-gold" /></div>{children}</section>;
+  return <section className="rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx"><div className="mb-4 flex items-start justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-gold">{eyebrow}</p><h3 className="lx-display mt-2 text-2xl font-light tracking-tight text-ink">{title}</h3></div><Shield size={22} className="text-gold" /></div>{children}</section>;
 }
 
 function TwoColumnSection({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
@@ -908,19 +908,19 @@ function TwoColumnSection({ left, right }: { left: React.ReactNode; right: React
 
 function MetricCard({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: string }) {
   const value_color = tone === "emerald" ? "text-gold" : "text-ink";
-  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4"><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/45">{label}</p><p className={clsx("lx-display mt-3 text-3xl font-light tracking-tight", value_color)}>{value}</p><p className="mt-2 text-sm text-ink/55">{detail}</p></div>;
+  return <div className="rounded-xl border border-ink/12 bg-ivory p-4"><p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/45">{label}</p><p className={clsx("lx-display mt-3 text-3xl font-light tracking-tight", value_color)}>{value}</p><p className="mt-2 text-sm text-ink/55">{detail}</p></div>;
 }
 
 function ListingCard({ listing, onOpen }: { listing: ManagerListing; onOpen: () => void }) {
-  return <button onClick={onOpen} className="rounded-[3px] border border-ink/12 bg-ivory p-4 text-left shadow-lx transition hover:-translate-y-1"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{listing.status}</p><h4 className="lx-display mt-1 text-xl font-light text-ink">{listing.title}</h4><p className="mt-1 text-sm text-ink/55">{listing.locality} · {listing.property_type} · {listing.lead_count} leads</p></div><span className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-ivory">{formatCr(listing.asking_price)}</span></div><div className="mt-4 grid gap-2 text-sm text-ink/55"><p>Legal risk: {listing.legal_risk_score}</p><p>Readiness: {listing.readiness_score}</p><p>Pending tasks: {listing.pending_tasks}</p></div></button>;
+  return <button onClick={onOpen} className="rounded-xl border border-ink/12 bg-ivory p-4 text-left shadow-lx transition hover:-translate-y-1"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{listing.status}</p><h4 className="lx-display mt-1 text-xl font-light text-ink">{listing.title}</h4><p className="mt-1 text-sm text-ink/55">{listing.locality} · {listing.property_type} · {listing.lead_count} leads</p></div><span className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-ivory">{formatCr(listing.asking_price)}</span></div><div className="mt-4 grid gap-2 text-sm text-ink/55"><p>Legal risk: {listing.legal_risk_score}</p><p>Readiness: {listing.readiness_score}</p><p>Pending tasks: {listing.pending_tasks}</p></div></button>;
 }
 
 function ListingMiniCard({ listing, onOpen }: { listing: ManagerListing; onOpen: () => void }) {
-  return <button onClick={onOpen} className="w-full rounded-[3px] border border-ink/12 bg-ivory px-3 py-3 text-left shadow-none transition-colors hover:bg-sand"><p className="lx-display text-sm font-light text-ink">{listing.title}</p><p className="text-xs text-ink/55">{listing.locality} · {formatCr(listing.asking_price)}</p></button>;
+  return <button onClick={onOpen} className="w-full rounded-xl border border-ink/12 bg-ivory px-3 py-3 text-left shadow-none transition-colors hover:bg-sand"><p className="lx-display text-sm font-light text-ink">{listing.title}</p><p className="text-xs text-ink/55">{listing.locality} · {formatCr(listing.asking_price)}</p></button>;
 }
 
 function LeadCard({ lead, onOpen }: { lead: ManagerLead; onOpen?: () => void }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{lead.source}</p><h3 className="lx-display mt-1 text-xl font-light text-ink">{lead.name}</h3><p className="mt-1 text-sm text-ink/55">{lead.buyer_profile || "buyer"} · {lead.status}</p></div><span className="rounded-full border border-gold/45 bg-gold/10 px-3 py-1 text-xs font-semibold text-[#8f6d32]">{lead.qualification_score}/100</span></div><div className="mt-4 grid gap-2 text-sm text-ink/55"><p>Budget: {formatCr(lead.budget_min)} - {formatCr(lead.budget_max)}</p><p>Preferred visit: {lead.preferred_visit_time || "Any time"}</p><p>Last summary: {lead.last_agent_summary || "No summary yet"}</p></div><div className="mt-4 flex flex-wrap gap-2">{onOpen ? <button onClick={onOpen} className="rounded-[3px] bg-ink px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#2b251f]">Open listing</button> : null}<button className="rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">WhatsApp</button><button className="rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">Schedule</button></div></div>;
+  return <div className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{lead.source}</p><h3 className="lx-display mt-1 text-xl font-light text-ink">{lead.name}</h3><p className="mt-1 text-sm text-ink/55">{lead.buyer_profile || "buyer"} · {lead.status}</p></div><span className="rounded-full border border-gold/45 bg-gold/10 px-3 py-1 text-xs font-semibold text-[#1d4ed8]">{lead.qualification_score}/100</span></div><div className="mt-4 grid gap-2 text-sm text-ink/55"><p>Budget: {formatCr(lead.budget_min)} - {formatCr(lead.budget_max)}</p><p>Preferred visit: {lead.preferred_visit_time || "Any time"}</p><p>Last summary: {lead.last_agent_summary || "No summary yet"}</p></div><div className="mt-4 flex flex-wrap gap-2">{onOpen ? <button onClick={onOpen} className="rounded-xl bg-ink px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1f2937]">Open listing</button> : null}<button className="rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">WhatsApp</button><button className="rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">Schedule</button></div></div>;
 }
 
 function AutomationView({ rules }: { rules: ManagerAutomationRule[] }) {
@@ -929,21 +929,21 @@ function AutomationView({ rules }: { rules: ManagerAutomationRule[] }) {
 
 function FeedRow({ entry }: { entry: { id: string; created_at: string; actor_type?: string; actor_name: string; action: string; details: string; tone?: string } }) {
   const tone = entry.tone === "emerald" ? "border-gold/45 bg-gold/10 text-ink" : entry.tone === "amber" ? "border-ink/20 bg-ink/5 text-ink" : "border-ink/12 bg-sand text-ink/70";
-  return <div className={clsx("rounded-[3px] border p-4", tone)}><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold">{entry.actor_name}</p><p className="mt-1 text-sm leading-6">{entry.details}</p></div><span className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-70">{entry.action.replace(/_/g, " ")}</span></div></div>;
+  return <div className={clsx("rounded-xl border p-4", tone)}><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold">{entry.actor_name}</p><p className="mt-1 text-sm leading-6">{entry.details}</p></div><span className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-70">{entry.action.replace(/_/g, " ")}</span></div></div>;
 }
 
 function TaskCard({ task, compact = false }: { task: { title: string; description: string; priority: string; action_label: string; listing_id?: string | null }; compact?: boolean }) {
-  return <div className={clsx("rounded-[3px] border border-ink/12 bg-sand p-4", compact && "bg-ivory") }><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{task.title}</p><p className="mt-1 text-sm text-ink/55">{task.description}</p></div><span className={clsx("rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]", task.priority === "high" ? "bg-gold/12 text-[#8f6d32]" : "bg-ink/5 text-ink/55")}>{task.action_label}</span></div></div>;
+  return <div className={clsx("rounded-xl border border-ink/12 bg-sand p-4", compact && "bg-ivory") }><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{task.title}</p><p className="mt-1 text-sm text-ink/55">{task.description}</p></div><span className={clsx("rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]", task.priority === "high" ? "bg-gold/12 text-[#1d4ed8]" : "bg-ink/5 text-ink/55")}>{task.action_label}</span></div></div>;
 }
 
 function TaskChip({ title, tone }: { title: string; tone: string }) {
-  const classes = tone === "emerald" ? "bg-gold/10 text-[#8f6d32] border-gold/45" : tone === "amber" ? "bg-ink/5 text-ink/60 border-ink/20" : "bg-sand text-ink/70 border-ink/12";
-  return <div className={clsx("rounded-[3px] border px-4 py-3 text-sm font-semibold", classes)}>{title}</div>;
+  const classes = tone === "emerald" ? "bg-gold/10 text-[#1d4ed8] border-gold/45" : tone === "amber" ? "bg-ink/5 text-ink/60 border-ink/20" : "bg-sand text-ink/70 border-ink/12";
+  return <div className={clsx("rounded-xl border px-4 py-3 text-sm font-semibold", classes)}>{title}</div>;
 }
 
 function Dropzone({ label, icon: Icon, onFiles, disabled }: { label: string; icon: typeof Upload; onFiles?: (files: File[]) => void; disabled?: boolean }) {
   return (
-    <label className={clsx("flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand", disabled && "pointer-events-none opacity-60")}>
+    <label className={clsx("flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-ink/15 bg-ivory px-4 py-8 text-sm font-semibold text-ink/60 transition-colors hover:border-gold hover:bg-sand", disabled && "pointer-events-none opacity-60")}>
       <Icon size={16} />
       {label}
       <input
@@ -962,27 +962,27 @@ function Dropzone({ label, icon: Icon, onFiles, disabled }: { label: string; ico
 }
 
 function DocumentCard({ doc }: { doc: Record<string, unknown> }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{String(doc.file_name || doc.document_type || "Document")}</p><p className="mt-1 text-sm text-ink/55">Status: {String(doc.extraction_status || "pending")}</p></div><span className="rounded-full bg-sand px-2 py-1 text-xs font-semibold text-ink/60">{String(doc.confidence_score || 0)}</span></div><pre className="mt-3 max-h-48 overflow-auto rounded-[3px] bg-espresso p-3 text-[11px] text-goldsoft">{JSON.stringify(doc.extracted_json || doc, null, 2)}</pre></div>;
+  return <div className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{String(doc.file_name || doc.document_type || "Document")}</p><p className="mt-1 text-sm text-ink/55">Status: {String(doc.extraction_status || "pending")}</p></div><span className="rounded-full bg-sand px-2 py-1 text-xs font-semibold text-ink/60">{String(doc.confidence_score || 0)}</span></div><pre className="mt-3 max-h-48 overflow-auto rounded-xl bg-espresso p-3 text-[11px] text-goldsoft">{JSON.stringify(doc.extracted_json || doc, null, 2)}</pre></div>;
 }
 
 function MediaCard({ media }: { media: Record<string, unknown> }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{String(media.room_type || media.media_type || "Media")}</p><p className="mt-1 text-sm text-ink/55">{String(media.caption || "No caption yet")}</p></div><span className="rounded-full bg-sand px-2 py-1 text-xs font-semibold text-ink/60">{String(media.quality_score || 0)}</span></div><div className="mt-3 rounded-[3px] bg-espresso px-4 py-4 text-ivory"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-goldsoft">Alt text</p><p className="mt-2 text-sm text-ivory/72">{String(media.alt_text || "Pending generation")}</p></div></div>;
+  return <div className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{String(media.room_type || media.media_type || "Media")}</p><p className="mt-1 text-sm text-ink/55">{String(media.caption || "No caption yet")}</p></div><span className="rounded-full bg-sand px-2 py-1 text-xs font-semibold text-ink/60">{String(media.quality_score || 0)}</span></div><div className="mt-3 rounded-xl bg-espresso px-4 py-4 text-ivory"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-goldsoft">Alt text</p><p className="mt-2 text-sm text-ivory/72">{String(media.alt_text || "Pending generation")}</p></div></div>;
 }
 
 function VisitCard({ visit }: { visit: Record<string, unknown> }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{String(visit.status || "requested")}</p><p className="mt-1 text-sm text-ink/55">{String(visit.scheduled_start || "Awaiting slot")}</p></div><CalendarClock size={18} className="text-gold" /></div><p className="mt-3 text-sm text-ink/55">{String(visit.notes || "No notes")}</p></div>;
+  return <div className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{String(visit.status || "requested")}</p><p className="mt-1 text-sm text-ink/55">{String(visit.scheduled_start || "Awaiting slot")}</p></div><CalendarClock size={18} className="text-gold" /></div><p className="mt-3 text-sm text-ink/55">{String(visit.notes || "No notes")}</p></div>;
 }
 
 function RuleCard({ rule }: { rule: ManagerAutomationRule }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{rule.name}</p><p className="mt-1 text-sm text-ink/55">{rule.agent_name}</p></div><span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] capitalize", rule.enabled ? "border-gold/45 bg-gold/10 text-[#8f6d32]" : "border-ink/20 bg-ink/5 text-ink/60")}>{rule.enabled ? "Enabled" : "Disabled"}</span></div><div className="mt-3 space-y-1 text-sm text-ink/55"><p>Last run: {rule.last_run || "-"}</p><p>Next run: {rule.next_run || "-"}</p><p>Failure: {rule.failure_state || "None"}</p></div></div>;
+  return <div className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-ink">{rule.name}</p><p className="mt-1 text-sm text-ink/55">{rule.agent_name}</p></div><span className={clsx("rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] capitalize", rule.enabled ? "border-gold/45 bg-gold/10 text-[#1d4ed8]" : "border-ink/20 bg-ink/5 text-ink/60")}>{rule.enabled ? "Enabled" : "Disabled"}</span></div><div className="mt-3 space-y-1 text-sm text-ink/55"><p>Last run: {rule.last_run || "-"}</p><p>Next run: {rule.next_run || "-"}</p><p>Failure: {rule.failure_state || "None"}</p></div></div>;
 }
 
 function StatPair({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-sand p-4"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</p><p className="lx-display mt-2 text-2xl font-light text-ink">{value}</p></div>;
+  return <div className="rounded-xl border border-ink/12 bg-sand p-4"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</p><p className="lx-display mt-2 text-2xl font-light text-ink">{value}</p></div>;
 }
 
 function InfoChip({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-[3px] border border-ink/12 bg-sand p-4"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</p><p className="lx-display mt-2 text-xl font-light text-ink">{value}</p></div>;
+  return <div className="rounded-xl border border-ink/12 bg-sand p-4"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</p><p className="lx-display mt-2 text-xl font-light text-ink">{value}</p></div>;
 }
 
 function Progress({ label, value }: { label: string; value: number; tone: string }) {

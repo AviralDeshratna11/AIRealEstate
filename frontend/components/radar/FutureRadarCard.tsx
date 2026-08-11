@@ -73,7 +73,7 @@ export function FutureRadarCard({
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <ShieldAlert size={14} className="text-red-600" />
               {card.major_risks.slice(0, 4).map((r) => (
-                <span key={r} className="rounded-[3px] border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">{r}</span>
+                <span key={r} className="rounded-xl border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">{r}</span>
               ))}
             </div>
           ) : null}
@@ -89,7 +89,7 @@ export function FutureRadarCard({
               type="button"
               onClick={() => setPersona(p)}
               className={clsx(
-                "rounded-[3px] px-3 py-1 text-[12px] font-semibold capitalize transition",
+                "rounded-xl px-3 py-1 text-[12px] font-semibold capitalize transition",
                 persona === p ? "bg-ink text-ivory" : "border border-ink/15 text-ink/65 hover:bg-ink/5",
               )}
             >
@@ -156,7 +156,7 @@ export function FutureRadarCard({
 
 function Mini({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-[3px] border border-ink/10 bg-ink/[0.02] p-2.5">
+    <div className="rounded-xl border border-ink/10 bg-ink/[0.02] p-2.5">
       <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/45">{icon}{label}</span>
       <span className="mt-0.5 block text-[13px] font-semibold text-ink">{value}</span>
       {sub ? <span className="text-[11px] text-ink/50">{sub}</span> : null}
@@ -167,7 +167,7 @@ function Mini({ icon, label, value, sub }: { icon: React.ReactNode; label: strin
 function Stat({ label, value, risk }: { label: string; value?: number; risk?: boolean }) {
   const v = typeof value === "number" ? value : 0;
   return (
-    <div className="rounded-[3px] bg-ink/[0.03] py-2 text-center">
+    <div className="rounded-xl bg-ink/[0.03] py-2 text-center">
       <span className="block text-lg font-bold tabular-nums" style={{ color: risk ? "#d6532c" : scoreTone(v) }}>{Math.round(v)}</span>
       <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink/50">{label}</span>
     </div>

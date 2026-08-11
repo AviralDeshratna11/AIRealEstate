@@ -46,7 +46,7 @@ export function ProjectDetailView({ id }: { id: string }) {
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <SourceReliabilityBadge sourceType={project.source_type} reliability={project.reliability_score} />
-          {project.stale ? <span className="rounded-[3px] border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.1em] text-red-700">Source may be stale</span> : null}
+          {project.stale ? <span className="rounded-xl border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.1em] text-red-700">Source may be stale</span> : null}
           {project.source_url ? (
             <a href={project.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[12px] font-semibold text-ink/70 hover:text-gold">
               Official source <ArrowUpRight size={12} />
@@ -68,7 +68,7 @@ export function ProjectDetailView({ id }: { id: string }) {
           <p className="mt-1 text-[13px] leading-relaxed text-ink/65">{project.impact_summary}</p>
           {project.impact_categories.length ? (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {project.impact_categories.map((c) => <span key={c} className="rounded-[3px] bg-ink/[0.05] px-2 py-0.5 text-[11px] font-medium text-ink/65">{c}</span>)}
+              {project.impact_categories.map((c) => <span key={c} className="rounded-xl bg-ink/[0.05] px-2 py-0.5 text-[11px] font-medium text-ink/65">{c}</span>)}
             </div>
           ) : null}
         </div>
@@ -116,7 +116,7 @@ export function ProjectDetailView({ id }: { id: string }) {
 
 function Fact({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-[3px] border border-ink/10 bg-ink/[0.02] p-3">
+    <div className="rounded-xl border border-ink/10 bg-ink/[0.02] p-3">
       <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/45">{icon}{label}</span>
       <span className="mt-0.5 block text-[14px] font-semibold text-ink">{value}</span>
     </div>

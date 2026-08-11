@@ -10,7 +10,7 @@ export default function UnauthorizedPage() {
           <ShieldAlert size={22} />
           <p className="text-sm font-black">ASTRA blocked this request to prevent unauthorized data access.</p>
         </div>
-        <Link href="/auth/onboarding" className="flex h-12 items-center justify-center rounded-md bg-ink px-4 text-sm font-black text-[#fffaf0] hover:bg-teal">
+        <Link href="/auth/onboarding" className="flex h-12 items-center justify-center rounded-md bg-ink px-4 text-sm font-black text-[#f9fafb] hover:bg-teal">
           Review role
         </Link>
       </div>

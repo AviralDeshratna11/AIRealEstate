@@ -71,7 +71,7 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-10 text-slate-950">
+      <main className="min-h-screen bg-[#ffffff] px-5 py-10 text-slate-950">
         <div className="mx-auto max-w-5xl rounded-[24px] border border-slate-200 bg-white p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
           <p className="text-sm font-black uppercase tracking-[0.22em] text-emerald-700">Property Intelligence</p>
           <h1 className="mt-3 text-4xl font-black">Loading Mumbai property intelligence...</h1>
@@ -138,7 +138,7 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f5ee] text-slate-950">
+    <main className="min-h-screen bg-[#f5f6f8] text-slate-950">
       <div className="mx-auto max-w-[1520px] px-4 py-4 md:px-6 lg:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 text-sm font-black text-slate-600">
@@ -231,7 +231,7 @@ export function PropertyIntelligencePage({ propertyId, role = "public" }: { prop
           </div>
         </section>
 
-        <nav className="sticky top-0 z-10 mt-4 overflow-x-auto rounded-[22px] border border-slate-200 bg-[#fffaf0]/95 px-3 py-3 shadow-[0_12px_36px_rgba(15,23,42,0.07)] backdrop-blur">
+        <nav className="sticky top-0 z-10 mt-4 overflow-x-auto rounded-[22px] border border-slate-200 bg-[#f9fafb]/95 px-3 py-3 shadow-[0_12px_36px_rgba(15,23,42,0.07)] backdrop-blur">
           <div className="flex min-w-max gap-2">
             {tabs.map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-2xl px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-950 hover:text-white">{label}</a>)}
           </div>

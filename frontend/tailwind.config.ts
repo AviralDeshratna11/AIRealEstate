@@ -5,17 +5,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#191713",
-        paper: "#f4efe3",
-        brass: "#b8832f",
+        ink: "#111827",
+        paper: "#f5f6f8",
+        brass: "#a8813c",
         coral: "#d6532c",
         peacock: "#006d77",
-        // Landing-page ("lx") editorial palette — shared across every portal/tab.
-        ivory: "#f7f3ea",
-        sand: "#efe7d7",
-        espresso: "#14110d",
-        gold: "#a8813c",
-        goldsoft: "#c8a35a",
+        // Shared platform palette — used across every portal/tab.
+        ivory: "#ffffff",
+        sand: "#f3f4f6",
+        espresso: "#0f172a",
+        // Primary brand accent (was gold — now a professional blue, matching the
+        // Radar module's existing connectivity blue for visual consistency).
+        gold: "#2563eb",
+        goldsoft: "#60a5fa",
+        // Original warm gold, preserved for sparing secondary/premium use
+        // (e.g. a "featured listing" ribbon) since it's demoted, not deleted.
+        premium: "#a8813c",
         estate: {
           50: "#eef8f6",
           100: "#d6ece8",
@@ -26,13 +31,15 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-body)", "ui-sans-serif", "sans-serif"],
-        display: ["var(--font-display)", "ui-serif", "serif"]
+        // Repointed to the body sans stack — no more serif display font.
+        display: ["var(--font-body)", "ui-sans-serif", "sans-serif"]
       },
       boxShadow: {
-        soft: "0 22px 60px rgba(25, 23, 19, 0.13)",
-        crisp: "8px 8px 0 rgba(25, 23, 19, 0.12)",
-        // Landing-page editorial card/panel lift.
-        lx: "0 30px 70px -40px rgba(25, 23, 19, 0.4)"
+        soft: "0 20px 50px rgba(17, 24, 39, 0.10)",
+        // Was a hard 8px offset "sticker" shadow — now a soft diffuse shadow like everything else.
+        crisp: "0 10px 30px rgba(17, 24, 39, 0.12)",
+        // Primary card/panel lift shadow.
+        lx: "0 12px 32px rgba(17, 24, 39, 0.10)"
       }
     }
   },

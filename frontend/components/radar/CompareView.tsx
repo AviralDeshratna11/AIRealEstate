@@ -74,7 +74,7 @@ export function CompareView() {
               type="button"
               onClick={() => toggle(l.slug)}
               className={clsx(
-                "rounded-[3px] border px-2.5 py-1 text-[12px] font-semibold transition",
+                "rounded-xl border px-2.5 py-1 text-[12px] font-semibold transition",
                 picked.includes(l.slug) ? "border-ink bg-ink text-ivory" : "border-ink/15 text-ink/65 hover:bg-ink/5",
               )}
             >
@@ -113,7 +113,7 @@ export function CompareView() {
                         const isBest = Math.round(v) === Math.round(best);
                         return (
                           <td key={l.slug} className="p-3">
-                            <span className={clsx("inline-flex items-center gap-1.5 font-bold tabular-nums", isBest && "rounded-[3px] bg-emerald-50 px-2 py-0.5")} style={{ color: isRisk ? "#d6532c" : scoreTone(v) }}>
+                            <span className={clsx("inline-flex items-center gap-1.5 font-bold tabular-nums", isBest && "rounded-xl bg-emerald-50 px-2 py-0.5")} style={{ color: isRisk ? "#d6532c" : scoreTone(v) }}>
                               {Math.round(v)}{isBest ? <Trophy size={12} className="text-emerald-600" /> : null}
                             </span>
                           </td>

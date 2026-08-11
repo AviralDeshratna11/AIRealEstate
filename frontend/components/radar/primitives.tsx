@@ -33,7 +33,7 @@ export function SignalBadge({ signal, small }: { signal: LocalitySignal; small?:
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-[3px] border font-semibold uppercase tracking-[0.12em]",
+        "inline-flex items-center gap-1.5 rounded-xl border font-semibold uppercase tracking-[0.12em]",
         small ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]",
         meta.chip,
       )}
@@ -47,7 +47,7 @@ export function SignalBadge({ signal, small }: { signal: LocalitySignal; small?:
 export function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   const meta = STATUS_META[status];
   return (
-    <span className={clsx("inline-flex items-center rounded-[3px] border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em]", meta.tone)}>
+    <span className={clsx("inline-flex items-center rounded-xl border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em]", meta.tone)}>
       {meta.label}
     </span>
   );
@@ -56,7 +56,7 @@ export function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
 export function SourceReliabilityBadge({ sourceType, reliability }: { sourceType: SourceType; reliability?: number }) {
   const meta = SOURCE_META[sourceType];
   return (
-    <span className={clsx("inline-flex items-center gap-1 rounded-[3px] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]", meta.tone)}>
+    <span className={clsx("inline-flex items-center gap-1 rounded-xl border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]", meta.tone)}>
       <BadgeCheck size={12} />
       {meta.label}
       {typeof reliability === "number" ? <span className="opacity-70">· {Math.round(reliability * 100)}%</span> : null}
@@ -120,7 +120,7 @@ export function FutureScoreGauge({ value, size = 132, label = "Future Score", co
 
 export function RadarDisclaimer({ className }: { className?: string }) {
   return (
-    <p className={clsx("rounded-[3px] border border-ink/12 bg-ink/[0.03] px-3 py-2 text-[11px] leading-relaxed text-ink/55", className)}>
+    <p className={clsx("rounded-xl border border-ink/12 bg-ink/[0.03] px-3 py-2 text-[11px] leading-relaxed text-ink/55", className)}>
       <span className="font-bold uppercase tracking-[0.12em] text-ink/65">Decision support</span> — {RADAR_DISCLAIMER}
     </p>
   );
@@ -166,7 +166,7 @@ export function WatchlistButton({
       onClick={onClick}
       disabled={busy}
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-[3px] border px-3 py-1.5 text-[12px] font-semibold transition disabled:opacity-60",
+        "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[12px] font-semibold transition disabled:opacity-60",
         saved ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-ink/20 bg-ivory text-ink hover:bg-ink hover:text-ivory",
         className,
       )}

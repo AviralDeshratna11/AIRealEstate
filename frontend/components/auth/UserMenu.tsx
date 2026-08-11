@@ -49,13 +49,13 @@ export function UserMenu() {
     return (
       <div className="flex items-center gap-2">
         <Link href="/login" className="rounded-md border border-ink/15 bg-white/70 px-3 py-2 text-xs font-black text-ink hover:bg-white">Login</Link>
-        <Link href="/signup" className="rounded-md bg-ink px-3 py-2 text-xs font-black text-[#fffaf0] hover:bg-teal">Signup</Link>
+        <Link href="/signup" className="rounded-md bg-ink px-3 py-2 text-xs font-black text-[#f9fafb] hover:bg-teal">Signup</Link>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-ink/15 bg-[#fffaf0]/90 p-2 shadow-sm">
+    <div className="flex items-center gap-2 rounded-lg border border-ink/15 bg-[#f9fafb]/90 p-2 shadow-sm">
       <Link href={dashboardForRole(user.role)} className="hidden text-right sm:block">
         <span className="block text-sm font-black leading-tight text-ink">{user.full_name}</span>
         <span className="block text-xs font-bold text-teal">{ROLE_LABELS[user.role]}</span>

@@ -91,7 +91,7 @@ export function OnboardingStepper() {
         ))}
       </div>
       {message && <p className="rounded-md border border-coral/20 bg-coral/10 px-3 py-2 text-sm font-bold text-coral">{message}</p>}
-      <button className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-black text-[#fffaf0] hover:bg-teal">
+      <button className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-black text-[#f9fafb] hover:bg-teal">
         <CheckCircle2 size={17} />
         Complete onboarding
       </button>

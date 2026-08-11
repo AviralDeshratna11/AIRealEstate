@@ -106,7 +106,7 @@ export function RadarMap({ data, height = 620 }: { data: RadarMapResponse; heigh
           const loc = localityCoords.get(slug);
           if (!loc) return;
           L.marker([loc.latitude - 0.004, loc.longitude - 0.004], {
-            icon: L.divIcon({ className: "astra-marker", html: `<div style="width:14px;height:14px;background:#2563eb;border:2px solid #fffaf0;box-shadow:2px 2px 0 rgba(25,23,19,.25)"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }),
+            icon: L.divIcon({ className: "astra-marker", html: `<div style="width:14px;height:14px;background:#2563eb;border:2px solid #f9fafb;box-shadow:2px 2px 0 rgba(17,24,39,.25)"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }),
           }).bindPopup(`<strong>${String(f.name ?? "Project")}</strong><br/>${String(f.type ?? "")} · ${String(f.status ?? "")}`).addTo(g);
         });
       });
@@ -119,7 +119,7 @@ export function RadarMap({ data, height = 620 }: { data: RadarMapResponse; heigh
         const meta = SIGNAL_META[l.signal];
         const marker = L.circleMarker([l.latitude, l.longitude], {
           radius: 9 + (l.future_score / 100) * 14,
-          color: "#fffaf0",
+          color: "#f9fafb",
           weight: 2,
           fillColor: meta.color,
           fillOpacity: 0.85,
@@ -145,7 +145,7 @@ export function RadarMap({ data, height = 620 }: { data: RadarMapResponse; heigh
           </div>
           <div className="space-y-1.5">
             {data.layers.map((l) => (
-              <label key={l.key} className="flex cursor-pointer items-center justify-between gap-2 rounded-[3px] px-2 py-1.5 hover:bg-ink/5">
+              <label key={l.key} className="flex cursor-pointer items-center justify-between gap-2 rounded-xl px-2 py-1.5 hover:bg-ink/5">
                 <span className="flex items-center gap-2 text-[13px] text-ink/80">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: l.color }} />
                   {l.label}
@@ -154,7 +154,7 @@ export function RadarMap({ data, height = 620 }: { data: RadarMapResponse; heigh
                   type="checkbox"
                   checked={!!enabled[l.key]}
                   onChange={(e) => setEnabled((prev) => ({ ...prev, [l.key]: e.target.checked }))}
-                  className="h-4 w-4 accent-[#191713]"
+                  className="h-4 w-4 accent-[#111827]"
                 />
               </label>
             ))}
@@ -195,7 +195,7 @@ export function RadarMap({ data, height = 620 }: { data: RadarMapResponse; heigh
             </div>
             <Link
               href={`/radar/localities/${selected.slug}`}
-              className="mt-3 inline-flex items-center gap-1 rounded-[3px] bg-ink px-3 py-1.5 text-[12px] font-semibold text-ivory hover:bg-ink/85"
+              className="mt-3 inline-flex items-center gap-1 rounded-xl bg-ink px-3 py-1.5 text-[12px] font-semibold text-ivory hover:bg-ink/85"
             >
               Open locality <ArrowUpRight size={13} />
             </Link>

@@ -43,7 +43,7 @@ export function RadarShell({
         <div className={clsx("mx-auto flex flex-col gap-3 px-5 py-3", wide ? "max-w-[1500px]" : "max-w-7xl")}>
           <div className="flex items-center justify-between gap-4">
             <Link href="/radar" className="flex items-center gap-2.5">
-              <span className="grid h-9 w-9 place-items-center rounded-[3px] bg-ink text-ivory">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink text-ivory">
                 <Radar size={18} />
               </span>
               <span>
@@ -63,7 +63,7 @@ export function RadarShell({
                   key={item.href}
                   href={item.href}
                   className={clsx(
-                    "whitespace-nowrap rounded-[3px] px-3 py-1.5 text-[12px] font-semibold transition",
+                    "whitespace-nowrap rounded-xl px-3 py-1.5 text-[12px] font-semibold transition",
                     isActive ? "bg-ink text-ivory" : "text-ink/65 hover:bg-ink/5 hover:text-ink",
                   )}
                 >

@@ -197,7 +197,7 @@ export function AlertsView() {
                 {a.project_id ? <Link href={`/radar/projects/${a.project_id}`} className="font-semibold text-gold hover:underline">View project</Link> : null}
               </div>
             </div>
-            {a.status === "unread" ? <span className="rounded-[3px] bg-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ivory">New</span> : null}
+            {a.status === "unread" ? <span className="rounded-xl bg-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ivory">New</span> : null}
           </div>
         ))}
       </div>
@@ -222,7 +222,7 @@ export function ReportsView() {
       <div className="radar-card mb-6 flex flex-wrap items-center gap-3 p-4">
         <Filter label="Locality" value={slug} onChange={setSlug} options={list.map((l) => [l.slug, l.name] as [string, string])} />
         {report ? (
-          <button type="button" onClick={() => typeof window !== "undefined" && window.print()} className="ml-auto inline-flex items-center gap-1.5 rounded-[3px] border border-ink/20 px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-ink/5">
+          <button type="button" onClick={() => typeof window !== "undefined" && window.print()} className="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-ink/20 px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-ink/5">
             <FileText size={13} /> Print / PDF
           </button>
         ) : null}
@@ -242,7 +242,7 @@ export function ReportsView() {
             ))}
           </div>
           {report.evidence.length ? <div className="mt-6"><EvidencePanel claims={report.evidence} title="Evidence" /></div> : null}
-          <p className="mt-5 rounded-[3px] border border-ink/12 bg-ink/[0.03] p-3 text-[12px] italic text-ink/55">{report.disclaimer}</p>
+          <p className="mt-5 rounded-xl border border-ink/12 bg-ink/[0.03] p-3 text-[12px] italic text-ink/55">{report.disclaimer}</p>
         </article>
       ) : <div className="radar-card p-8 text-ink/50">Select a locality…</div>}
     </RadarShell>
@@ -287,13 +287,13 @@ export function AdminView() {
             <h3 className="lx-display text-xl font-light text-ink">Source ingestion</h3>
           </div>
           <p className="text-[13px] text-ink/60">Live ingest fetches current project data from Wikipedia (status, cost, dates, last-revised) and fresh locality signals from Google News, then merges them alongside the seeded official records. Tertiary-source items are marked <span className="font-semibold text-emerald-700">Live</span> and never auto-verified.</p>
-          <button type="button" onClick={runIngest} disabled={busy} className="mt-3 inline-flex items-center gap-1.5 rounded-[3px] bg-ink px-4 py-2 text-[13px] font-semibold text-ivory hover:bg-ink/85 disabled:opacity-60">
+          <button type="button" onClick={runIngest} disabled={busy} className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-[13px] font-semibold text-ivory hover:bg-ink/85 disabled:opacity-60">
             {busy ? <RefreshCw size={14} className="animate-spin" /> : <Play size={14} />} {busy ? "Ingesting…" : "Run ingestion"}
           </button>
           {jobs.length ? (
             <ul className="mt-4 space-y-2">
               {jobs.map((j) => (
-                <li key={j.id} className="rounded-[3px] border border-ink/10 bg-ink/[0.02] p-3 text-[13px]">
+                <li key={j.id} className="rounded-xl border border-ink/10 bg-ink/[0.02] p-3 text-[13px]">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-ink">{j.source_name}</span>
                     <ProjectStatusBadge status={(j.status === "completed" ? "operational" : "under_construction") as ProjectStatus} />
@@ -311,7 +311,7 @@ export function AdminView() {
             <h3 className="lx-display text-xl font-light text-ink">Subscribe to alerts</h3>
           </div>
           <Filter label="Locality" value={subSlug} onChange={setSubSlug} options={localities.map((l) => [l.slug, l.name] as [string, string])} />
-          <button type="button" onClick={subscribe} className="mt-3 inline-flex items-center gap-1.5 rounded-[3px] border border-ink/20 px-4 py-2 text-[13px] font-semibold text-ink hover:bg-ink/5">
+          <button type="button" onClick={subscribe} className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-ink/20 px-4 py-2 text-[13px] font-semibold text-ink hover:bg-ink/5">
             Subscribe
           </button>
           {subMsg ? <p className="mt-2 text-[13px] text-emerald-700">{subMsg}</p> : null}
@@ -342,7 +342,7 @@ function Filter({ label, value, onChange, options }: { label: string; value: str
   return (
     <label className="flex items-center gap-2 text-[12px]">
       <span className="font-bold uppercase tracking-[0.12em] text-ink/45">{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="rounded-[3px] border border-ink/15 bg-ivory px-2 py-1.5 text-[13px] text-ink outline-none focus:border-gold">
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="rounded-xl border border-ink/15 bg-ivory px-2 py-1.5 text-[13px] text-ink outline-none focus:border-gold">
         {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
       </select>
     </label>

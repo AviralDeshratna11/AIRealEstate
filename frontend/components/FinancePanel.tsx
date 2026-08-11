@@ -19,7 +19,7 @@ export function FinancePanel({ focused }: { focused: Property | null }) {
   }
 
   return (
-    <section className="rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+    <section className="rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx">
       <div className="flex items-center gap-2">
         <span className="h-px w-10 bg-gold" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Finance and construction</p>
@@ -31,13 +31,13 @@ export function FinancePanel({ focused }: { focused: Property | null }) {
       <button
         onClick={run}
         disabled={!focused}
-        className="mt-4 flex items-center gap-2 rounded-[3px] bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#8f6d32] disabled:opacity-50"
+        className="mt-4 flex items-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory shadow-lx transition hover:bg-[#1d4ed8] disabled:opacity-50"
       >
         <Calculator size={16} />
         Estimate focused property
       </button>
       {result && (
-        <div className="mt-4 grid gap-3 rounded-[3px] border border-ink/12 bg-ivory p-4 md:grid-cols-2">
+        <div className="mt-4 grid gap-3 rounded-xl border border-ink/12 bg-ivory p-4 md:grid-cols-2">
           <Kpi label="Monthly EMI" value={formatInr(result.monthly_emi)} />
           <Kpi label="EMI/lakh" value={formatInr(result.emi_per_lakh)} />
           <Kpi label="Construction range" value={`${formatInr(result.construction_cost_range?.min)} - ${formatInr(result.construction_cost_range?.max)}`} />

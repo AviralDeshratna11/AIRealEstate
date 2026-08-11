@@ -8,7 +8,7 @@ export default function BillingPlaceholderPage() {
           <h1 className="font-display text-4xl font-black">Billing</h1>
           <UserMenu />
         </div>
-        <section className="rounded-lg border border-ink/15 bg-[#fffaf0]/92 p-5 shadow-soft">
+        <section className="rounded-lg border border-ink/15 bg-[#f9fafb]/92 p-5 shadow-soft">
           <p className="font-semibold text-ink/62">Billing is reserved for a future ASTRA subscription module.</p>
         </section>
       </div>

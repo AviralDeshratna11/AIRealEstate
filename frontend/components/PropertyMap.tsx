@@ -69,7 +69,7 @@ export function PropertyMap({
   }, [properties, focused, onFocus]);
 
   return (
-    <section className="overflow-hidden rounded-[3px] border border-ink/12 bg-ivory p-5 shadow-lx">
+    <section className="overflow-hidden rounded-xl border border-ink/12 bg-ivory p-5 shadow-lx">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -78,10 +78,10 @@ export function PropertyMap({
           </div>
           <h2 className="lx-display mt-1 text-3xl font-light leading-none text-ink">Locality pins</h2>
         </div>
-        <div className="rounded-[3px] bg-ink px-3 py-1 text-xs font-semibold text-ivory">OSM - {properties.length}</div>
+        <div className="rounded-xl bg-ink px-3 py-1 text-xs font-semibold text-ivory">OSM - {properties.length}</div>
       </div>
-      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-[3px] border border-ink/15 bg-sand" />
-      <div className="mt-4 rounded-[3px] bg-espresso text-ivory p-4">
+      <div ref={containerRef} className="h-[620px] overflow-hidden rounded-xl border border-ink/15 bg-sand" />
+      <div className="mt-4 rounded-xl bg-espresso text-ivory p-4">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-goldsoft">
           <MapPin size={14} />
           Focused property

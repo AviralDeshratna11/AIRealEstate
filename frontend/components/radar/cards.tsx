@@ -44,7 +44,7 @@ export function LocalityScoreCard({ locality }: { locality: RadarLocality }) {
           ["Redev", s.redevelopment_score],
           ["Self-use", s.self_use_score],
         ].map(([label, val]) => (
-          <div key={label as string} className="rounded-[3px] bg-ink/[0.03] py-1.5">
+          <div key={label as string} className="rounded-xl bg-ink/[0.03] py-1.5">
             <span className="block text-sm font-bold tabular-nums" style={{ color: scoreTone(val as number) }}>{Math.round(val as number)}</span>
             <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink/45">{label as string}</span>
           </div>
@@ -74,7 +74,7 @@ export function ProjectCard({ project, compact }: { project: RadarProject; compa
     <Link href={`/radar/projects/${project.id}`} className="radar-card group block p-5 transition hover:-translate-y-0.5 hover:shadow-lx">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-[3px] bg-ink/5 text-ink/70"><Building2 size={15} /></span>
+          <span className="grid h-8 w-8 place-items-center rounded-xl bg-ink/5 text-ink/70"><Building2 size={15} /></span>
           <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/45">{PROJECT_TYPE_LABEL[project.project_type]} · {project.authority}</span>
         </div>
         <ProjectStatusBadge status={project.status} />
@@ -83,13 +83,13 @@ export function ProjectCard({ project, compact }: { project: RadarProject; compa
       {!compact ? <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-ink/65">{project.description || project.impact_summary}</p> : null}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {project.id.startsWith("live-") ? (
-          <span className="inline-flex items-center gap-1 rounded-[3px] border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> Live
           </span>
         ) : null}
         <SourceReliabilityBadge sourceType={project.source_type} reliability={project.reliability_score} />
         {project.stale ? (
-          <span className="inline-flex items-center gap-1 rounded-[3px] border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-red-700">
+          <span className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-red-700">
             <AlertTriangle size={11} /> Stale
           </span>
         ) : null}
@@ -102,7 +102,7 @@ export function ProjectCard({ project, compact }: { project: RadarProject; compa
       </div>
       <div className="mt-3 flex flex-wrap gap-1.5">
         {project.affected_localities.slice(0, 4).map((slug) => (
-          <span key={slug} className="inline-flex items-center gap-1 rounded-[3px] bg-ink/[0.04] px-2 py-0.5 text-[11px] capitalize text-ink/65">
+          <span key={slug} className="inline-flex items-center gap-1 rounded-xl bg-ink/[0.04] px-2 py-0.5 text-[11px] capitalize text-ink/65">
             <MapPin size={10} /> {slug.replace(/-/g, " ")}
           </span>
         ))}
@@ -193,7 +193,7 @@ export function RiskOpportunityMatrix({ opportunities, risks }: { opportunities:
         <p className="text-[12px] text-ink/50">Who this locality may suit, and why.</p>
         <ul className="mt-3 space-y-3">
           {opportunities.map((o) => (
-            <li key={o.persona} className="rounded-[3px] border border-emerald-100 bg-emerald-50/50 p-3">
+            <li key={o.persona} className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-800">{o.persona}</span>
                 <span className="text-[12px] font-semibold text-emerald-700">{o.headline}</span>
@@ -208,7 +208,7 @@ export function RiskOpportunityMatrix({ opportunities, risks }: { opportunities:
         <p className="text-[12px] text-ink/50">What could delay, dilute or disrupt the thesis.</p>
         <ul className="mt-3 space-y-3">
           {risks.map((r, i) => (
-            <li key={`${r.kind}-${i}`} className="rounded-[3px] border border-red-100 bg-red-50/50 p-3">
+            <li key={`${r.kind}-${i}`} className="rounded-xl border border-red-100 bg-red-50/50 p-3">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-red-800">{r.kind}</span>
                 <span

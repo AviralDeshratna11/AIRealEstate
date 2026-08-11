@@ -28,9 +28,9 @@ export function RadarDashboardView() {
       title="Where Mumbai is going next"
       subtitle="Evidence-backed future-locality intelligence: government infrastructure, redevelopment schemes, zoning and live ASTRA demand — distilled into explainable, risk-adjusted Future Scores."
     >
-      <div className="radar-scan mb-7 grid gap-3 rounded-[3px] sm:grid-cols-2 lg:grid-cols-4">
+      <div className="radar-scan mb-7 grid gap-3 rounded-xl sm:grid-cols-2 lg:grid-cols-4">
         {(data?.stats ?? []).map((s) => (
-          <div key={s.label} className={`rounded-[3px] p-5 ${TONE_BG[s.tone] ?? "radar-card"}`}>
+          <div key={s.label} className={`rounded-xl p-5 ${TONE_BG[s.tone] ?? "radar-card"}`}>
             <span className="lx-display block text-4xl font-light leading-none">{s.value}</span>
             <span className="mt-2 block text-[12px] font-semibold uppercase tracking-[0.14em] opacity-80">{s.label}</span>
             {s.detail ? <span className="mt-0.5 block text-[12px] opacity-70">{s.detail}</span> : null}
@@ -100,7 +100,7 @@ export function RadarDashboardView() {
 
 function QuickLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2 rounded-[3px] border border-ink/15 bg-ivory px-3 py-2 text-[13px] font-semibold text-ink transition hover:bg-ink hover:text-ivory">
+    <Link href={href} className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[13px] font-semibold text-ink transition hover:bg-ink hover:text-ivory">
       {icon}{label}
     </Link>
   );

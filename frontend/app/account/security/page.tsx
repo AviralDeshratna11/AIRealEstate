@@ -12,7 +12,7 @@ export default function AccountSecurityPage() {
           </div>
           <UserMenu />
         </header>
-        <section className="space-y-5 rounded-lg border border-ink/15 bg-[#fffaf0]/92 p-5 shadow-soft">
+        <section className="space-y-5 rounded-lg border border-ink/15 bg-[#f9fafb]/92 p-5 shadow-soft">
           <div className="grid gap-3 sm:grid-cols-3">
             {["Provider", "Last login", "Marketing opt-out"].map((item) => (
               <div key={item} className="rounded-md border border-ink/10 bg-white/70 p-4">
