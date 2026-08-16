@@ -8,18 +8,21 @@ import {
   Bot,
   Building2,
   CalendarClock,
+  Check,
+  ChevronDown,
   ChevronRight,
   FileText,
   GanttChartSquare,
   Home,
   IndianRupee,
   LayoutGrid,
-  Map,
   MessagesSquare,
   RadioTower,
   Search,
   SlidersHorizontal,
+  Sparkles,
   TrendingUp,
+  X,
 } from "lucide-react";
 import { AgentConsole } from "@/components/AgentConsole";
 import { AgentSwarmPanel } from "@/components/AgentSwarmPanel";
@@ -34,7 +37,7 @@ import { PropertyMap } from "@/components/PropertyMap";
 import { TourGuidePanel } from "@/components/TourGuidePanel";
 import { Property, formatCr, getProperties } from "@/lib/api";
 
-type TabId = "search" | "market" | "map" | "finance" | "tour" | "channels" | "documents" | "agents";
+type TabId = "search" | "market" | "finance" | "tour" | "channels" | "documents" | "agents";
 
 const tabs: Array<{
   id: TabId;
@@ -42,9 +45,8 @@ const tabs: Array<{
   description: string;
   icon: ComponentType<{ size?: number; className?: string }>;
 }> = [
-  { id: "search", label: "Search", description: "Intent, ranking, shortlist", icon: LayoutGrid },
+  { id: "search", label: "Search", description: "Map, filters, ranked list", icon: LayoutGrid },
   { id: "market", label: "Market", description: "Inventory and redevelopment", icon: TrendingUp },
-  { id: "map", label: "Map", description: "Pins, locality, focus", icon: Map },
   { id: "finance", label: "Finance", description: "EMI and materials", icon: IndianRupee },
   { id: "tour", label: "Tours", description: "Viewing route control", icon: CalendarClock },
   { id: "channels", label: "Channels", description: "WhatsApp, calls, slots", icon: MessagesSquare },
@@ -52,12 +54,31 @@ const tabs: Array<{
   { id: "agents", label: "Agents", description: "Swarm operations", icon: Bot },
 ];
 
+type Filters = {
+  minPrice: number | null;
+  maxPrice: number | null;
+  minBeds: number | null;
+  propertyType: string | null;
+};
+
+const EMPTY_FILTERS: Filters = { minPrice: null, maxPrice: null, minBeds: null, propertyType: null };
+const PRICE_PRESETS: Array<{ label: string; min: number | null; max: number | null }> = [
+  { label: "Under ₹1 Cr", min: null, max: 1_00_00_000 },
+  { label: "₹1-2 Cr", min: 1_00_00_000, max: 2_00_00_000 },
+  { label: "₹2-5 Cr", min: 2_00_00_000, max: 5_00_00_000 },
+  { label: "₹5 Cr+", min: 5_00_00_000, max: null },
+];
+const BED_OPTIONS = [1, 2, 3, 4];
+const TYPE_OPTIONS = ["apartment", "villa", "plot", "commercial"];
+
 export function WorkspaceShell() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [focused, setFocused] = useState<Property | null>(null);
   const [compare, setCompare] = useState<Property[]>([]);
   const [activeTab, setActiveTab] = useState<TabId>("search");
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [showAiSearch, setShowAiSearch] = useState(false);
 
   useEffect(() => {
     const tab = new URLSearchParams(window.location.search).get("tab");
@@ -79,22 +100,30 @@ export function WorkspaceShell() {
   const ActiveIcon = active.icon;
   const filteredProperties = useMemo(() => {
     const lower = query.trim().toLowerCase();
-    if (!lower) return properties;
-    return properties.filter((property) =>
-      [
-        property.title,
-        property.locality,
-        property.micro_market,
-        property.status,
-        property.builder,
-        property.description,
-        `${property.bedrooms}bhk`,
-        `${property.bedrooms} bed`,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(lower))
-    );
-  }, [properties, query]);
+    return properties.filter((property) => {
+      if (lower) {
+        const matchesText = [
+          property.title,
+          property.locality,
+          property.micro_market,
+          property.status,
+          property.builder,
+          property.description,
+          `${property.bedrooms}bhk`,
+          `${property.bedrooms} bed`,
+        ]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(lower));
+        if (!matchesText) return false;
+      }
+      if (filters.minPrice != null && property.price < filters.minPrice) return false;
+      if (filters.maxPrice != null && property.price > filters.maxPrice) return false;
+      if (filters.minBeds != null && (property.bedrooms || 0) < filters.minBeds) return false;
+      if (filters.propertyType && property.property_type?.toLowerCase() !== filters.propertyType) return false;
+      return true;
+    });
+  }, [properties, query, filters]);
+  const activeFilterCount = Number(filters.minPrice != null || filters.maxPrice != null) + Number(filters.minBeds != null) + Number(filters.propertyType != null);
 
   function toggleCompare(property: Property) {
     setCompare((items) => {
@@ -175,10 +204,6 @@ export function WorkspaceShell() {
                   <Search size={16} />
                   Search
                 </button>
-                <button onClick={() => selectTab("map")} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-ink/15 bg-ivory px-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
-                  <SlidersHorizontal size={16} />
-                  Filters
-                </button>
               </div>
               <div className="mt-4 flex flex-wrap gap-2 text-[12px] font-semibold text-ink/60">
                 {["2BHK", "Under 5 Cr", "Sea link", "Low legal risk", "XR ready"].map((chip) => (
@@ -250,9 +275,33 @@ export function WorkspaceShell() {
             </div>
 
             {activeTab === "search" && (
-              <div className="grid gap-5 2xl:grid-cols-[410px_1fr]">
-                <AgentConsole onProperties={updateProperties} />
-                <InventoryGrid properties={filteredProperties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <FilterBar filters={filters} setFilters={setFilters} activeCount={activeFilterCount} />
+                  <button
+                    onClick={() => setShowAiSearch((value) => !value)}
+                    className={clsx(
+                      "inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors",
+                      showAiSearch ? "border-gold bg-gold text-ivory" : "border-ink/15 bg-ivory text-ink hover:bg-sand"
+                    )}
+                  >
+                    <Sparkles size={14} />
+                    Ask AI agent
+                  </button>
+                </div>
+
+                {showAiSearch && <AgentConsole onProperties={updateProperties} />}
+
+                <div className="grid gap-5 2xl:grid-cols-[460px_1fr]">
+                  <div className="max-h-[calc(100vh-260px)] min-h-[420px] overflow-y-auto pr-1">
+                    <InventoryRail properties={filteredProperties} focused={focused} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
+                  </div>
+                  <div className="hidden 2xl:block">
+                    <div className="sticky top-4">
+                      <PropertyMap properties={filteredProperties} focused={focused} onFocus={setFocused} compact heightClassName="h-[calc(100vh-260px)] min-h-[420px]" />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -260,13 +309,6 @@ export function WorkspaceShell() {
               <div className="space-y-5">
                 <MarketDashboard />
                 <InventoryGrid properties={filteredProperties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} compact />
-              </div>
-            )}
-
-            {activeTab === "map" && (
-              <div className="grid gap-5 2xl:grid-cols-[1fr_420px]">
-                <PropertyMap properties={filteredProperties} focused={focused} onFocus={setFocused} />
-                <InventoryRail properties={filteredProperties} focused={focused} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
               </div>
             )}
 
@@ -299,6 +341,145 @@ export function WorkspaceShell() {
       </div>
       <CompareDrawer items={compare} onClear={() => setCompare([])} />
     </main>
+  );
+}
+
+function FilterBar({
+  filters,
+  setFilters,
+  activeCount,
+}: {
+  filters: Filters;
+  setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+  activeCount: number;
+}) {
+  const [open, setOpen] = useState<"price" | "beds" | "type" | null>(null);
+  const priceLabel =
+    filters.minPrice != null && filters.maxPrice != null
+      ? `${formatCr(filters.minPrice)} - ${formatCr(filters.maxPrice)}`
+      : filters.maxPrice != null
+      ? `Under ${formatCr(filters.maxPrice)}`
+      : filters.minPrice != null
+      ? `${formatCr(filters.minPrice)}+`
+      : "Price";
+  const bedsLabel = filters.minBeds != null ? `${filters.minBeds}+ beds` : "Beds";
+  const typeLabel = filters.propertyType ? filters.propertyType[0].toUpperCase() + filters.propertyType.slice(1) : "Home type";
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {open && <div className="fixed inset-0 z-20" onClick={() => setOpen(null)} />}
+
+      <div className="relative">
+        <FilterPill label={priceLabel} active={filters.minPrice != null || filters.maxPrice != null} open={open === "price"} onClick={() => setOpen(open === "price" ? null : "price")} />
+        {open === "price" && (
+          <div className="absolute left-0 top-full z-30 mt-2 w-72 rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">Price range</p>
+            <div className="grid grid-cols-2 gap-2">
+              {PRICE_PRESETS.map((preset) => {
+                const selected = filters.minPrice === preset.min && filters.maxPrice === preset.max;
+                return (
+                  <button
+                    key={preset.label}
+                    onClick={() => {
+                      setFilters((f) => ({ ...f, minPrice: preset.min, maxPrice: preset.max }));
+                      setOpen(null);
+                    }}
+                    className={clsx("rounded-xl border px-3 py-2 text-left text-sm font-semibold transition-colors", selected ? "border-gold bg-gold/10 text-gold" : "border-ink/12 text-ink/70 hover:bg-sand")}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => {
+                setFilters((f) => ({ ...f, minPrice: null, maxPrice: null }));
+                setOpen(null);
+              }}
+              className="mt-3 text-xs font-semibold text-ink/50 hover:text-gold"
+            >
+              Clear price
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="relative">
+        <FilterPill label={bedsLabel} active={filters.minBeds != null} open={open === "beds"} onClick={() => setOpen(open === "beds" ? null : "beds")} />
+        {open === "beds" && (
+          <div className="absolute left-0 top-full z-30 mt-2 w-64 rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">Minimum bedrooms</p>
+            <div className="flex flex-wrap gap-2">
+              {BED_OPTIONS.map((n) => {
+                const selected = filters.minBeds === n;
+                return (
+                  <button
+                    key={n}
+                    onClick={() => {
+                      setFilters((f) => ({ ...f, minBeds: selected ? null : n }));
+                      setOpen(null);
+                    }}
+                    className={clsx("grid h-11 w-11 place-items-center rounded-xl border text-sm font-semibold transition-colors", selected ? "border-gold bg-gold text-ivory" : "border-ink/12 text-ink/70 hover:bg-sand")}
+                  >
+                    {n}+
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="relative">
+        <FilterPill label={typeLabel} active={Boolean(filters.propertyType)} open={open === "type"} onClick={() => setOpen(open === "type" ? null : "type")} />
+        {open === "type" && (
+          <div className="absolute left-0 top-full z-30 mt-2 w-56 rounded-xl border border-ink/12 bg-ivory p-2 shadow-lx">
+            {TYPE_OPTIONS.map((type) => {
+              const selected = filters.propertyType === type;
+              return (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setFilters((f) => ({ ...f, propertyType: selected ? null : type }));
+                    setOpen(null);
+                  }}
+                  className={clsx("flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold capitalize transition-colors", selected ? "bg-gold/10 text-gold" : "text-ink/70 hover:bg-sand")}
+                >
+                  {type}
+                  {selected && <Check size={15} />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {activeCount > 0 && (
+        <button
+          onClick={() => setFilters(EMPTY_FILTERS)}
+          className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-ink/50 transition-colors hover:text-gold"
+        >
+          <X size={14} />
+          Clear all ({activeCount})
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FilterPill({ label, active, open, onClick }: { label: string; active: boolean; open: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        "relative z-30 inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-[12px] font-semibold transition-colors",
+        active || open ? "border-gold bg-gold/10 text-gold" : "border-ink/15 bg-ivory text-ink/70 hover:bg-sand"
+      )}
+    >
+      <SlidersHorizontal size={13} />
+      {label}
+      <ChevronDown size={14} className={clsx("transition-transform", open && "rotate-180")} />
+    </button>
   );
 }
 
