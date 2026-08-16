@@ -215,14 +215,14 @@ export function BrokerPortal({ view, id }: BrokerPortalProps) {
   }
 
   return (
-    <main className="min-h-screen bg-ivory text-ink">
+    <main className="min-h-screen bg-paper text-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-[1740px] gap-5 px-4 py-4 md:px-6 lg:px-8">
         <aside className="hidden w-[284px] shrink-0 lg:block">
           <div className="sticky top-4 space-y-4 rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx">
-            <div className="rounded-xl bg-espresso px-4 py-4 text-ivory">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-goldsoft">ASTRA Partner</p>
-              <h1 className="lx-display font-light mt-3 text-2xl leading-none">Broker Partner Portal</h1>
-              <p className="mt-2 text-sm leading-6 text-ivory/68">Verified inventory, tie-ups, buyers, PropertyPool, attribution, and commissions.</p>
+            <div className="rounded-xl border border-gold/25 bg-gold/8 px-4 py-4 text-ink">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">ASTRA Partner</p>
+              <h1 className="mt-3 text-2xl font-bold leading-none">Broker Partner Portal</h1>
+              <p className="mt-2 text-sm leading-6 text-ink/62">Inventory search, approved sharing, buyer attribution, PropertyPool visits, and payout tracking.</p>
             </div>
             <nav className="space-y-1">
               {navItems.map((item) => {
@@ -248,17 +248,17 @@ export function BrokerPortal({ view, id }: BrokerPortalProps) {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-5 pb-8">
-          <header className="rounded-xl border border-ink/12 bg-ivory px-5 py-5 shadow-lx">
+          <header className="portal-surface rounded-xl border border-ink/12 px-5 py-5 shadow-lx">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
                   <span className="h-px w-10 bg-gold" />
                   <Sparkles size={14} className="text-gold" />
-                  PropertyPool Network
+                  Partner marketplace
                 </div>
-                <h2 className="lx-display mt-2 text-3xl font-light tracking-tight md:text-5xl">AI-powered brokerage office for independent Mumbai agents.</h2>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-5xl">Broker tools for finding, sharing, and closing verified Mumbai homes.</h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/60">
-                  Discover manager inventory, request tie-ups, protect attribution, bring buyers, organize collective visits, and track commissions from one command center.
+                  Discover manager inventory, request tie-ups, protect attribution, bring buyers, organize group visits, and track commissions from one clean partner desk.
                 </p>
               </div>
             <div className="flex flex-wrap gap-3">

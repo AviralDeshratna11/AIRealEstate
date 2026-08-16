@@ -17,6 +17,8 @@ import {
   Map,
   MessagesSquare,
   RadioTower,
+  Search,
+  SlidersHorizontal,
   TrendingUp,
 } from "lucide-react";
 import { AgentConsole } from "@/components/AgentConsole";
@@ -55,6 +57,7 @@ export function WorkspaceShell() {
   const [focused, setFocused] = useState<Property | null>(null);
   const [compare, setCompare] = useState<Property[]>([]);
   const [activeTab, setActiveTab] = useState<TabId>("search");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const tab = new URLSearchParams(window.location.search).get("tab");
@@ -74,6 +77,24 @@ export function WorkspaceShell() {
 
   const active = useMemo(() => tabs.find((tab) => tab.id === activeTab) || tabs[0], [activeTab]);
   const ActiveIcon = active.icon;
+  const filteredProperties = useMemo(() => {
+    const lower = query.trim().toLowerCase();
+    if (!lower) return properties;
+    return properties.filter((property) =>
+      [
+        property.title,
+        property.locality,
+        property.micro_market,
+        property.status,
+        property.builder,
+        property.description,
+        `${property.bedrooms}bhk`,
+        `${property.bedrooms} bed`,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(lower))
+    );
+  }, [properties, query]);
 
   function toggleCompare(property: Property) {
     setCompare((items) => {
@@ -98,47 +119,76 @@ export function WorkspaceShell() {
   }
 
   return (
-    <main className="min-h-screen bg-ivory text-ink">
+    <main className="min-h-screen bg-paper text-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 py-4 md:px-6 lg:px-8">
         <header className="mb-5 overflow-hidden rounded-xl border border-ink/12 bg-ivory shadow-lx">
-          <div className="grid gap-0 xl:grid-cols-[1fr_520px]">
-            <div className="p-5 md:p-6">
-              <div className="mb-8 flex items-center justify-between gap-4">
+          <div className="border-b border-ink/10 px-5 py-4 md:px-6">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
                 <Link href="/" className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
                   <Home size={14} />
                   Home
                 </Link>
-                <div className="flex flex-wrap items-center justify-end gap-2">
-                  <Link href="/radar" className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-gold hover:text-ivory">
-                    <RadioTower size={13} />
-                    Future growth radar
-                  </Link>
-                  <Link href="/manager" className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
-                    <Building2 size={13} />
-                    Manager portal
-                  </Link>
-                  <Link href="/crm" className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
-                    <GanttChartSquare size={13} />
-                    Sales OS
-                  </Link>
-                  <span className="inline-flex items-center gap-2 rounded-xl bg-gold px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory">
-                    <RadioTower size={13} />
-                    Live desk
-                  </span>
-                </div>
+                <Link href="/radar" className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/8 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-gold hover:text-ivory">
+                  <RadioTower size={13} />
+                  Radar
+                </Link>
+                <Link href="/broker" className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
+                  <Building2 size={13} />
+                  Broker
+                </Link>
+                <Link href="/manager" className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
+                  <Building2 size={13} />
+                  Manager
+                </Link>
+                <Link href="/crm" className="inline-flex items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
+                  <GanttChartSquare size={13} />
+                  CRM
+                </Link>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="h-px w-10 bg-gold" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-gold">ASTRA Estate Mumbai</span>
-              </div>
-              <h1 className="lx-display mt-5 text-4xl font-light leading-[0.98] tracking-tight text-ink md:text-6xl">
-                Real-estate command workspace
-              </h1>
-              <p className="mt-5 max-w-3xl text-base font-medium leading-7 text-ink/60">
-                One operator surface for ranked inventory, maps, finance, viewings, lead channels, documents, and deal strategy.
-              </p>
+              <span className="inline-flex items-center gap-2 rounded-xl bg-gold px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory">
+                <RadioTower size={13} />
+                Live listings
+              </span>
             </div>
-            <div className="grid border-t border-ink/12 bg-espresso text-ivory sm:grid-cols-3 xl:border-l xl:border-t-0">
+          </div>
+          <div className="grid gap-0 xl:grid-cols-[1fr_420px]">
+            <div className="p-5 md:p-6">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.24em] text-gold">ASTRA Estate Mumbai</p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-5xl">
+                Homes, data, and visits in one Mumbai search.
+              </h1>
+              <p className="mt-4 max-w-3xl text-base font-medium leading-7 text-ink/60">
+                Browse live inventory with map context, finance checks, tour planning, documents, and broker-ready follow-up panels.
+              </p>
+              <div className="portal-search mt-6 flex flex-col gap-2 rounded-xl border border-ink/12 bg-ivory p-2 md:flex-row md:items-center">
+                <label className="flex min-h-12 flex-1 items-center gap-3 px-3 text-sm font-semibold text-ink/55">
+                  <Search size={19} className="text-gold" />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search locality, budget, bedrooms, market signal..."
+                    className="w-full bg-transparent outline-none placeholder:text-ink/35"
+                  />
+                </label>
+                <button onClick={() => selectTab("search")} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gold px-5 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
+                  <Search size={16} />
+                  Search
+                </button>
+                <button onClick={() => selectTab("map")} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-ink/15 bg-ivory px-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:bg-sand">
+                  <SlidersHorizontal size={16} />
+                  Filters
+                </button>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-[12px] font-semibold text-ink/60">
+                {["2BHK", "Under 5 Cr", "Sea link", "Low legal risk", "XR ready"].map((chip) => (
+                  <button key={chip} onClick={() => setQuery(chip)} className="rounded-full border border-ink/12 bg-sand px-3 py-1.5 transition-colors hover:border-gold hover:bg-gold/10 hover:text-gold">
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid border-t border-ink/12 bg-[#f8fafc] text-ink sm:grid-cols-3 xl:border-l xl:border-t-0">
               <Metric label="Inventory" value={String(properties.length || "-")} />
               <Metric label="Shortlist" value={String(compare.length)} />
               <Metric label="Focus" value={focused ? formatCr(focused.price) : "-"} />
@@ -202,35 +252,35 @@ export function WorkspaceShell() {
             {activeTab === "search" && (
               <div className="grid gap-5 2xl:grid-cols-[410px_1fr]">
                 <AgentConsole onProperties={updateProperties} />
-                <InventoryGrid properties={properties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
+                <InventoryGrid properties={filteredProperties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
               </div>
             )}
 
             {activeTab === "market" && (
               <div className="space-y-5">
                 <MarketDashboard />
-                <InventoryGrid properties={properties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} compact />
+                <InventoryGrid properties={filteredProperties} compare={compare} onCompare={toggleCompare} onFocus={setFocused} compact />
               </div>
             )}
 
             {activeTab === "map" && (
               <div className="grid gap-5 2xl:grid-cols-[1fr_420px]">
-                <PropertyMap properties={properties} focused={focused} onFocus={setFocused} />
-                <InventoryRail properties={properties} focused={focused} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
+                <PropertyMap properties={filteredProperties} focused={focused} onFocus={setFocused} />
+                <InventoryRail properties={filteredProperties} focused={focused} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
               </div>
             )}
 
             {activeTab === "finance" && (
               <div className="grid gap-5 xl:grid-cols-[440px_1fr]">
                 <FinancePanel focused={focused} />
-                <InventoryRail properties={properties} focused={focused} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
+                <InventoryRail properties={filteredProperties} focused={focused} compare={compare} onCompare={toggleCompare} onFocus={setFocused} />
               </div>
             )}
 
             {activeTab === "tour" && (
               <div className="grid gap-5 xl:grid-cols-[440px_1fr]">
                 <TourGuidePanel focused={focused} />
-                <PropertyMap properties={properties} focused={focused} onFocus={setFocused} />
+                <PropertyMap properties={filteredProperties} focused={focused} onFocus={setFocused} />
               </div>
             )}
 
@@ -254,9 +304,9 @@ export function WorkspaceShell() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-b border-ivory/12 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
-      <p className="lx-display text-3xl font-light leading-none text-ivory">{value}</p>
-      <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory/50">{label}</p>
+    <div className="border-b border-ink/10 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+      <p className="text-3xl font-bold leading-none text-ink">{value}</p>
+      <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/50">{label}</p>
     </div>
   );
 }

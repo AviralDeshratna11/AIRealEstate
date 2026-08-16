@@ -138,14 +138,14 @@ export function CRMPortal({ view, id }: { view: CRMView; id?: string | null }) {
   }
 
   return (
-    <main className="min-h-screen bg-ivory text-ink">
+    <main className="min-h-screen bg-paper text-ink">
       <div className="mx-auto flex min-h-screen max-w-[1780px] gap-4 px-3 py-3 md:px-5 lg:px-7">
         <aside className="hidden w-[274px] shrink-0 lg:block">
           <div className="sticky top-3 rounded-xl border border-ink/12 bg-ivory p-3 shadow-lx">
-            <div className="rounded-xl bg-espresso p-4 text-ivory">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-goldsoft"><Sparkles size={14} /> ASTRA Sales OS</div>
-              <h1 className="lx-display mt-3 text-2xl font-light leading-tight">Real Estate CRM / ERP</h1>
-              <p className="mt-2 text-sm leading-6 text-ivory/70">Leads, pipeline, broker attribution, visits, offers, commissions, reports, and AI next actions.</p>
+            <div className="rounded-xl border border-gold/25 bg-gold/8 p-4 text-ink">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold"><Sparkles size={14} /> ASTRA Sales OS</div>
+              <h1 className="mt-3 text-2xl font-bold leading-tight">Real Estate CRM / ERP</h1>
+              <p className="mt-2 text-sm leading-6 text-ink/62">Leads, pipeline, broker attribution, visits, offers, commissions, reports, and next actions.</p>
             </div>
             <nav className="mt-3 space-y-1">
               <Link href="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink/60 hover:bg-sand"><span className="grid h-7 w-7 place-items-center rounded-xl border border-ink/15 bg-ivory text-ink/70"><Home size={16} /></span> Home</Link>
@@ -166,11 +166,11 @@ export function CRMPortal({ view, id }: { view: CRMView; id?: string | null }) {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-4 pb-28">
-          <header className="rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx">
+          <header className="portal-surface rounded-xl border border-ink/12 p-4 shadow-lx">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="flex items-center gap-3"><span className="h-px w-10 bg-gold" /><span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Mumbai-first AI command center</span></div>
-                <h2 className="lx-display mt-3 text-3xl font-light tracking-tight md:text-5xl">From lead chaos to closing intelligence.</h2>
+                <div className="flex items-center gap-3"><span className="h-px w-10 bg-gold" /><span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">Mumbai sales workspace</span></div>
+                <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-5xl">Pipeline, leads, and property deals in one CRM view.</h2>
               </div>
               <div className="flex flex-wrap gap-2">
                 <label className="flex min-h-11 items-center gap-2 rounded-xl border border-ink/15 bg-ivory px-3 text-sm font-semibold text-ink/60 focus-within:border-gold">

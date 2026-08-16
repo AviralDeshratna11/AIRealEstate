@@ -323,14 +323,14 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
   }
 
   return (
-    <main className="min-h-screen bg-ivory text-ink">
+    <main className="min-h-screen bg-paper text-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-[1720px] gap-5 px-4 py-4 md:px-6 lg:px-8">
         <aside className="hidden w-[280px] shrink-0 lg:block">
           <div className="sticky top-4 space-y-4 rounded-xl border border-ink/12 bg-ivory p-4 shadow-lx">
-            <div className="rounded-xl bg-espresso px-4 py-4 text-ivory">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-goldsoft">Patel Panel</p>
-              <h1 className="lx-display mt-3 text-2xl font-light leading-none">Manager Selling Portal</h1>
-              <p className="mt-2 text-sm leading-6 text-ivory/70">Seller command center for Mumbai listings, documents, media, pricing, and lead automation.</p>
+            <div className="rounded-xl border border-gold/25 bg-gold/8 px-4 py-4 text-ink">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold">Patel Panel</p>
+              <h1 className="mt-3 text-2xl font-bold leading-none">Manager Selling Portal</h1>
+              <p className="mt-2 text-sm leading-6 text-ink/62">Seller listings, documents, media, pricing, leads, and broker approvals in one panel.</p>
             </div>
             <nav className="space-y-1">
               {navItems.map((item) => {
@@ -362,15 +362,15 @@ export function ManagerPortal({ view, listingId }: ManagerPortalProps) {
         </aside>
 
         <section className="min-w-0 flex-1 space-y-5 pb-6">
-          <header className="rounded-xl border border-ink/12 bg-ivory px-5 py-5 shadow-lx">
+          <header className="portal-surface rounded-xl border border-ink/12 px-5 py-5 shadow-lx">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-gold">
                   <span className="h-px w-10 bg-gold" />
-                  Manager selling OS
+                  Seller marketplace
                 </div>
-                <h2 className="lx-display text-3xl font-light tracking-tight text-ink md:text-5xl">Autonomous seller operating system for Mumbai brokers and owners.</h2>
-                <p className="max-w-3xl text-sm leading-7 text-ink/55">This portal handles listing intake, document extraction, media intelligence, pricing, copy generation, publishing, lead qualification, site visits, negotiation, and Codex-backed automation.</p>
+                <h2 className="text-3xl font-bold tracking-tight text-ink md:text-5xl">List, publish, and manage Mumbai homes with seller-side controls.</h2>
+                <p className="max-w-3xl text-sm leading-7 text-ink/55">Handle intake, document extraction, media review, pricing, publishing, lead qualification, site visits, negotiation, and audit-backed automation.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <button onClick={onRunListingAgents} className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1d4ed8]">
@@ -989,4 +989,3 @@ function Progress({ label, value }: { label: string; value: number; tone: string
   const bar = "bg-gold";
   return <div className="space-y-2"><div className="flex items-center justify-between text-sm font-semibold text-ink/55"><span>{label}</span><span>{value}%</span></div><div className="h-2 overflow-hidden rounded-full bg-ink/10"><div className={clsx("h-full rounded-full", bar)} style={{ width: `${value}%` }} /></div></div>;
 }
-
