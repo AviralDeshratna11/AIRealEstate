@@ -340,7 +340,32 @@ function LeadVoiceRow({ lead }: { lead: CRMLead }) {
 }
 
 function OpportunitiesView({ opportunities }: { opportunities: CRMOpportunity[] }) {
-  return <Panel title="Opportunity workspace" eyebrow="Property-specific sales discipline"><div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">{opportunities.map((opp) => <OpportunityCard key={opp.id} opportunity={opp} />)}</div></Panel>;
+  const [stage, setStage] = useState("all");
+  const [sort, setSort] = useState<"value" | "probability">("value");
+
+  const filtered = useMemo(() => {
+    const items = stage === "all" ? opportunities : opportunities.filter((item) => item.stage === stage);
+    return [...items].sort((a, b) => (sort === "value" ? b.opportunity_value - a.opportunity_value : b.probability - a.probability));
+  }, [opportunities, stage, sort]);
+
+  const stages = useMemo(() => Array.from(new Set(opportunities.map((item) => item.stage))), [opportunities]);
+
+  return (
+    <Panel title="Opportunity workspace" eyebrow="Property-specific sales discipline">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <select value={stage} onChange={(event) => setStage(event.target.value)} className="rounded-xl border border-ink/15 bg-ivory px-3 py-2.5 text-sm font-semibold text-ink/70 outline-none focus:border-gold">
+          <option value="all">All stages</option>
+          {stages.map((item) => <option key={item} value={item}>{item}</option>)}
+        </select>
+        <select value={sort} onChange={(event) => setSort(event.target.value as "value" | "probability")} className="rounded-xl border border-ink/15 bg-ivory px-3 py-2.5 text-sm font-semibold text-ink/70 outline-none focus:border-gold">
+          <option value="value">Sort: Highest value</option>
+          <option value="probability">Sort: Highest probability</option>
+        </select>
+        <span className="text-xs font-semibold text-ink/45">{filtered.length} opportunities</span>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">{filtered.map((opp) => <OpportunityCard key={opp.id} opportunity={opp} />)}</div>
+    </Panel>
+  );
 }
 
 function OpportunityDetail({ opportunity, activities, commissions }: { opportunity: CRMOpportunity; activities: CRMActivity[]; commissions: CRMCommission[] }) {

@@ -375,19 +375,45 @@ function ProfileView({ dashboard, mode, onSave }: { dashboard: BrokerDashboard; 
 }
 
 function PropertiesView({ properties, query, setQuery, onOpen, onRequestTieup, busy }: { properties: BrokerProperty[]; query: string; setQuery: (value: string) => void; onOpen: (property: BrokerProperty) => void; onRequestTieup: (property: BrokerProperty) => void; busy: string | null }) {
+  const [tieupFilter, setTieupFilter] = useState("all");
+  const [focused, setFocused] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    if (tieupFilter === "all") return properties;
+    return properties.filter((item) => item.tieup_status === tieupFilter);
+  }, [properties, tieupFilter]);
+
   return (
     <div className="space-y-5">
       <Panel title="Property discovery" eyebrow="Natural-language inventory search">
         <div className="flex flex-col gap-3 lg:flex-row">
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by locality, commission, tie-up status, buyer fit, legal risk..." className="min-h-12 flex-1 rounded-xl border border-ink/15 bg-ivory px-4 text-sm outline-none focus:border-gold" />
+          <select value={tieupFilter} onChange={(event) => setTieupFilter(event.target.value)} className="min-h-12 rounded-xl border border-ink/15 bg-ivory px-4 text-sm font-semibold text-ink/70 outline-none focus:border-gold">
+            <option value="all">All tie-up status</option>
+            <option value="open">Open</option>
+            <option value="active">Active</option>
+            <option value="under_review">Under review</option>
+          </select>
           <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1f2937]"><Search size={16} />Search</button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {naturalQueries.map((item) => <button key={item} onClick={() => setQuery(item)} className="rounded-full border border-ink/15 bg-sand px-3 py-2 text-xs font-semibold text-ink/60 hover:bg-gold/10">{item}</button>)}
         </div>
       </Panel>
-      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-        {properties.map((property) => <PropertyCard key={property.id} property={property} onOpen={() => onOpen(property)} onRequestTieup={() => onRequestTieup(property)} busy={busy === `tieup-${property.id}`} />)}
+      <div className="grid gap-4 2xl:grid-cols-[1fr_440px]">
+        <div className="grid gap-4 lg:grid-cols-2">
+          {filtered.map((property) => (
+            <div key={property.id} onMouseEnter={() => setFocused(property.id)}>
+              <PropertyCard property={property} onOpen={() => onOpen(property)} onRequestTieup={() => onRequestTieup(property)} busy={busy === `tieup-${property.id}`} />
+            </div>
+          ))}
+          {filtered.length === 0 && <p className="lg:col-span-2 rounded-xl border border-dashed border-ink/15 bg-ivory p-6 text-center text-sm font-semibold text-ink/50">No properties match this filter.</p>}
+        </div>
+        <div className="hidden 2xl:block">
+          <div className="sticky top-4 h-[calc(100vh-260px)] min-h-[420px] overflow-hidden rounded-xl border border-ink/12 bg-ivory shadow-lx">
+            <BrokerMap properties={filtered} focused={focused} onFocus={setFocused} compact />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -539,7 +565,7 @@ function AnalyticsView({ dashboard }: { dashboard: BrokerDashboard }) {
   return <div className="grid gap-5 xl:grid-cols-[1fr_0.9fr]"><Panel title="Broker performance analytics" eyebrow="What is working"><InfoGrid items={[["Best locality", "Andheri / Bandra"], ["Buyer conversion", "31%"], ["Avg response SLA", "8 min"], ["PropertyPool show-up", "74%"], ["Protected leads", String(dashboard.buyers.length)], ["Pipeline", formatCr(dashboard.commissions.reduce((sum, item) => sum + item.expected_commission, 0))]]} /></Panel><Panel title="Growth recommendations" eyebrow="Broker Growth Agent"><div className="space-y-3">{["Request tie-ups on low legal-risk inventory before WhatsApp sharing.", "Run one PropertyPool for Andheri/Powai cluster this weekend.", "Move ready-to-offer buyers into negotiation within 2 hours of visit feedback.", "Prioritize NRI buyer copy for Bandra/Worli premium listings."].map((item) => <TaskRow key={item} title={item} agent="Broker Growth Agent" priority="high" />)}</div></Panel></div>;
 }
 
-function BrokerMap({ properties, focused, onFocus }: { properties: BrokerProperty[]; focused: string | null; onFocus: (id: string) => void }) {
+function BrokerMap({ properties, focused, onFocus, compact }: { properties: BrokerProperty[]; focused: string | null; onFocus: (id: string) => void; compact?: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
@@ -580,6 +606,10 @@ function BrokerMap({ properties, focused, onFocus }: { properties: BrokerPropert
     if (selected) map.flyTo([selected.latitude, selected.longitude], 13, { duration: 0.8 });
     else if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
   }, [properties, focused, onFocus]);
+
+  if (compact) {
+    return <div ref={containerRef} className="h-full min-h-[420px] overflow-hidden rounded-xl border border-ink/12 bg-sand" />;
+  }
 
   return <Panel title="Broker opportunity map" eyebrow="Mumbai manager inventory"><div ref={containerRef} className="h-[620px] overflow-hidden rounded-xl border border-ink/12 bg-sand" /><div className="mt-4 grid gap-2 md:grid-cols-4"><Legend color="bg-emerald-500" label="Open tie-up" /><Legend color="bg-blue-500" label="Approved" /><Legend color="bg-amber-500" label="Pending" /><Legend color="bg-violet-500" label="High commission" /></div></Panel>;
 }

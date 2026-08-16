@@ -478,19 +478,59 @@ function DashboardView({ dashboard, listings, mapPins, onFocus }: { dashboard: M
 }
 
 function ListingsView({ listings, search, setSearch, onOpen }: { listings: ManagerListing[]; search: string; setSearch: (value: string) => void; onOpen: (id: string) => void }) {
+  const [status, setStatus] = useState("all");
+  const [maxPrice, setMaxPrice] = useState("all");
+  const [focused, setFocused] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    return listings.filter((item) => {
+      if (status !== "all" && item.status !== status) return false;
+      if (maxPrice !== "all" && (item.asking_price || 0) > Number(maxPrice)) return false;
+      return true;
+    });
+  }, [listings, status, maxPrice]);
+
+  const pins = useMemo(() => listingsToPins(filtered), [filtered]);
+
   return (
     <div className="space-y-4">
       <Panel title="Listings pipeline" eyebrow="Seller command center">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title, locality, status, address" className="w-full rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold placeholder:text-ink/40 md:max-w-lg" />
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search title, locality, status, address" className="min-w-[220px] flex-1 rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm outline-none focus:border-gold placeholder:text-ink/40" />
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm font-semibold text-ink/70 outline-none focus:border-gold">
+              <option value="all">All statuses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="needs_review">Needs review</option>
+            </select>
+            <select value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className="rounded-xl border border-ink/15 bg-ivory px-3 py-3 text-sm font-semibold text-ink/70 outline-none focus:border-gold">
+              <option value="all">Any price</option>
+              <option value="20000000">Under ₹2 Cr</option>
+              <option value="50000000">Under ₹5 Cr</option>
+              <option value="100000000">Under ₹10 Cr</option>
+            </select>
+          </div>
           <Link href="/manager/listings/new" className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-ivory transition-colors hover:bg-[#1f2937]">
             <Plus size={16} />
             New listing
           </Link>
         </div>
       </Panel>
-      <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-        {listings.map((listing) => <ListingCard key={listing.id} listing={listing} onOpen={() => onOpen(listing.id)} />)}
+      <div className="grid gap-4 2xl:grid-cols-[1fr_440px]">
+        <div className="grid gap-4 md:grid-cols-2">
+          {filtered.map((listing) => (
+            <div key={listing.id} onMouseEnter={() => setFocused(listing.id)}>
+              <ListingCard listing={listing} onOpen={() => onOpen(listing.id)} />
+            </div>
+          ))}
+          {filtered.length === 0 && <p className="md:col-span-2 rounded-xl border border-dashed border-ink/15 bg-ivory p-6 text-center text-sm font-semibold text-ink/50">No listings match these filters.</p>}
+        </div>
+        <div className="hidden 2xl:block">
+          <div className="sticky top-4 h-[calc(100vh-260px)] min-h-[420px] overflow-hidden rounded-xl border border-ink/12 bg-ivory shadow-lx">
+            <ManagerMap pins={pins} focused={focused} onFocus={setFocused} compact />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -833,7 +873,27 @@ function SettingsView() {
   return <Panel title="Settings" eyebrow="Manager profile and automation controls"><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3"><TaskChip title="Auto-publish disabled by default" tone="amber" /><TaskChip title="Document sharing gated by manager approval" tone="slate" /><TaskChip title="WhatsApp and call agents enabled for published listings" tone="emerald" /><TaskChip title="Audit logging active for every autonomous action" tone="emerald" /><TaskChip title="Cal.com integration ready for setup" tone="slate" /><TaskChip title="Supabase / Postgres compatibility on" tone="emerald" /></div></Panel>;
 }
 
-function ManagerMap({ pins, focused, onFocus }: { pins: ManagerDashboard["map_pins"]; focused: string | null; onFocus: (id: string) => void }) {
+function listingsToPins(listings: ManagerListing[]): ManagerDashboard["map_pins"] {
+  return listings
+    .filter((item) => item.latitude && item.longitude)
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      locality: item.locality,
+      status: item.status,
+      color: item.status === "published" ? "green" : item.status === "draft" ? "gray" : "blue",
+      latitude: item.latitude,
+      longitude: item.longitude,
+      price: item.asking_price,
+      market_heat_score: item.market_heat_score,
+      legal_risk_score: item.legal_risk_score,
+      lead_count: item.lead_count,
+      readiness_score: item.readiness_score,
+      next_visit: null,
+    }));
+}
+
+function ManagerMap({ pins, focused, onFocus, compact }: { pins: ManagerDashboard["map_pins"]; focused: string | null; onFocus: (id: string) => void; compact?: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
@@ -882,6 +942,10 @@ function ManagerMap({ pins, focused, onFocus }: { pins: ManagerDashboard["map_pi
   }, [pins, focused, onFocus]);
 
   const preview = pins.find((pin) => pin.id === focused) || pins[0];
+
+  if (compact) {
+    return <div ref={containerRef} className="h-full min-h-[420px] overflow-hidden rounded-xl border border-ink/12 bg-sand" />;
+  }
 
   return (
     <Panel title="Mumbai map" eyebrow="Color-coded seller listings">
